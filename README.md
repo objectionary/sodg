@@ -1,5 +1,6 @@
 This Rust library helps you build an object tree for
-reo compiler of EO programs.
+[reo](https://github.com/objectionary/reo) compiler of
+[EO](https://www.eolang.org) programs.
 
 Create a tree:
 
