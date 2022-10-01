@@ -1,3 +1,5 @@
+<img alt="logo" src="https://www.objectionary.com/cactus.svg" height="100px" />
+
 This Rust library helps you build an object tree for
 [reo](https://github.com/objectionary/reo) compiler of
 [EO](https://www.eolang.org) programs.
