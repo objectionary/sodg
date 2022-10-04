@@ -18,5 +18,4 @@ jobs:
         with:
           toolchain: stable
       - run: cargo test -vv
-      - run: target/debug/reo --help
       - run: cargo fmt --check

@@ -43,10 +43,13 @@ impl Sot {
             if !vtx.data.is_empty() {
                 let mut data_node = XMLElement::new("data");
                 data_node
-                    .add_text(vtx.data.iter()
-                        .map(|b| format!("{:02X}", b).to_string())
-                        .collect::<Vec<String>>()
-                        .join(" "))
+                    .add_text(
+                        vtx.data
+                            .iter()
+                            .map(|b| format!("{:02X}", b).to_string())
+                            .collect::<Vec<String>>()
+                            .join(" "),
+                    )
                     .unwrap();
                 v_node.add_child(data_node).unwrap();
             }

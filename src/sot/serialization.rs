@@ -20,11 +20,11 @@
 
 use crate::sot::Sot;
 use anyhow::{Context, Result};
+use bincode::{deserialize, serialize};
 use log::trace;
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
-use bincode::{serialize, deserialize};
 
 impl Sot {
     /// Save the entire Sot into a binary file. The entire Sot
@@ -49,8 +49,8 @@ impl Sot {
         let start = Instant::now();
         let bytes = fs::read(path).context(format!("Can't read from {}", path.display()))?;
         let size = bytes.len();
-        let sot = deserialize(&bytes)
-            .context(format!("Can't deserialize from {}", path.display()))?;
+        let sot =
+            deserialize(&bytes).context(format!("Can't deserialize from {}", path.display()))?;
         trace!(
             "Deserialized {} bytes from {} in {:?}",
             size,

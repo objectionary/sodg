@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+use crate::sot::Sot;
 use anyhow::Result;
 use std::collections::{HashMap, HashSet};
-use crate::sot::Sot;
 
 impl Sot {
     /// Take a slice of the Sot, keeping only the vertex specified
@@ -50,7 +50,9 @@ impl Sot {
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             new_vertices.insert(*v, vtx.clone());
         }
-        Ok(Sot { vertices: new_vertices })
+        Ok(Sot {
+            vertices: new_vertices,
+        })
     }
 }
 

@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use std::collections::VecDeque;
-use std::str::FromStr;
 use crate::sot::{Edge, Sot, Vertex};
 use anyhow::{anyhow, Context, Result};
 use log::trace;
+use std::collections::VecDeque;
+use std::str::FromStr;
 
 impl Sot {
     /// Add a new vertex `v1` to the Sot.
@@ -52,7 +52,10 @@ impl Sot {
         if !self.vertices.contains_key(&v2) {
             return Err(anyhow!("Can't find ν{}", v2));
         }
-        let vtx1 = self.vertices.get_mut(&v1).context(format!("Can't find ν{}", v1))?;
+        let vtx1 = self
+            .vertices
+            .get_mut(&v1)
+            .context(format!("Can't find ν{}", v1))?;
         vtx1.edges.retain(|e| e.a != a);
         vtx1.edges.push(Edge::new(v2, a.to_string()));
         trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
@@ -61,7 +64,8 @@ impl Sot {
 
     /// Set vertex data.
     pub fn put(&mut self, v: u32, d: Vec<u8>) -> Result<()> {
-        let vtx = self.vertices
+        let vtx = self
+            .vertices
             .get_mut(&v)
             .context(format!("Can't find ν{}", v))?;
         vtx.data = d.clone();
@@ -71,7 +75,8 @@ impl Sot {
 
     /// Read vertex data.
     pub fn data(&mut self, v: u32) -> Result<Vec<u8>> {
-        let vtx = self.vertices
+        let vtx = self
+            .vertices
             .get(&v)
             .context(format!("Can't find ν{}", v))?;
         Ok(vtx.data.clone())
@@ -79,12 +84,14 @@ impl Sot {
 
     /// Find kid.
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
-        if let Some(e) = self.vertices
+        if let Some(e) = self
+            .vertices
             .get(&v)
             .unwrap()
             .edges
             .iter()
-            .find(|e| e.a == a) {
+            .find(|e| e.a == a)
+        {
             Some(e.to)
         } else {
             None
@@ -119,7 +126,9 @@ impl Sot {
                 v = to;
                 continue;
             };
-            let others: Vec<String> = self.vertices.get(&v)
+            let others: Vec<String> = self
+                .vertices
+                .get(&v)
                 .unwrap()
                 .edges
                 .iter()

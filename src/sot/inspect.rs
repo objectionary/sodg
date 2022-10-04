@@ -42,7 +42,8 @@ impl Sot {
     fn inspect_v(&self, v: u32, seen: &mut HashSet<u32>) -> Result<Vec<String>> {
         seen.insert(v);
         let mut lines = vec![];
-        self.vertices.get(&v)
+        self.vertices
+            .get(&v)
             .context(format!("Can't find ν{}", v))?
             .edges
             .iter()

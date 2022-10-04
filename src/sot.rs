@@ -18,17 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
-use serde::{Deserialize, Serialize};
 
+mod inconsistencies;
+mod inspect;
+mod merge;
 mod ops;
 mod serialization;
-mod inconsistencies;
-mod xml;
-mod inspect;
 mod slice;
-mod merge;
+mod xml;
 
 #[derive(Clone, Serialize, Deserialize, Eq, PartialOrd, PartialEq, Ord)]
 struct Edge {
@@ -45,7 +45,7 @@ impl Edge {
 #[derive(Clone, Serialize, Deserialize)]
 struct Vertex {
     edges: Vec<Edge>,
-    data: Vec<u8>
+    data: Vec<u8>,
 }
 
 impl Vertex {
@@ -53,14 +53,14 @@ impl Vertex {
     pub fn empty() -> Self {
         Vertex {
             edges: vec![],
-            data: vec![]
+            data: vec![],
         }
     }
 }
 
 #[derive(Serialize, Deserialize)]
 pub struct Sot {
-    vertices: HashMap<u32, Vertex>
+    vertices: HashMap<u32, Vertex>,
 }
 
 impl fmt::Debug for Sot {
@@ -72,7 +72,7 @@ impl fmt::Debug for Sot {
                 .iter()
                 .map(|e| format!("\n\t{} ➞ ν{}", e.a, e.to))
                 .collect::<Vec<String>>();
-            if ! &v.data.is_empty() {
+            if !&v.data.is_empty() {
                 attrs.push(format!("{}b", v.data.len()));
             }
             lines.push(format!("ν{} -> ⟦{}⟧", i, attrs.join(", ")));
@@ -85,7 +85,7 @@ impl Sot {
     /// Makes an empty Sot, with no vertices and no edges.
     pub fn empty() -> Self {
         Sot {
-            vertices: HashMap::new()
+            vertices: HashMap::new(),
         }
     }
 

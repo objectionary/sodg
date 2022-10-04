@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use std::collections::HashMap;
-use log::debug;
 use crate::sot::Sot;
+use log::debug;
+use std::collections::HashMap;
 
 impl Sot {
     /// Merge this new Sot into itself.
