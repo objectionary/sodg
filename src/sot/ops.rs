@@ -82,6 +82,15 @@ impl Sot {
         Ok(vtx.data.clone())
     }
 
+    /// Find all kids of a vertex.
+    /// @todo #1:30min Let's implement this method. It has to find
+    ///  all edges departing from the given one and return a vector
+    ///  of tuples, where first element is the label of the edge
+    ///  and the second one is the vertex this edge points to.
+    pub fn kids(&self, _v: u32) -> Result<Vec<(String, u32)>> {
+        Err(anyhow!("Not implemented yet"))
+    }
+
     /// Find kid.
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         if let Some(e) = self

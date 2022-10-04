@@ -35,7 +35,7 @@ let id = sot.kid(0, "foo")?; // returns 1
 You can find all kids of a vertex:
 
 ```rust
-let kids: Vec<(u32, String)> = sot.kids(0);
+let kids: Vec<(String, u32)> = sot.kids(0);
 ```
 
 You can read the data of a vertex:
