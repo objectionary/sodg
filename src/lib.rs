@@ -18,6 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+// @todo #1:30min For some weird reason, if I enable this check,
+//  the build fails due to many warnings in the code about
+//  "unused" methods. Let's find the reason and uncomment this line.
 // #![deny(warnings)]
 
 mod sot;
