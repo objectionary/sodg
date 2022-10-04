@@ -20,7 +20,7 @@ Create a tree:
 ```rust
 use sot::Sot;
 let mut sot = Sot::empty();
-sot.add(0)?; // add a vertex no.1
+sot.add(0)?; // add a vertex no.0
 sot.add(1)?; // add a vertex no.1
 sot.bind(0, 1, "foo")?; // connect v0 to v1 with label "foo"
 sot.put(1, "Hello, world!".as_bytes().to_vec())?; // attach data to v1
