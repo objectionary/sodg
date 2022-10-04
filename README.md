@@ -1,5 +1,16 @@
 <img alt="logo" src="https://www.objectionary.com/cactus.svg" height="100px" />
 
+[![EO principles respected here](https://www.elegantobjects.org/badge.svg)](https://www.elegantobjects.org)
+[![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
+
+[![cargo](https://github.com/objectionary/sot/actions/workflows/cargo.yml/badge.svg)](https://github.com/objectionary/sot/actions/workflows/cargo.yml)
+[![crates.io](https://img.shields.io/crates/v/sot.svg)](https://crates.io/crates/sot)
+[![PDD status](http://www.0pdd.com/svg?name=objectionary/sot)](http://www.0pdd.com/p?name=objectionary/sot)
+[![codecov](https://codecov.io/gh/objectionary/sot/branch/master/graph/badge.svg)](https://codecov.io/gh/objectionary/sot)
+[![Hits-of-Code](https://hitsofcode.com/github/objectionary/sot)](https://hitsofcode.com/view/github/objectionary/sot)
+![Lines of code](https://img.shields.io/tokei/lines/github/objectionary/sot)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/objectionary/sot/blob/master/LICENSE.txt)
+
 This Rust library helps you build an object tree for
 [reo](https://github.com/objectionary/reo) compiler of
 [EO](https://www.eolang.org) programs.
