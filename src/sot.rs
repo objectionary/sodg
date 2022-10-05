@@ -26,6 +26,7 @@ mod inconsistencies;
 mod inspect;
 mod merge;
 mod ops;
+mod parse;
 mod serialization;
 mod slice;
 mod xml;

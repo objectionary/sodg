@@ -74,7 +74,7 @@ impl Sot {
     }
 
     /// Read vertex data.
-    pub fn data(&mut self, v: u32) -> Result<Vec<u8>> {
+    pub fn data(&self, v: u32) -> Result<Vec<u8>> {
         let vtx = self
             .vertices
             .get(&v)
@@ -83,10 +83,6 @@ impl Sot {
     }
 
     /// Find all kids of a vertex.
-    /// @todo #1:30min Let's implement this method. It has to find
-    ///  all edges departing from the given one and return a vector
-    ///  of tuples, where first element is the label of the edge
-    ///  and the second one is the vertex this edge points to.
     pub fn kids(&self, _v: u32) -> Result<Vec<(String, u32)>> {
         Err(anyhow!("Not implemented yet"))
     }
@@ -244,5 +240,21 @@ fn finds_root() -> Result<()> {
     let mut sot = Sot::empty();
     sot.add(0)?;
     assert_eq!(0, sot.find(0, "")?);
+    Ok(())
+}
+
+/// @todo #1:30min Let's implement this method. It has to find
+///  all edges departing from the given one and return a vector
+///  of tuples, where first element is the label of the edge
+///  and the second one is the vertex this edge points to.
+#[test]
+#[ignore]
+fn finds_all_kids() -> Result<()> {
+    let mut sot = Sot::empty();
+    sot.add(0)?;
+    sot.add(1)?;
+    sot.bind(0, 1, "one")?;
+    sot.bind(0, 1, "two")?;
+    assert_eq!(2, sot.kids(0).iter().count());
     Ok(())
 }
