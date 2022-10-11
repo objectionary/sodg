@@ -48,6 +48,15 @@ impl Sot {
     /// Makes an edge `e1` from vertex `v1` to vertex `v2` and puts `a` label on it. If the
     /// label is not equal to `"ρ"`, makes two backward edges from `v2` to `v1`
     /// and label them as `"ρ"` an `"𝜎"`.
+    ///
+    /// ```
+    /// use sot::Sot;
+    /// let mut sot = Sot::empty();
+    /// sot.add(0).unwrap();
+    /// sot.add(42).unwrap();
+    /// sot.bind(0, 42, "forward").unwrap();
+    /// sot.bind(42, 0, "backward").unwrap();
+    /// ```
     pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
         if a.is_empty() {
             return Err(anyhow!(
@@ -73,6 +82,13 @@ impl Sot {
     }
 
     /// Set vertex data.
+    ///
+    /// ```
+    /// use sot::Sot;
+    /// let mut sot = Sot::empty();
+    /// sot.add(42).unwrap();
+    /// sot.put(42, "hello, world!".as_bytes().to_vec()).unwrap();
+    /// ```
     pub fn put(&mut self, v: u32, d: Vec<u8>) -> Result<()> {
         let vtx = self
             .vertices
@@ -84,6 +100,15 @@ impl Sot {
     }
 
     /// Read vertex data.
+    ///
+    /// ```
+    /// use sot::Sot;
+    /// let mut sot = Sot::empty();
+    /// sot.add(42).unwrap();
+    /// let data : &[u8] = "hello, world!".as_bytes();
+    /// sot.put(42, data.to_vec()).unwrap();
+    /// assert_eq!(data, sot.data(42).unwrap());
+    /// ```
     pub fn data(&self, v: u32) -> Result<Vec<u8>> {
         let vtx = self
             .vertices
@@ -98,6 +123,15 @@ impl Sot {
     }
 
     /// Find kid.
+    ///
+    /// ```
+    /// use sot::Sot;
+    /// let mut sot = Sot::empty();
+    /// sot.add(0).unwrap();
+    /// sot.add(42).unwrap();
+    /// sot.bind(0, 42, "k").unwrap();
+    /// assert_eq!(42, sot.kid(0, "k").unwrap());
+    /// ```
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         if let Some(e) = self
             .vertices
@@ -114,6 +148,17 @@ impl Sot {
     }
 
     /// Find a vertex in the Sot by its locator.
+    ///
+    /// ```
+    /// use sot::Sot;
+    /// let mut sot = Sot::empty();
+    /// sot.add(0).unwrap();
+    /// sot.add(1).unwrap();
+    /// sot.bind(0, 1, "a").unwrap();
+    /// sot.add(2).unwrap();
+    /// sot.bind(1, 2, "b").unwrap();
+    /// assert_eq!(2, sot.find(0, "a.b").unwrap());
+    /// ```
     pub fn find(&self, v1: u32, loc: &str) -> Result<u32> {
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
