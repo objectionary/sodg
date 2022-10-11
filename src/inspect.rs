@@ -75,12 +75,12 @@ impl Sodg {
 
 #[test]
 fn inspects_simple_object() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    sodg.put(0, "hello".as_bytes().to_vec())?;
-    sodg.add(1)?;
-    sodg.bind(0, 1, "foo")?;
-    let txt = sodg.inspect("")?;
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.put(0, "hello".as_bytes().to_vec())?;
+    g.add(1)?;
+    g.bind(0, 1, "foo")?;
+    let txt = g.inspect("")?;
     println!("{}", txt);
     assert_ne!("".to_string(), txt);
     Ok(())

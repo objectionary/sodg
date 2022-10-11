@@ -58,13 +58,13 @@ impl Sodg {
 
 #[test]
 fn makes_a_slice() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    sodg.add(1)?;
-    sodg.bind(0, 1, "foo")?;
-    sodg.add(2)?;
-    sodg.bind(0, 2, "bar")?;
-    let slice = sodg.slice("bar")?;
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "foo")?;
+    g.add(2)?;
+    g.bind(0, 2, "bar")?;
+    let slice = g.slice("bar")?;
     assert_eq!(1, slice.vertices.len());
     Ok(())
 }

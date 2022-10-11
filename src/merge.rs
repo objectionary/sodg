@@ -23,11 +23,11 @@ use log::debug;
 use std::collections::HashMap;
 
 impl Sodg {
-    /// Merge this new Sodg into itself.
-    pub fn merge(&mut self, sodg: &Sodg) {
+    /// Merge this new graph into itself.
+    pub fn merge(&mut self, g: &Sodg) {
         let mut matcher: HashMap<u32, u32> = HashMap::new();
         let mut next = self.max() + 1;
-        for (v, vtx) in sodg.vertices.iter() {
+        for (v, vtx) in g.vertices.iter() {
             let mut id = 0;
             if *v != 0 {
                 id = next;
@@ -44,7 +44,7 @@ impl Sodg {
         }
         debug!(
             "Merged {} vertices into the existing Sodg",
-            sodg.vertices.len()
+            g.vertices.len()
         );
     }
 }
@@ -54,15 +54,15 @@ use anyhow::Result;
 
 #[test]
 fn merges_two_sodgs() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    sodg.add(1)?;
-    sodg.bind(0, 1, "foo")?;
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "foo")?;
     let mut extra = Sodg::empty();
     extra.add(0)?;
     extra.add(1)?;
     extra.bind(0, 1, "bar")?;
-    sodg.merge(&extra);
-    assert_eq!(3, sodg.vertices.len());
+    g.merge(&extra);
+    assert_eq!(3, g.vertices.len());
     Ok(())
 }

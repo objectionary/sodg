@@ -54,11 +54,11 @@ use anyhow::Result;
 
 #[test]
 fn finds_lost_edge() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    sodg.add(1)?;
-    sodg.bind(0, 1, "foo")?;
-    sodg.vertices.remove(&1);
-    assert_eq!(1, sodg.inconsistencies().len());
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "foo")?;
+    g.vertices.remove(&1);
+    assert_eq!(1, g.inconsistencies().len());
     Ok(())
 }

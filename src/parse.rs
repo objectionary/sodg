@@ -152,14 +152,14 @@ use std::str;
 
 #[test]
 fn simple_command() -> Result<()> {
-    let sodg = Sodg::from_str(
+    let g = Sodg::from_str(
         "
         ADD(0);  ADD($ν1); # adding two vertices
         BIND(0, $ν1, foo  );
         PUT($ν1  , d0-bf-D1-80-d0-B8-d0-b2-d0-b5-d1-82);
         ",
     )?;
-    assert_eq!("привет", str::from_utf8(sodg.data(1)?.as_slice())?);
-    assert_eq!(1, sodg.kid(0, "foo").unwrap());
+    assert_eq!("привет", str::from_utf8(g.data(1)?.as_slice())?);
+    assert_eq!(1, g.kid(0, "foo").unwrap());
     Ok(())
 }

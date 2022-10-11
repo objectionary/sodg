@@ -210,91 +210,91 @@ impl Sodg {
 
 #[test]
 fn adds_simple_vertex() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(1)?;
-    assert!(sodg.inconsistencies().is_empty());
-    assert_eq!(1, sodg.find(1, "")?);
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    assert!(g.inconsistencies().is_empty());
+    assert_eq!(1, g.find(1, "")?);
     Ok(())
 }
 
 #[test]
 fn binds_simple_vertices() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(1)?;
-    sodg.add(2)?;
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
     let k = "hello";
-    sodg.bind(1, 2, k)?;
-    assert!(sodg.inconsistencies().is_empty());
-    assert_eq!(2, sodg.find(1, k)?);
+    g.bind(1, 2, k)?;
+    assert!(g.inconsistencies().is_empty());
+    assert_eq!(2, g.find(1, k)?);
     Ok(())
 }
 
 #[test]
 fn pre_defined_ids() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(1)?;
-    sodg.add(2)?;
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
     let k = "a-привет";
-    sodg.bind(1, 2, k)?;
-    assert!(sodg.inconsistencies().is_empty());
-    assert_eq!(2, sodg.find(1, k)?);
+    g.bind(1, 2, k)?;
+    assert!(g.inconsistencies().is_empty());
+    assert_eq!(2, g.find(1, k)?);
     Ok(())
 }
 
 #[test]
 fn binds_two_names() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(1)?;
-    sodg.add(2)?;
-    sodg.bind(1, 2, "first")?;
-    sodg.bind(1, 2, "second")?;
-    assert!(sodg.inconsistencies().is_empty());
-    assert_eq!(2, sodg.find(1, "first")?);
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    g.bind(1, 2, "first")?;
+    g.bind(1, 2, "second")?;
+    assert!(g.inconsistencies().is_empty());
+    assert_eq!(2, g.find(1, "first")?);
     Ok(())
 }
 
 #[test]
 fn overwrites_edge() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(1)?;
-    sodg.add(2)?;
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
     let label = "hello";
-    sodg.bind(1, 2, label)?;
-    sodg.add(3)?;
-    sodg.bind(1, 3, label)?;
-    assert!(sodg.inconsistencies().is_empty());
-    assert_eq!(3, sodg.find(1, label)?);
+    g.bind(1, 2, label)?;
+    g.add(3)?;
+    g.bind(1, 3, label)?;
+    assert!(g.inconsistencies().is_empty());
+    assert_eq!(3, g.find(1, label)?);
     Ok(())
 }
 
 #[test]
 fn binds_to_root() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    sodg.add(1)?;
-    sodg.bind(0, 1, "x")?;
-    assert!(sodg.inconsistencies().is_empty());
-    assert!(sodg.kid(0, "ρ").is_none());
-    assert!(sodg.kid(0, "σ").is_none());
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "x")?;
+    assert!(g.inconsistencies().is_empty());
+    assert!(g.kid(0, "ρ").is_none());
+    assert!(g.kid(0, "σ").is_none());
     Ok(())
 }
 
 #[test]
 fn sets_simple_data() -> Result<()> {
-    let mut sodg = Sodg::empty();
+    let mut g = Sodg::empty();
     let data = "hello".as_bytes().to_vec();
-    sodg.add(0)?;
-    sodg.put(0, data.clone())?;
-    assert_eq!(data, sodg.data(0)?);
-    assert!(sodg.inconsistencies().is_empty());
+    g.add(0)?;
+    g.put(0, data.clone())?;
+    assert_eq!(data, g.data(0)?);
+    assert!(g.inconsistencies().is_empty());
     Ok(())
 }
 
 #[test]
 fn finds_root() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    assert_eq!(0, sodg.find(0, "")?);
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    assert_eq!(0, g.find(0, "")?);
     Ok(())
 }
 
@@ -305,11 +305,11 @@ fn finds_root() -> Result<()> {
 #[test]
 #[ignore]
 fn finds_all_kids() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    sodg.add(1)?;
-    sodg.bind(0, 1, "one")?;
-    sodg.bind(0, 1, "two")?;
-    assert_eq!(2, sodg.kids(0).iter().count());
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "one")?;
+    g.bind(0, 1, "two")?;
+    assert_eq!(2, g.kids(0).iter().count());
     Ok(())
 }

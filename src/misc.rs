@@ -65,17 +65,17 @@ use anyhow::Result;
 
 #[test]
 fn makes_an_empty_sodg() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    assert_eq!(1, sodg.vertices.len());
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    assert_eq!(1, g.vertices.len());
     Ok(())
 }
 
 #[test]
 fn calculates_max() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    sodg.add(1)?;
-    assert_eq!(1, sodg.max());
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    assert_eq!(1, g.max());
     Ok(())
 }

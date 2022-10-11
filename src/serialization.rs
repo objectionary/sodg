@@ -66,16 +66,16 @@ use tempfile::TempDir;
 
 #[test]
 fn saves_and_loads() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    sodg.put(0, "hello".as_bytes().to_vec())?;
-    sodg.add(1)?;
-    sodg.bind(0, 1, "foo")?;
-    sodg.put(1, "foo".as_bytes().to_vec())?;
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.put(0, "hello".as_bytes().to_vec())?;
+    g.add(1)?;
+    g.bind(0, 1, "foo")?;
+    g.put(1, "foo".as_bytes().to_vec())?;
     let tmp = TempDir::new()?;
     let file = tmp.path().join("foo.sodg");
-    sodg.save(file.as_path())?;
+    g.save(file.as_path())?;
     let after = Sodg::load(file.as_path())?;
-    assert_eq!(sodg.inspect("")?, after.inspect("")?);
+    assert_eq!(g.inspect("")?, after.inspect("")?);
     Ok(())
 }

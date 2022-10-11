@@ -67,12 +67,12 @@ use sxd_xpath::evaluate_xpath;
 
 #[test]
 fn prints_simple_graph() -> Result<()> {
-    let mut sodg = Sodg::empty();
-    sodg.add(0)?;
-    sodg.put(0, "hello".as_bytes().to_vec())?;
-    sodg.add(1)?;
-    sodg.bind(0, 1, "foo")?;
-    let xml = sodg.to_xml()?;
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.put(0, "hello".as_bytes().to_vec())?;
+    g.add(1)?;
+    g.bind(0, 1, "foo")?;
+    let xml = g.to_xml()?;
     let parser = sxd_document::parser::parse(xml.as_str())?;
     let doc = parser.as_document();
     assert_eq!(
