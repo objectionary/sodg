@@ -21,7 +21,6 @@
 #![deny(warnings)]
 
 mod edge;
-mod inconsistencies;
 mod inspect;
 mod merge;
 mod misc;
@@ -35,6 +34,8 @@ mod xml;
 use crate::vertex::Vertex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
 
 /// This struct represents a Simple Object DiGraph (SODG). You add vertices
 /// to it, bind them one to one with edges
@@ -52,6 +53,15 @@ use std::collections::HashMap;
 #[derive(Serialize, Deserialize)]
 pub struct Sodg {
     vertices: HashMap<u32, Vertex>,
+    #[serde(skip_serializing, skip_deserializing)]
+    alerts: Vec<Alert>,
+}
+
+impl Sodg {
+    /// Attach a new alert to this SODG.
+    pub fn alert_on(&mut self, a: Alert) {
+        self.alerts.push(a);
+    }
 }
 
 #[cfg(test)]

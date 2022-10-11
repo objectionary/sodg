@@ -43,9 +43,22 @@ impl fmt::Debug for Sodg {
 impl Sodg {
     /// Makes an empty Sodg, with no vertices and no edges.
     pub fn empty() -> Self {
-        Sodg {
+        let mut g = Sodg {
             vertices: HashMap::new(),
-        }
+            alerts: vec![],
+        };
+        g.alert_on(|g, vx| {
+            let mut errors = Vec::new();
+            for v in vx.iter() {
+                for e in g.vertices.get(v).unwrap().edges.iter() {
+                    if !g.vertices.contains_key(&e.to) {
+                        errors.push(format!("Edge ν{}.{} arrives to lost ν{}", v, e.a, e.to));
+                    }
+                }
+            }
+            errors
+        });
+        g
     }
 
     /// Get max ID of a vertex.

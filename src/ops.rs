@@ -41,6 +41,7 @@ impl Sodg {
             return Err(anyhow!("Vertex ν{} already exists", v1));
         }
         self.vertices.insert(v1, Vertex::empty());
+        self.validate(vec![v1])?;
         trace!("#add(ν{}): new vertex added", v1);
         Ok(())
     }
@@ -80,6 +81,7 @@ impl Sodg {
             .context(format!("Can't depart from ν{}, it's absent", v1))?;
         vtx1.edges.retain(|e| e.a != a);
         vtx1.edges.push(Edge::new(v2, a));
+        self.validate(vec![v1, v2])?;
         trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
         Ok(())
     }
@@ -98,6 +100,7 @@ impl Sodg {
             .get_mut(&v)
             .context(format!("Can't find ν{}", v))?;
         vtx.data = d.clone();
+        self.validate(vec![v])?;
         trace!("#data: data of ν{} set to {}b", v, d.len());
         Ok(())
     }
@@ -209,13 +212,23 @@ impl Sodg {
         trace!("#find: found ν{} by '{}'", v1, loc);
         Ok(v)
     }
+
+    /// Check all alerts.
+    fn validate(&self, vx: Vec<u32>) -> Result<()> {
+        for a in self.alerts.iter() {
+            let msgs = a(self, vx.clone());
+            if !msgs.is_empty() {
+                return Err(anyhow!("{}", msgs.join("; ")));
+            }
+        }
+        Ok(())
+    }
 }
 
 #[test]
 fn adds_simple_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
-    assert!(g.inconsistencies().is_empty());
     assert_eq!(1, g.find(1, "")?);
     Ok(())
 }
@@ -227,7 +240,6 @@ fn binds_simple_vertices() -> Result<()> {
     g.add(2)?;
     let k = "hello";
     g.bind(1, 2, k)?;
-    assert!(g.inconsistencies().is_empty());
     assert_eq!(2, g.find(1, k)?);
     Ok(())
 }
@@ -239,7 +251,6 @@ fn pre_defined_ids() -> Result<()> {
     g.add(2)?;
     let k = "a-привет";
     g.bind(1, 2, k)?;
-    assert!(g.inconsistencies().is_empty());
     assert_eq!(2, g.find(1, k)?);
     Ok(())
 }
@@ -251,7 +262,6 @@ fn binds_two_names() -> Result<()> {
     g.add(2)?;
     g.bind(1, 2, "first")?;
     g.bind(1, 2, "second")?;
-    assert!(g.inconsistencies().is_empty());
     assert_eq!(2, g.find(1, "first")?);
     Ok(())
 }
@@ -265,7 +275,6 @@ fn overwrites_edge() -> Result<()> {
     g.bind(1, 2, label)?;
     g.add(3)?;
     g.bind(1, 3, label)?;
-    assert!(g.inconsistencies().is_empty());
     assert_eq!(3, g.find(1, label)?);
     Ok(())
 }
@@ -276,7 +285,6 @@ fn binds_to_root() -> Result<()> {
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "x")?;
-    assert!(g.inconsistencies().is_empty());
     assert!(g.kid(0, "ρ").is_none());
     assert!(g.kid(0, "σ").is_none());
     Ok(())
@@ -289,7 +297,6 @@ fn sets_simple_data() -> Result<()> {
     g.add(0)?;
     g.put(0, data.clone())?;
     assert_eq!(data, g.data(0)?);
-    assert!(g.inconsistencies().is_empty());
     Ok(())
 }
 
@@ -314,5 +321,28 @@ fn finds_all_kids() -> Result<()> {
     g.bind(0, 1, "one")?;
     g.bind(0, 1, "two")?;
     assert_eq!(2, g.kids(0).iter().count());
+    Ok(())
+}
+
+#[test]
+fn panic_on_simple_alert() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.alert_on(|_, _| vec![format!("{}", "oops")]);
+    assert!(g.add(0).is_err());
+    Ok(())
+}
+
+#[test]
+fn panic_on_complex_alert() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.alert_on(|_, vx| {
+        let v = 42;
+        if vx.contains(&v) {
+            vec![format!("Vertex no.{} is not allowed", v)]
+        } else {
+            vec![]
+        }
+    });
+    assert!(g.add(42).is_err());
     Ok(())
 }
