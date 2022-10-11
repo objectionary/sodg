@@ -11,7 +11,7 @@
 ![Lines of code](https://img.shields.io/tokei/lines/github/objectionary/sot)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/objectionary/sot/blob/master/LICENSE.txt)
 
-This Rust library helps you build an object tree for
+This Rust library helps you build a simple object tree (SOT) for
 [reo](https://github.com/objectionary/reo) compiler of
 [EO](https://www.eolang.org) programs.
 

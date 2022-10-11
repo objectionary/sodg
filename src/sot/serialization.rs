@@ -71,6 +71,7 @@ fn saves_and_loads() -> Result<()> {
     sot.put(0, "hello".as_bytes().to_vec())?;
     sot.add(1)?;
     sot.bind(0, 1, "foo")?;
+    sot.put(1, "foo".as_bytes().to_vec())?;
     let tmp = TempDir::new()?;
     let file = tmp.path().join("foo.sot");
     sot.save(file.as_path())?;

@@ -156,7 +156,7 @@ fn simple_command() -> Result<()> {
         "
         ADD(0);  ADD($ν1); # adding two vertices
         BIND(0, $ν1, foo  );
-        PUT($ν1  , d0-bf-d1-80-d0-b8-d0-b2-d0-b5-d1-82);
+        PUT($ν1  , d0-bf-D1-80-d0-B8-d0-b2-d0-b5-d1-82);
         ",
     )?;
     assert_eq!("привет", str::from_utf8(sot.data(1)?.as_slice())?);
