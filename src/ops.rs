@@ -58,6 +58,12 @@ impl Sodg {
     /// sodg.bind(42, 0, "backward").unwrap();
     /// ```
     pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
+        if v1 == v2 {
+            return Err(anyhow!(
+                "An edge can't depart from ν{} and arrive to itself",
+                v1
+            ));
+        }
         if a.is_empty() {
             return Err(anyhow!(
                 "Edge label can't be empty, from ν{} to ν{}",

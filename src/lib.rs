@@ -36,7 +36,7 @@ use crate::vertex::Vertex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// This struct represents a simple object tree (SODG). You add vertices
+/// This struct represents a Simple Object DiGraph (SODG). You add vertices
 /// to it, bind them one to one with edges
 ///
 /// ```
