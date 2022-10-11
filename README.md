@@ -11,43 +11,43 @@
 ![Lines of code](https://img.shields.io/tokei/lines/github/objectionary/sodg)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/objectionary/sodg/blob/master/LICENSE.txt)
 
-This Rust library helps you build a simple object tree (SODG) for
+This Rust library helps you build a Simple Object DiGraph (SODG) for
 [reo](https://github.com/objectionary/reo) compiler of
 [EO](https://www.eolang.org) programs.
 
-Create a tree:
+Create a graph:
 
 ```rust
 use sodg::Sodg;
-let mut sodg = Sodg::empty();
-sodg.add(0)?; // add a vertex no.0
-sodg.add(1)?; // add a vertex no.1
-sodg.bind(0, 1, "foo")?; // connect v0 to v1 with label "foo"
-sodg.put(1, "Hello, world!".as_bytes().to_vec())?; // attach data to v1
+let mut g = Sodg::empty();
+g.add(0)?; // add a vertex no.0
+g.add(1)?; // add a vertex no.1
+g.bind(0, 1, "foo")?; // connect v0 to v1 with label "foo"
+g.put(1, "Hello, world!".as_bytes().to_vec())?; // attach data to v1
 ```
 
 You can find a vertex by the label of an edge departing from another vertex:
 
 ```rust
-let id = sodg.kid(0, "foo")?; // returns 1
+let id = g.kid(0, "foo")?; // returns 1
 ```
 
 You can find all kids of a vertex:
 
 ```rust
-let kids: Vec<(String, u32)> = sodg.kids(0);
+let kids: Vec<(String, u32)> = g.kids(0);
 ```
 
 You can read the data of a vertex:
 
 ```rust
-let bytes: Vec<u8> = sodg.data(1)?; // empty if no data written before
+let bytes: Vec<u8> = g.data(1)?; // empty if no data written before
 ```
 
-Then, you can print the tree:
+Then, you can print the graph:
 
 ```rust
-println!("{:?}", sodg);
+println!("{:?}", g);
 ```
 
-Also, you can serialize and deserialize the tree.
+Also, you can serialize and deserialize the graph.
