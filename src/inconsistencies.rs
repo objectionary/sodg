@@ -18,51 +18,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::sot::Sot;
-use log::debug;
-use std::collections::HashMap;
+use log::error;
 
 impl Sot {
-    /// Merge this new Sot into itself.
-    pub fn merge(&mut self, sot: &Sot) {
-        let mut matcher: HashMap<u32, u32> = HashMap::new();
-        let mut next = self.max() + 1;
-        for (v, vtx) in sot.vertices.iter() {
-            let mut id = 0;
-            if *v != 0 {
-                id = next;
-                next += 1;
-            }
-            matcher.insert(*v, id);
-            self.vertices.insert(id, vtx.clone());
+    /// Validate the Sot and return all found data
+    /// inconsistencies. This is mostly used for testing.
+    pub fn inconsistencies(&self) -> Vec<String> {
+        let mut errors = Vec::new();
+        for e in self.lost_edges() {
+            errors.push(e);
         }
-        for v in matcher.values() {
-            let vtx = self.vertices.get_mut(&v).unwrap();
-            for e in vtx.edges.iter_mut() {
-                e.to = *matcher.get(&v).unwrap();
+        for e in errors.to_vec() {
+            error!("{}", e)
+        }
+        errors
+    }
+
+    /// Finds all edges that have lost ends.
+    fn lost_edges(&self) -> Vec<String> {
+        let mut errors = Vec::new();
+        for (v, vtx) in self.vertices.iter() {
+            for e in vtx.edges.iter() {
+                if !self.vertices.contains_key(&e.to) {
+                    errors.push(format!("Edge ν{}.{} arrives to lost ν{}", v, e.a, e.to));
+                }
             }
         }
-        debug!(
-            "Merged {} vertices into the existing Sot",
-            sot.vertices.len()
-        );
+        errors
     }
 }
 
+use crate::Sot;
 #[cfg(test)]
 use anyhow::Result;
 
 #[test]
-fn merges_two_sots() -> Result<()> {
+fn finds_lost_edge() -> Result<()> {
     let mut sot = Sot::empty();
     sot.add(0)?;
     sot.add(1)?;
     sot.bind(0, 1, "foo")?;
-    let mut extra = Sot::empty();
-    extra.add(0)?;
-    extra.add(1)?;
-    extra.bind(0, 1, "bar")?;
-    sot.merge(&extra);
-    assert_eq!(3, sot.vertices.len());
+    sot.vertices.remove(&1);
+    assert_eq!(1, sot.inconsistencies().len());
     Ok(())
 }

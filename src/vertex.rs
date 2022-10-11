@@ -18,41 +18,37 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#![deny(warnings)]
-
-mod edge;
-mod inconsistencies;
-mod inspect;
-mod merge;
-mod misc;
-mod ops;
-mod parse;
-mod serialization;
-mod slice;
-mod vertex;
-mod xml;
-
-use crate::vertex::Vertex;
+use crate::edge::Edge;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize)]
-pub struct Sot {
-    vertices: HashMap<u32, Vertex>,
+#[derive(Clone, Serialize, Deserialize)]
+pub struct Vertex {
+    pub edges: Vec<Edge>,
+    pub data: Vec<u8>,
+}
+
+impl Vertex {
+    /// Make an empty one.
+    ///
+    /// ```
+    /// use sot::Sot;
+    /// let mut sot = Sot::empty();
+    /// sot.add(0).unwrap();
+    /// ```
+    pub fn empty() -> Self {
+        Vertex {
+            edges: vec![],
+            data: vec![],
+        }
+    }
 }
 
 #[cfg(test)]
-use simple_logger::SimpleLogger;
+use anyhow::Result;
 
-#[cfg(test)]
-use log::LevelFilter;
-
-#[cfg(test)]
-#[ctor::ctor]
-fn init() {
-    SimpleLogger::new()
-        .without_timestamps()
-        .with_level(LevelFilter::Trace)
-        .init()
-        .unwrap();
+#[test]
+fn makes_an_empty_vertex() -> Result<()> {
+    let vtx = Vertex::empty();
+    assert_eq!(0, vtx.edges.len());
+    Ok(())
 }

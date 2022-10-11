@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::sot::Sot;
+use crate::Sot;
 use anyhow::{anyhow, Context, Result};
 use lazy_static::lazy_static;
 use log::trace;

@@ -18,53 +18,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::sot::Sot;
-use anyhow::Result;
-use std::collections::{HashMap, HashSet};
+use crate::Sot;
+use log::debug;
+use std::collections::HashMap;
 
 impl Sot {
-    /// Take a slice of the Sot, keeping only the vertex specified
-    /// by the locator.
-    pub fn slice(&mut self, loc: &str) -> Result<Sot> {
-        let mut todo = HashSet::new();
-        let mut done = HashSet::new();
-        todo.insert(self.find(0, loc)?);
-        loop {
-            if todo.is_empty() {
-                break;
+    /// Merge this new Sot into itself.
+    pub fn merge(&mut self, sot: &Sot) {
+        let mut matcher: HashMap<u32, u32> = HashMap::new();
+        let mut next = self.max() + 1;
+        for (v, vtx) in sot.vertices.iter() {
+            let mut id = 0;
+            if *v != 0 {
+                id = next;
+                next += 1;
             }
-            let before: Vec<u32> = todo.drain().collect();
-            for v in before {
-                done.insert(v);
-                let vtx = self.vertices.get(&v).unwrap();
-                for to in vtx.edges.iter().map(|e| e.to) {
-                    if done.contains(&to) {
-                        continue;
-                    }
-                    done.insert(to);
-                    todo.insert(to);
-                }
+            matcher.insert(*v, id);
+            self.vertices.insert(id, vtx.clone());
+        }
+        for v in matcher.values() {
+            let vtx = self.vertices.get_mut(&v).unwrap();
+            for e in vtx.edges.iter_mut() {
+                e.to = *matcher.get(&v).unwrap();
             }
         }
-        let mut new_vertices = HashMap::new();
-        for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
-            new_vertices.insert(*v, vtx.clone());
-        }
-        Ok(Sot {
-            vertices: new_vertices,
-        })
+        debug!(
+            "Merged {} vertices into the existing Sot",
+            sot.vertices.len()
+        );
     }
 }
 
+#[cfg(test)]
+use anyhow::Result;
+
 #[test]
-fn makes_a_slice() -> Result<()> {
+fn merges_two_sots() -> Result<()> {
     let mut sot = Sot::empty();
     sot.add(0)?;
     sot.add(1)?;
     sot.bind(0, 1, "foo")?;
-    sot.add(2)?;
-    sot.bind(0, 2, "bar")?;
-    let slice = sot.slice("bar")?;
-    assert_eq!(1, slice.vertices.len());
+    let mut extra = Sot::empty();
+    extra.add(0)?;
+    extra.add(1)?;
+    extra.bind(0, 1, "bar")?;
+    sot.merge(&extra);
+    assert_eq!(3, sot.vertices.len());
     Ok(())
 }

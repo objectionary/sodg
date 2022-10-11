@@ -18,47 +18,53 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::sot::Sot;
-use log::error;
+use crate::Sot;
+use anyhow::Result;
+use std::collections::{HashMap, HashSet};
 
 impl Sot {
-    /// Validate the Sot and return all found data
-    /// inconsistencies. This is mostly used for testing.
-    pub fn inconsistencies(&self) -> Vec<String> {
-        let mut errors = Vec::new();
-        for e in self.lost_edges() {
-            errors.push(e);
-        }
-        for e in errors.to_vec() {
-            error!("{}", e)
-        }
-        errors
-    }
-
-    /// Finds all edges that have lost ends.
-    fn lost_edges(&self) -> Vec<String> {
-        let mut errors = Vec::new();
-        for (v, vtx) in self.vertices.iter() {
-            for e in vtx.edges.iter() {
-                if !self.vertices.contains_key(&e.to) {
-                    errors.push(format!("Edge ν{}.{} arrives to lost ν{}", v, e.a, e.to));
+    /// Take a slice of the Sot, keeping only the vertex specified
+    /// by the locator.
+    pub fn slice(&mut self, loc: &str) -> Result<Sot> {
+        let mut todo = HashSet::new();
+        let mut done = HashSet::new();
+        todo.insert(self.find(0, loc)?);
+        loop {
+            if todo.is_empty() {
+                break;
+            }
+            let before: Vec<u32> = todo.drain().collect();
+            for v in before {
+                done.insert(v);
+                let vtx = self.vertices.get(&v).unwrap();
+                for to in vtx.edges.iter().map(|e| e.to) {
+                    if done.contains(&to) {
+                        continue;
+                    }
+                    done.insert(to);
+                    todo.insert(to);
                 }
             }
         }
-        errors
+        let mut new_vertices = HashMap::new();
+        for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
+            new_vertices.insert(*v, vtx.clone());
+        }
+        Ok(Sot {
+            vertices: new_vertices,
+        })
     }
 }
 
-#[cfg(test)]
-use anyhow::Result;
-
 #[test]
-fn finds_lost_edge() -> Result<()> {
+fn makes_a_slice() -> Result<()> {
     let mut sot = Sot::empty();
     sot.add(0)?;
     sot.add(1)?;
     sot.bind(0, 1, "foo")?;
-    sot.vertices.remove(&1);
-    assert_eq!(1, sot.inconsistencies().len());
+    sot.add(2)?;
+    sot.bind(0, 2, "bar")?;
+    let slice = sot.slice("bar")?;
+    assert_eq!(1, slice.vertices.len());
     Ok(())
 }

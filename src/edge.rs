@@ -18,41 +18,29 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#![deny(warnings)]
-
-mod edge;
-mod inconsistencies;
-mod inspect;
-mod merge;
-mod misc;
-mod ops;
-mod parse;
-mod serialization;
-mod slice;
-mod vertex;
-mod xml;
-
-use crate::vertex::Vertex;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
-#[derive(Serialize, Deserialize)]
-pub struct Sot {
-    vertices: HashMap<u32, Vertex>,
+#[derive(Clone, Serialize, Deserialize, Eq, PartialOrd, PartialEq, Ord)]
+pub struct Edge {
+    pub to: u32,
+    pub a: String,
+}
+
+impl Edge {
+    pub fn new(to: u32, a: &str) -> Edge {
+        Edge {
+            to,
+            a: a.to_string(),
+        }
+    }
 }
 
 #[cfg(test)]
-use simple_logger::SimpleLogger;
+use anyhow::Result;
 
-#[cfg(test)]
-use log::LevelFilter;
-
-#[cfg(test)]
-#[ctor::ctor]
-fn init() {
-    SimpleLogger::new()
-        .without_timestamps()
-        .with_level(LevelFilter::Trace)
-        .init()
-        .unwrap();
+#[test]
+fn makes_an_empty_edge() -> Result<()> {
+    let edge = Edge::new(42, "hello");
+    assert_eq!(42, edge.to);
+    Ok(())
 }

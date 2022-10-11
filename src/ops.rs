@@ -18,14 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::sot::{Edge, Sot, Vertex};
+use crate::edge::Edge;
+use crate::Sot;
+use crate::Vertex;
 use anyhow::{anyhow, Context, Result};
 use log::trace;
 use std::collections::VecDeque;
 use std::str::FromStr;
 
 impl Sot {
-    /// Add a new vertex `v1` to the Sot.
+    /// Add a new vertex `v1` to the Sot:
+    ///
+    /// ```
+    /// use sot::Sot;
+    /// let mut sot = Sot::empty();
+    /// sot.add(0).unwrap();
+    /// sot.add(42).unwrap();
+    /// sot.bind(0, 42, "hello").unwrap();
+    /// ```
     pub fn add(&mut self, v1: u32) -> Result<()> {
         if self.vertices.contains_key(&v1) {
             return Err(anyhow!("Vertex ν{} already exists", v1));
@@ -57,7 +67,7 @@ impl Sot {
             .get_mut(&v1)
             .context(format!("Can't find ν{}", v1))?;
         vtx1.edges.retain(|e| e.a != a);
-        vtx1.edges.push(Edge::new(v2, a.to_string()));
+        vtx1.edges.push(Edge::new(v2, a));
         trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
         Ok(())
     }

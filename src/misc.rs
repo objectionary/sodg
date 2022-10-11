@@ -18,51 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use serde::{Deserialize, Serialize};
+use crate::Sot;
 use std::collections::HashMap;
 use std::fmt;
-
-mod inconsistencies;
-mod inspect;
-mod merge;
-mod ops;
-mod parse;
-mod serialization;
-mod slice;
-mod xml;
-
-#[derive(Clone, Serialize, Deserialize, Eq, PartialOrd, PartialEq, Ord)]
-struct Edge {
-    to: u32,
-    a: String,
-}
-
-impl Edge {
-    fn new(to: u32, a: String) -> Edge {
-        Edge { to, a }
-    }
-}
-
-#[derive(Clone, Serialize, Deserialize)]
-struct Vertex {
-    edges: Vec<Edge>,
-    data: Vec<u8>,
-}
-
-impl Vertex {
-    /// Make an empty one.
-    pub fn empty() -> Self {
-        Vertex {
-            edges: vec![],
-            data: vec![],
-        }
-    }
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct Sot {
-    vertices: HashMap<u32, Vertex>,
-}
 
 impl fmt::Debug for Sot {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

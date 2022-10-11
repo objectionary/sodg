@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::sot::Sot;
+use crate::Sot;
 use anyhow::Result;
 use itertools::Itertools;
 use xml_builder::{XMLBuilder, XMLElement, XMLVersion};
@@ -73,7 +73,6 @@ fn prints_simple_graph() -> Result<()> {
     sot.add(1)?;
     sot.bind(0, 1, "foo")?;
     let xml = sot.to_xml()?;
-    println!("{}", xml);
     let parser = sxd_document::parser::parse(xml.as_str())?;
     let doc = parser.as_document();
     assert_eq!(
