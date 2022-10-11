@@ -18,11 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sot;
+use crate::Sodg;
 use std::collections::HashMap;
 use std::fmt;
 
-impl fmt::Debug for Sot {
+impl fmt::Debug for Sodg {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let mut lines = vec![];
         for (i, v) in self.vertices.iter() {
@@ -40,10 +40,10 @@ impl fmt::Debug for Sot {
     }
 }
 
-impl Sot {
-    /// Makes an empty Sot, with no vertices and no edges.
+impl Sodg {
+    /// Makes an empty Sodg, with no vertices and no edges.
     pub fn empty() -> Self {
-        Sot {
+        Sodg {
             vertices: HashMap::new(),
         }
     }
@@ -64,18 +64,18 @@ impl Sot {
 use anyhow::Result;
 
 #[test]
-fn makes_an_empty_sot() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    assert_eq!(1, sot.vertices.len());
+fn makes_an_empty_sodg() -> Result<()> {
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    assert_eq!(1, sodg.vertices.len());
     Ok(())
 }
 
 #[test]
 fn calculates_max() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    sot.add(1)?;
-    assert_eq!(1, sot.max());
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    sodg.add(1)?;
+    assert_eq!(1, sodg.max());
     Ok(())
 }

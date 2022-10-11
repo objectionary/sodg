@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sot;
+use crate::Sodg;
 use anyhow::{Context, Result};
 use itertools::Itertools;
 use std::collections::HashSet;
 
-impl Sot {
+impl Sodg {
     /// Finds an object by the provided locator and prints its tree
     /// of sub-objects and edges. Mostly used for testing.
     pub fn inspect(&self, loc: &str) -> Result<String> {
@@ -75,12 +75,12 @@ impl Sot {
 
 #[test]
 fn inspects_simple_object() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    sot.put(0, "hello".as_bytes().to_vec())?;
-    sot.add(1)?;
-    sot.bind(0, 1, "foo")?;
-    let txt = sot.inspect("")?;
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    sodg.put(0, "hello".as_bytes().to_vec())?;
+    sodg.add(1)?;
+    sodg.bind(0, 1, "foo")?;
+    let txt = sodg.inspect("")?;
     println!("{}", txt);
     assert_ne!("".to_string(), txt);
     Ok(())

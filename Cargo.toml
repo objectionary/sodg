@@ -1,13 +1,13 @@
 [package]
-name = "sot"
+name = "sodg"
 version = "0.0.0"
 edition = "2021"
-repository = "https://github.com/objectionary/sot"
-description = "Simple Object Tree"
+repository = "https://github.com/objectionary/sodg"
+description = "Simple Object DiGraph"
 readme = "README.md"
 license-file = "LICENSE.txt"
-homepage = "https://github.com/objectionary/sot"
-keywords = ["graph", "tree", "oop"]
+homepage = "https://github.com/objectionary/sodg"
+keywords = ["graph", "oop"]
 categories = ["graph"]
 
 [dependencies]

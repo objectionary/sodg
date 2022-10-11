@@ -19,22 +19,22 @@
 // SOFTWARE.
 
 use crate::edge::Edge;
-use crate::Sot;
+use crate::Sodg;
 use crate::Vertex;
 use anyhow::{anyhow, Context, Result};
 use log::trace;
 use std::collections::VecDeque;
 use std::str::FromStr;
 
-impl Sot {
-    /// Add a new vertex `v1` to the Sot:
+impl Sodg {
+    /// Add a new vertex `v1` to the Sodg:
     ///
     /// ```
-    /// use sot::Sot;
-    /// let mut sot = Sot::empty();
-    /// sot.add(0).unwrap();
-    /// sot.add(42).unwrap();
-    /// sot.bind(0, 42, "hello").unwrap();
+    /// use sodg::Sodg;
+    /// let mut sodg = Sodg::empty();
+    /// sodg.add(0).unwrap();
+    /// sodg.add(42).unwrap();
+    /// sodg.bind(0, 42, "hello").unwrap();
     /// ```
     pub fn add(&mut self, v1: u32) -> Result<()> {
         if self.vertices.contains_key(&v1) {
@@ -50,12 +50,12 @@ impl Sot {
     /// and label them as `"ρ"` an `"𝜎"`.
     ///
     /// ```
-    /// use sot::Sot;
-    /// let mut sot = Sot::empty();
-    /// sot.add(0).unwrap();
-    /// sot.add(42).unwrap();
-    /// sot.bind(0, 42, "forward").unwrap();
-    /// sot.bind(42, 0, "backward").unwrap();
+    /// use sodg::Sodg;
+    /// let mut sodg = Sodg::empty();
+    /// sodg.add(0).unwrap();
+    /// sodg.add(42).unwrap();
+    /// sodg.bind(0, 42, "forward").unwrap();
+    /// sodg.bind(42, 0, "backward").unwrap();
     /// ```
     pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
         if a.is_empty() {
@@ -84,10 +84,10 @@ impl Sot {
     /// Set vertex data.
     ///
     /// ```
-    /// use sot::Sot;
-    /// let mut sot = Sot::empty();
-    /// sot.add(42).unwrap();
-    /// sot.put(42, "hello, world!".as_bytes().to_vec()).unwrap();
+    /// use sodg::Sodg;
+    /// let mut sodg = Sodg::empty();
+    /// sodg.add(42).unwrap();
+    /// sodg.put(42, "hello, world!".as_bytes().to_vec()).unwrap();
     /// ```
     pub fn put(&mut self, v: u32, d: Vec<u8>) -> Result<()> {
         let vtx = self
@@ -102,12 +102,12 @@ impl Sot {
     /// Read vertex data.
     ///
     /// ```
-    /// use sot::Sot;
-    /// let mut sot = Sot::empty();
-    /// sot.add(42).unwrap();
+    /// use sodg::Sodg;
+    /// let mut sodg = Sodg::empty();
+    /// sodg.add(42).unwrap();
     /// let data : &[u8] = "hello, world!".as_bytes();
-    /// sot.put(42, data.to_vec()).unwrap();
-    /// assert_eq!(data, sot.data(42).unwrap());
+    /// sodg.put(42, data.to_vec()).unwrap();
+    /// assert_eq!(data, sodg.data(42).unwrap());
     /// ```
     pub fn data(&self, v: u32) -> Result<Vec<u8>> {
         let vtx = self
@@ -125,12 +125,12 @@ impl Sot {
     /// Find kid.
     ///
     /// ```
-    /// use sot::Sot;
-    /// let mut sot = Sot::empty();
-    /// sot.add(0).unwrap();
-    /// sot.add(42).unwrap();
-    /// sot.bind(0, 42, "k").unwrap();
-    /// assert_eq!(42, sot.kid(0, "k").unwrap());
+    /// use sodg::Sodg;
+    /// let mut sodg = Sodg::empty();
+    /// sodg.add(0).unwrap();
+    /// sodg.add(42).unwrap();
+    /// sodg.bind(0, 42, "k").unwrap();
+    /// assert_eq!(42, sodg.kid(0, "k").unwrap());
     /// ```
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         if let Some(e) = self
@@ -147,17 +147,17 @@ impl Sot {
         }
     }
 
-    /// Find a vertex in the Sot by its locator.
+    /// Find a vertex in the Sodg by its locator.
     ///
     /// ```
-    /// use sot::Sot;
-    /// let mut sot = Sot::empty();
-    /// sot.add(0).unwrap();
-    /// sot.add(1).unwrap();
-    /// sot.bind(0, 1, "a").unwrap();
-    /// sot.add(2).unwrap();
-    /// sot.bind(1, 2, "b").unwrap();
-    /// assert_eq!(2, sot.find(0, "a.b").unwrap());
+    /// use sodg::Sodg;
+    /// let mut sodg = Sodg::empty();
+    /// sodg.add(0).unwrap();
+    /// sodg.add(1).unwrap();
+    /// sodg.bind(0, 1, "a").unwrap();
+    /// sodg.add(2).unwrap();
+    /// sodg.bind(1, 2, "b").unwrap();
+    /// assert_eq!(2, sodg.find(0, "a.b").unwrap());
     /// ```
     pub fn find(&self, v1: u32, loc: &str) -> Result<u32> {
         let mut v = v1;
@@ -210,91 +210,91 @@ impl Sot {
 
 #[test]
 fn adds_simple_vertex() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(1)?;
-    assert!(sot.inconsistencies().is_empty());
-    assert_eq!(1, sot.find(1, "")?);
+    let mut sodg = Sodg::empty();
+    sodg.add(1)?;
+    assert!(sodg.inconsistencies().is_empty());
+    assert_eq!(1, sodg.find(1, "")?);
     Ok(())
 }
 
 #[test]
 fn binds_simple_vertices() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(1)?;
-    sot.add(2)?;
+    let mut sodg = Sodg::empty();
+    sodg.add(1)?;
+    sodg.add(2)?;
     let k = "hello";
-    sot.bind(1, 2, k)?;
-    assert!(sot.inconsistencies().is_empty());
-    assert_eq!(2, sot.find(1, k)?);
+    sodg.bind(1, 2, k)?;
+    assert!(sodg.inconsistencies().is_empty());
+    assert_eq!(2, sodg.find(1, k)?);
     Ok(())
 }
 
 #[test]
 fn pre_defined_ids() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(1)?;
-    sot.add(2)?;
+    let mut sodg = Sodg::empty();
+    sodg.add(1)?;
+    sodg.add(2)?;
     let k = "a-привет";
-    sot.bind(1, 2, k)?;
-    assert!(sot.inconsistencies().is_empty());
-    assert_eq!(2, sot.find(1, k)?);
+    sodg.bind(1, 2, k)?;
+    assert!(sodg.inconsistencies().is_empty());
+    assert_eq!(2, sodg.find(1, k)?);
     Ok(())
 }
 
 #[test]
 fn binds_two_names() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(1)?;
-    sot.add(2)?;
-    sot.bind(1, 2, "first")?;
-    sot.bind(1, 2, "second")?;
-    assert!(sot.inconsistencies().is_empty());
-    assert_eq!(2, sot.find(1, "first")?);
+    let mut sodg = Sodg::empty();
+    sodg.add(1)?;
+    sodg.add(2)?;
+    sodg.bind(1, 2, "first")?;
+    sodg.bind(1, 2, "second")?;
+    assert!(sodg.inconsistencies().is_empty());
+    assert_eq!(2, sodg.find(1, "first")?);
     Ok(())
 }
 
 #[test]
 fn overwrites_edge() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(1)?;
-    sot.add(2)?;
+    let mut sodg = Sodg::empty();
+    sodg.add(1)?;
+    sodg.add(2)?;
     let label = "hello";
-    sot.bind(1, 2, label)?;
-    sot.add(3)?;
-    sot.bind(1, 3, label)?;
-    assert!(sot.inconsistencies().is_empty());
-    assert_eq!(3, sot.find(1, label)?);
+    sodg.bind(1, 2, label)?;
+    sodg.add(3)?;
+    sodg.bind(1, 3, label)?;
+    assert!(sodg.inconsistencies().is_empty());
+    assert_eq!(3, sodg.find(1, label)?);
     Ok(())
 }
 
 #[test]
 fn binds_to_root() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    sot.add(1)?;
-    sot.bind(0, 1, "x")?;
-    assert!(sot.inconsistencies().is_empty());
-    assert!(sot.kid(0, "ρ").is_none());
-    assert!(sot.kid(0, "σ").is_none());
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    sodg.add(1)?;
+    sodg.bind(0, 1, "x")?;
+    assert!(sodg.inconsistencies().is_empty());
+    assert!(sodg.kid(0, "ρ").is_none());
+    assert!(sodg.kid(0, "σ").is_none());
     Ok(())
 }
 
 #[test]
 fn sets_simple_data() -> Result<()> {
-    let mut sot = Sot::empty();
+    let mut sodg = Sodg::empty();
     let data = "hello".as_bytes().to_vec();
-    sot.add(0)?;
-    sot.put(0, data.clone())?;
-    assert_eq!(data, sot.data(0)?);
-    assert!(sot.inconsistencies().is_empty());
+    sodg.add(0)?;
+    sodg.put(0, data.clone())?;
+    assert_eq!(data, sodg.data(0)?);
+    assert!(sodg.inconsistencies().is_empty());
     Ok(())
 }
 
 #[test]
 fn finds_root() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    assert_eq!(0, sot.find(0, "")?);
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    assert_eq!(0, sodg.find(0, "")?);
     Ok(())
 }
 
@@ -305,11 +305,11 @@ fn finds_root() -> Result<()> {
 #[test]
 #[ignore]
 fn finds_all_kids() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    sot.add(1)?;
-    sot.bind(0, 1, "one")?;
-    sot.bind(0, 1, "two")?;
-    assert_eq!(2, sot.kids(0).iter().count());
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    sodg.add(1)?;
+    sodg.bind(0, 1, "one")?;
+    sodg.bind(0, 1, "two")?;
+    assert_eq!(2, sodg.kids(0).iter().count());
     Ok(())
 }

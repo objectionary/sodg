@@ -18,16 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sot;
+use crate::Sodg;
 use log::debug;
 use std::collections::HashMap;
 
-impl Sot {
-    /// Merge this new Sot into itself.
-    pub fn merge(&mut self, sot: &Sot) {
+impl Sodg {
+    /// Merge this new Sodg into itself.
+    pub fn merge(&mut self, sodg: &Sodg) {
         let mut matcher: HashMap<u32, u32> = HashMap::new();
         let mut next = self.max() + 1;
-        for (v, vtx) in sot.vertices.iter() {
+        for (v, vtx) in sodg.vertices.iter() {
             let mut id = 0;
             if *v != 0 {
                 id = next;
@@ -43,8 +43,8 @@ impl Sot {
             }
         }
         debug!(
-            "Merged {} vertices into the existing Sot",
-            sot.vertices.len()
+            "Merged {} vertices into the existing Sodg",
+            sodg.vertices.len()
         );
     }
 }
@@ -53,16 +53,16 @@ impl Sot {
 use anyhow::Result;
 
 #[test]
-fn merges_two_sots() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    sot.add(1)?;
-    sot.bind(0, 1, "foo")?;
-    let mut extra = Sot::empty();
+fn merges_two_sodgs() -> Result<()> {
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    sodg.add(1)?;
+    sodg.bind(0, 1, "foo")?;
+    let mut extra = Sodg::empty();
     extra.add(0)?;
     extra.add(1)?;
     extra.bind(0, 1, "bar")?;
-    sot.merge(&extra);
-    assert_eq!(3, sot.vertices.len());
+    sodg.merge(&extra);
+    assert_eq!(3, sodg.vertices.len());
     Ok(())
 }

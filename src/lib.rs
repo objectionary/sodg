@@ -36,8 +36,21 @@ use crate::vertex::Vertex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+/// This struct represents a simple object tree (SODG). You add vertices
+/// to it, bind them one to one with edges
+///
+/// ```
+/// use sodg::Sodg;
+/// let mut sodg = Sodg::empty();
+/// sodg.add(0).unwrap();
+/// sodg.add(1).unwrap();
+/// sodg.bind(0, 1, "a").unwrap();
+/// sodg.add(2).unwrap();
+/// sodg.bind(1, 2, "b").unwrap();
+/// assert_eq!(2, sodg.find(0, "a.b").unwrap());
+/// ```
 #[derive(Serialize, Deserialize)]
-pub struct Sot {
+pub struct Sodg {
     vertices: HashMap<u32, Vertex>,
 }
 

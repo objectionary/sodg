@@ -18,19 +18,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sot;
+use crate::Sodg;
 use anyhow::Result;
 use itertools::Itertools;
 use xml_builder::{XMLBuilder, XMLElement, XMLVersion};
 
-impl Sot {
+impl Sodg {
     /// Make XML graph.
     pub fn to_xml(&self) -> Result<String> {
         let mut xml = XMLBuilder::new()
             .version(XMLVersion::XML1_1)
             .encoding("UTF-8".into())
             .build();
-        let mut root = XMLElement::new("sot");
+        let mut root = XMLElement::new("sodg");
         for (v, vtx) in self.vertices.iter().sorted_by_key(|(v, _)| v.clone()) {
             let mut v_node = XMLElement::new("v");
             v_node.add_attribute("id", v.to_string().as_str());
@@ -67,21 +67,21 @@ use sxd_xpath::evaluate_xpath;
 
 #[test]
 fn prints_simple_graph() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    sot.put(0, "hello".as_bytes().to_vec())?;
-    sot.add(1)?;
-    sot.bind(0, 1, "foo")?;
-    let xml = sot.to_xml()?;
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    sodg.put(0, "hello".as_bytes().to_vec())?;
+    sodg.add(1)?;
+    sodg.bind(0, 1, "foo")?;
+    let xml = sodg.to_xml()?;
     let parser = sxd_document::parser::parse(xml.as_str())?;
     let doc = parser.as_document();
     assert_eq!(
         "foo",
-        evaluate_xpath(&doc, "/sot/v[@id=0]/e[1]/@a")?.string()
+        evaluate_xpath(&doc, "/sodg/v[@id=0]/e[1]/@a")?.string()
     );
     assert_eq!(
         "68 65 6C 6C 6F",
-        evaluate_xpath(&doc, "/sot/v[@id=0]/data")?.string()
+        evaluate_xpath(&doc, "/sodg/v[@id=0]/data")?.string()
     );
     Ok(())
 }

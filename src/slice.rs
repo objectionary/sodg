@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sot;
+use crate::Sodg;
 use anyhow::Result;
 use std::collections::{HashMap, HashSet};
 
-impl Sot {
-    /// Take a slice of the Sot, keeping only the vertex specified
+impl Sodg {
+    /// Take a slice of the Sodg, keeping only the vertex specified
     /// by the locator.
-    pub fn slice(&mut self, loc: &str) -> Result<Sot> {
+    pub fn slice(&mut self, loc: &str) -> Result<Sodg> {
         let mut todo = HashSet::new();
         let mut done = HashSet::new();
         todo.insert(self.find(0, loc)?);
@@ -50,7 +50,7 @@ impl Sot {
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             new_vertices.insert(*v, vtx.clone());
         }
-        Ok(Sot {
+        Ok(Sodg {
             vertices: new_vertices,
         })
     }
@@ -58,13 +58,13 @@ impl Sot {
 
 #[test]
 fn makes_a_slice() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    sot.add(1)?;
-    sot.bind(0, 1, "foo")?;
-    sot.add(2)?;
-    sot.bind(0, 2, "bar")?;
-    let slice = sot.slice("bar")?;
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    sodg.add(1)?;
+    sodg.bind(0, 1, "foo")?;
+    sodg.add(2)?;
+    sodg.bind(0, 2, "bar")?;
+    let slice = sodg.slice("bar")?;
     assert_eq!(1, slice.vertices.len());
     Ok(())
 }

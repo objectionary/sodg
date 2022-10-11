@@ -31,9 +31,9 @@ impl Vertex {
     /// Make an empty one.
     ///
     /// ```
-    /// use sot::Sot;
-    /// let mut sot = Sot::empty();
-    /// sot.add(0).unwrap();
+    /// use sodg::Sodg;
+    /// let mut sodg = Sodg::empty();
+    /// sodg.add(0).unwrap();
     /// ```
     pub fn empty() -> Self {
         Vertex {

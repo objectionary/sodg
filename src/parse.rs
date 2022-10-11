@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sot;
+use crate::Sodg;
 use anyhow::{anyhow, Context, Result};
 use lazy_static::lazy_static;
 use log::trace;
@@ -40,12 +40,12 @@ impl Script {
         }
     }
 
-    /// Deploy the entire script to the Sot.
-    pub fn deploy_to(&mut self, sot: &mut Sot) -> Result<usize> {
+    /// Deploy the entire script to the Sodg.
+    pub fn deploy_to(&mut self, sodg: &mut Sodg) -> Result<usize> {
         let mut pos = 0;
         for cmd in self.commands().iter() {
             trace!("#deploy_to: deploying command no.{} '{}'...", pos + 1, cmd);
-            self.deploy_one(cmd, sot)
+            self.deploy_one(cmd, sodg)
                 .context(format!("Failure at the command no.{}: '{}'", pos, cmd))?;
             pos += 1;
         }
@@ -67,8 +67,8 @@ impl Script {
             .collect()
     }
 
-    /// Deploy a single command to the sot.
-    fn deploy_one(&mut self, cmd: &str, sot: &mut Sot) -> Result<()> {
+    /// Deploy a single command to the sodg.
+    fn deploy_one(&mut self, cmd: &str, sodg: &mut Sodg) -> Result<()> {
         lazy_static! {
             static ref LINE: Regex = Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap();
         }
@@ -83,21 +83,21 @@ impl Script {
             .collect();
         match &cap[1] {
             "ADD" => {
-                let v = self.parse(&args[0], sot)?;
-                sot.add(v).context(format!("Failed to ADD({})", &args[0]))
+                let v = self.parse(&args[0], sodg)?;
+                sodg.add(v).context(format!("Failed to ADD({})", &args[0]))
             }
             "BIND" => {
-                let v1 = self.parse(&args[0], sot)?;
-                let v2 = self.parse(&args[1], sot)?;
+                let v1 = self.parse(&args[0], sodg)?;
+                let v2 = self.parse(&args[1], sodg)?;
                 let a = &args[2];
-                sot.bind(v1, v2, a).context(format!(
+                sodg.bind(v1, v2, a).context(format!(
                     "Failed to BIND({}, {}, {})",
                     &args[0], &args[1], &args[2]
                 ))
             }
             "PUT" => {
-                let v = self.parse(&args[0], sot)?;
-                sot.put(v, Self::parse_data(&args[1])?)
+                let v = self.parse(&args[0], sodg)?;
+                sodg.put(v, Self::parse_data(&args[1])?)
                     .context(format!("Failed to DATA({})", &args[0]))
             }
             _cmd => Err(anyhow!("Unknown command: {}", _cmd)),
@@ -123,27 +123,27 @@ impl Script {
     }
 
     /// Parses `$ν5` into `5`.
-    fn parse(&mut self, s: &str, sot: &mut Sot) -> Result<u32> {
+    fn parse(&mut self, s: &str, sodg: &mut Sodg) -> Result<u32> {
         let head = s.chars().next().context(format!("Empty identifier"))?;
         if head == '$' {
             let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
             Ok(*self
                 .vars
                 .entry(tail.to_string())
-                .or_insert_with(|| sot.max() + 1))
+                .or_insert_with(|| sodg.max() + 1))
         } else {
             Ok(u32::from_str(s).context(format!("Parsing of '{}' failed", s))?)
         }
     }
 }
 
-impl Sot {
+impl Sodg {
     /// Parse string with instructions.
-    pub fn from_str(txt: &str) -> Result<Sot> {
-        let mut sot = Sot::empty();
+    pub fn from_str(txt: &str) -> Result<Sodg> {
+        let mut sodg = Sodg::empty();
         let mut script = Script::new(txt);
-        script.deploy_to(&mut sot)?;
-        Ok(sot)
+        script.deploy_to(&mut sodg)?;
+        Ok(sodg)
     }
 }
 
@@ -152,14 +152,14 @@ use std::str;
 
 #[test]
 fn simple_command() -> Result<()> {
-    let sot = Sot::from_str(
+    let sodg = Sodg::from_str(
         "
         ADD(0);  ADD($ν1); # adding two vertices
         BIND(0, $ν1, foo  );
         PUT($ν1  , d0-bf-D1-80-d0-B8-d0-b2-d0-b5-d1-82);
         ",
     )?;
-    assert_eq!("привет", str::from_utf8(sot.data(1)?.as_slice())?);
-    assert_eq!(1, sot.kid(0, "foo").unwrap());
+    assert_eq!("привет", str::from_utf8(sodg.data(1)?.as_slice())?);
+    assert_eq!(1, sodg.kid(0, "foo").unwrap());
     Ok(())
 }

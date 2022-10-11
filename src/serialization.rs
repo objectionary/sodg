@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sot;
+use crate::Sodg;
 use anyhow::{Context, Result};
 use bincode::{deserialize, serialize};
 use log::trace;
@@ -26,8 +26,8 @@ use std::fs;
 use std::path::Path;
 use std::time::Instant;
 
-impl Sot {
-    /// Save the entire Sot into a binary file. The entire Sot
+impl Sodg {
+    /// Save the entire Sodg into a binary file. The entire Sodg
     /// can be restored from the file. Returns the size of the file just saved.
     pub fn save(&mut self, path: &Path) -> Result<usize> {
         let start = Instant::now();
@@ -43,13 +43,13 @@ impl Sot {
         Ok(size)
     }
 
-    /// Load the entire Sot from a binary file previously
+    /// Load the entire Sodg from a binary file previously
     /// created by `save()`.
-    pub fn load(path: &Path) -> Result<Sot> {
+    pub fn load(path: &Path) -> Result<Sodg> {
         let start = Instant::now();
         let bytes = fs::read(path).context(format!("Can't read from {}", path.display()))?;
         let size = bytes.len();
-        let sot =
+        let sodg =
             deserialize(&bytes).context(format!("Can't deserialize from {}", path.display()))?;
         trace!(
             "Deserialized {} bytes from {} in {:?}",
@@ -57,7 +57,7 @@ impl Sot {
             path.display(),
             start.elapsed()
         );
-        Ok(sot)
+        Ok(sodg)
     }
 }
 
@@ -66,16 +66,16 @@ use tempfile::TempDir;
 
 #[test]
 fn saves_and_loads() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    sot.put(0, "hello".as_bytes().to_vec())?;
-    sot.add(1)?;
-    sot.bind(0, 1, "foo")?;
-    sot.put(1, "foo".as_bytes().to_vec())?;
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    sodg.put(0, "hello".as_bytes().to_vec())?;
+    sodg.add(1)?;
+    sodg.bind(0, 1, "foo")?;
+    sodg.put(1, "foo".as_bytes().to_vec())?;
     let tmp = TempDir::new()?;
-    let file = tmp.path().join("foo.sot");
-    sot.save(file.as_path())?;
-    let after = Sot::load(file.as_path())?;
-    assert_eq!(sot.inspect("")?, after.inspect("")?);
+    let file = tmp.path().join("foo.sodg");
+    sodg.save(file.as_path())?;
+    let after = Sodg::load(file.as_path())?;
+    assert_eq!(sodg.inspect("")?, after.inspect("")?);
     Ok(())
 }

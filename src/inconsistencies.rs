@@ -20,8 +20,8 @@
 
 use log::error;
 
-impl Sot {
-    /// Validate the Sot and return all found data
+impl Sodg {
+    /// Validate the Sodg and return all found data
     /// inconsistencies. This is mostly used for testing.
     pub fn inconsistencies(&self) -> Vec<String> {
         let mut errors = Vec::new();
@@ -48,17 +48,17 @@ impl Sot {
     }
 }
 
-use crate::Sot;
+use crate::Sodg;
 #[cfg(test)]
 use anyhow::Result;
 
 #[test]
 fn finds_lost_edge() -> Result<()> {
-    let mut sot = Sot::empty();
-    sot.add(0)?;
-    sot.add(1)?;
-    sot.bind(0, 1, "foo")?;
-    sot.vertices.remove(&1);
-    assert_eq!(1, sot.inconsistencies().len());
+    let mut sodg = Sodg::empty();
+    sodg.add(0)?;
+    sodg.add(1)?;
+    sodg.bind(0, 1, "foo")?;
+    sodg.vertices.remove(&1);
+    assert_eq!(1, sodg.inconsistencies().len());
     Ok(())
 }
