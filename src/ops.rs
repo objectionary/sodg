@@ -72,10 +72,10 @@ impl Sodg {
             ));
         }
         if !self.vertices.contains_key(&v1) {
-            return Err(anyhow!("Can't find ν{}", v1));
+            return Err(anyhow!("Can't depart from ν{}, it's absent", v1));
         }
         if !self.vertices.contains_key(&v2) {
-            return Err(anyhow!("Can't find ν{}", v2));
+            return Err(anyhow!("Can't arrive to ν{}, it's absent", v2));
         }
         let vtx1 = self
             .vertices
