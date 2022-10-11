@@ -71,16 +71,13 @@ impl Sodg {
                 v2
             ));
         }
-        if !self.vertices.contains_key(&v1) {
-            return Err(anyhow!("Can't depart from ν{}, it's absent", v1));
-        }
         if !self.vertices.contains_key(&v2) {
             return Err(anyhow!("Can't arrive to ν{}, it's absent", v2));
         }
         let vtx1 = self
             .vertices
             .get_mut(&v1)
-            .context(format!("Can't find ν{}", v1))?;
+            .context(format!("Can't depart from ν{}, it's absent", v1))?;
         vtx1.edges.retain(|e| e.a != a);
         vtx1.edges.push(Edge::new(v2, a));
         trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
