@@ -11,7 +11,7 @@
 ![Lines of code](https://img.shields.io/tokei/lines/github/objectionary/sodg)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/objectionary/sodg/blob/master/LICENSE.txt)
 
-This Rust library helps you build a Simple Object DiGraph (SODG) for
+This Rust library helps you build a Surging Object DiGraph (SODG) for
 [reo](https://github.com/objectionary/reo) compiler of
 [EO](https://www.eolang.org) programs.
 
