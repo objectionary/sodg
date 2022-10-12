@@ -124,12 +124,12 @@ impl Sodg {
     }
 
     /// Find all kids of a vertex.
-    pub fn kids(&self, _v: u32) -> Result<Vec<(String, u32)>> {
-        let vert = self
+    pub fn kids(&self, v: u32) -> Result<Vec<(String, u32)>> {
+        let vtx = self
             .vertices
-            .get(&_v)
-            .context(format!("Can't find v{_v}"))?;
-        Ok(vert.edges.iter().map(|x| (x.a.clone(), x.to)).collect())
+            .get(&v)
+            .context(format!("Can't find ν{v}"))?;
+        Ok(vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect())
     }
 
     /// Find kid.
