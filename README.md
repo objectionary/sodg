@@ -51,3 +51,18 @@ println!("{:?}", g);
 ```
 
 Also, you can serialize and deserialize the graph.
+
+## How to Contribute
+
+First, install [Rust](https://www.rust-lang.org/tools/install) and then:
+
+```bash
+$ cargo test --vv
+```
+
+If everything goes well, fork repository, make changes, send us a [pull request](https://www.yegor256.com/2014/04/15/github-guidelines.html).
+We will review your changes and apply them to the `master` branch shortly,
+provided they don't violate our quality standards. To avoid frustration,
+before sending us your pull request please run `cargo test` again. Also, 
+run `cargo fmt` and `cargo clippy`.
+
