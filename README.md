@@ -57,7 +57,7 @@ Also, you can serialize and deserialize the graph.
 First, install [Rust](https://www.rust-lang.org/tools/install) and then:
 
 ```bash
-$ cargo test
+$ cargo test --vv
 ```
 
 If everything goes well, fork repository, make changes, send us a [pull request](https://www.yegor256.com/2014/04/15/github-guidelines.html).
