@@ -75,7 +75,7 @@ impl Script {
         let cap = LINE
             .captures(cmd)
             .context(format!("Can't parse '{}'", cmd))?;
-        let args: Vec<String> = (&cap[2])
+        let args: Vec<String> = cap[2]
             .split(',')
             .map(|t| t.trim())
             .filter(|t| !t.is_empty())
