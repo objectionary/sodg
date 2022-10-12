@@ -8,12 +8,14 @@ merge:
   script: |
     cargo --color=never test -vv
     cargo --color=never fmt --check
+    cargo clippy
 release:
   script: |-
     [[ "${tag}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit -1
     sed -i -e "s/^version = \"0.0.0\"/version = \"${tag}\"/" Cargo.toml
     cargo --color=never test -vv
     cargo --color=never fmt --check
+    cargo clippy
     git commit -am "${tag}"
     mkdir -p ~/.cargo && cp ../credentials ~/.cargo
     cargo --color=never publish

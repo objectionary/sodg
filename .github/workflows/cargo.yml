@@ -19,3 +19,4 @@ jobs:
           toolchain: stable
       - run: cargo test -vv
       - run: cargo fmt --check
+      - run: cargo clippy
