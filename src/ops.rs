@@ -139,13 +139,13 @@ impl Sodg {
     /// assert_eq!(42, sodg.kid(0, "k").unwrap());
     /// ```
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
-        self
-            .vertices
+        self.vertices
             .get(&v)
             .unwrap()
             .edges
             .iter()
-            .find(|e| e.a == a).map(|e| e.to)
+            .find(|e| e.a == a)
+            .map(|e| e.to)
     }
 
     /// Find a vertex in the Sodg by its locator.

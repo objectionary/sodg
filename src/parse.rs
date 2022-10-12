@@ -127,10 +127,7 @@ impl Script {
         let head = s.chars().next().context("Empty identifier".to_string())?;
         if head == '$' {
             let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
-            Ok(*self
-                .vars
-                .entry(tail)
-                .or_insert_with(|| sodg.max() + 1))
+            Ok(*self.vars.entry(tail).or_insert_with(|| sodg.max() + 1))
         } else {
             Ok(u32::from_str(s).context(format!("Parsing of '{}' failed", s))?)
         }
