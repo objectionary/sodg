@@ -309,19 +309,14 @@ fn finds_root() -> Result<()> {
     Ok(())
 }
 
-/// @todo #1:30min Let's implement this method. It has to find
-///  all edges departing from the given one and return a vector
-///  of tuples, where first element is the label of the edge
-///  and the second one is the vertex this edge points to.
 #[test]
-#[ignore]
 fn finds_all_kids() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "one")?;
     g.bind(0, 1, "two")?;
-    assert_eq!(2, g.kids(0).iter().count());
+    assert_eq!(2, g.kids(0)?.iter().count());
     Ok(())
 }
 
