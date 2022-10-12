@@ -60,7 +60,7 @@ impl Script {
         let text = self.txt.as_str();
         let clean: &str = &STRIP_COMMENTS.replace_all(text, "");
         clean
-            .split(";")
+            .split(';')
             .map(|t| t.trim())
             .filter(|t| !t.is_empty())
             .map(|t| t.to_string())
@@ -76,7 +76,7 @@ impl Script {
             .captures(cmd)
             .context(format!("Can't parse '{}'", cmd))?;
         let args: Vec<String> = (&cap[2])
-            .split(",")
+            .split(',')
             .map(|t| t.trim())
             .filter(|t| !t.is_empty())
             .map(|t| t.to_string())
@@ -124,12 +124,12 @@ impl Script {
 
     /// Parses `$ν5` into `5`.
     fn parse(&mut self, s: &str, sodg: &mut Sodg) -> Result<u32> {
-        let head = s.chars().next().context(format!("Empty identifier"))?;
+        let head = s.chars().next().context("Empty identifier".to_string())?;
         if head == '$' {
             let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
             Ok(*self
                 .vars
-                .entry(tail.to_string())
+                .entry(tail)
                 .or_insert_with(|| sodg.max() + 1))
         } else {
             Ok(u32::from_str(s).context(format!("Parsing of '{}' failed", s))?)
@@ -139,7 +139,7 @@ impl Script {
 
 impl Sodg {
     /// Parse string with instructions.
-    pub fn from_str(txt: &str) -> Result<Sodg> {
+    pub fn from_string(txt: &str) -> Result<Sodg> {
         let mut sodg = Sodg::empty();
         let mut script = Script::new(txt);
         script.deploy_to(&mut sodg)?;
@@ -152,7 +152,7 @@ use std::str;
 
 #[test]
 fn simple_command() -> Result<()> {
-    let g = Sodg::from_str(
+    let g = Sodg::from_string(
         "
         ADD(0);  ADD($ν1); # adding two vertices
         BIND(0, $ν1, foo  );

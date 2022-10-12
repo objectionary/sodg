@@ -37,9 +37,9 @@ impl Sodg {
             self.vertices.insert(id, vtx.clone());
         }
         for v in matcher.values() {
-            let vtx = self.vertices.get_mut(&v).unwrap();
+            let vtx = self.vertices.get_mut(v).unwrap();
             for e in vtx.edges.iter_mut() {
-                e.to = *matcher.get(&v).unwrap();
+                e.to = *matcher.get(v).unwrap();
             }
         }
         debug!(

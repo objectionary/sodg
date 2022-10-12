@@ -139,18 +139,13 @@ impl Sodg {
     /// assert_eq!(42, sodg.kid(0, "k").unwrap());
     /// ```
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
-        if let Some(e) = self
+        self
             .vertices
             .get(&v)
             .unwrap()
             .edges
             .iter()
-            .find(|e| e.a == a)
-        {
-            Some(e.to)
-        } else {
-            None
-        }
+            .find(|e| e.a == a).map(|e| e.to)
     }
 
     /// Find a vertex in the Sodg by its locator.
@@ -181,7 +176,7 @@ impl Sodg {
             if k.is_empty() {
                 return Err(anyhow!("System error, the locator is empty"));
             }
-            if k.starts_with("ν") {
+            if k.starts_with('ν') {
                 let num: String = k.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
                 v = u32::from_str(num.as_str())?;
                 trace!("#find: jumping directly to ν{}", v);
