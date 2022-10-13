@@ -136,7 +136,7 @@ impl Script {
 
 impl Sodg {
     /// Parse string with instructions.
-    pub fn from_string(txt: &str) -> Result<Sodg> {
+    pub fn from_str(txt: &str) -> Result<Sodg> {
         let mut sodg = Sodg::empty();
         let mut script = Script::new(txt);
         script.deploy_to(&mut sodg)?;
@@ -149,7 +149,7 @@ use std::str;
 
 #[test]
 fn simple_command() -> Result<()> {
-    let g = Sodg::from_string(
+    let g = Sodg::from_str(
         "
         ADD(0);  ADD($ν1); # adding two vertices
         BIND(0, $ν1, foo  );
