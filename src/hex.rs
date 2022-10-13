@@ -63,7 +63,7 @@ impl Hex {
 
     /// From BYTES as HEX.
     pub fn parse(hex: String) -> Self {
-        let s = hex.replace("-", "");
+        let s = hex.replace('-', "");
         Self::from_vec(hex::decode(s).unwrap())
     }
 
@@ -120,7 +120,7 @@ impl Hex {
             .bytes
             .as_slice()
             .try_into()
-            .context(format!("There is no data, can't make INT"))?;
+            .context("There is no data, can't make INT")?;
         Ok(i64::from_be_bytes(*a))
     }
 
@@ -136,7 +136,7 @@ impl Hex {
             .bytes
             .as_slice()
             .try_into()
-            .context(format!("There is no data, can't make FLOAT"))?;
+            .context("There is no data, can't make FLOAT")?;
         Ok(f64::from_be_bytes(*a))
     }
 
@@ -164,7 +164,7 @@ impl Hex {
         } else {
             self.bytes
                 .iter()
-                .map(|b| format!("{:02X}", b).to_string())
+                .map(|b| format!("{:02X}", b))
                 .collect::<Vec<String>>()
                 .join("-")
         }
