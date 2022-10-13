@@ -33,7 +33,23 @@ pub struct Script {
 }
 
 impl Script {
-    /// Make a new one.
+    /// Make a new one, parsing a string with instructions. Instructions
+    /// must be separated by semicolon. There are just three of them
+    /// possible: `ADD`, `BIND`, and `PUT`. The arguments must be
+    /// separated by a comma. An argument may either be 1) a positive integer,
+    /// 2) a variable started with `$`, 3) an attribute name, or
+    /// 4) data in `XX-XX-...` hexadecimal format.
+    ///
+    /// ```
+    /// use sodg::script::Script;
+    /// use sodg::Sodg;
+    /// let mut s = Script::from_str(
+    ///   "ADD(0); ADD($ν1); BIND(0, $ν1, foo);"
+    /// );
+    /// let mut g = Sodg::empty();
+    /// let total = s.deploy_to(&mut g).unwrap();
+    /// assert_eq!(1, g.kid(0, "foo").unwrap());
+    /// ```
     pub fn from_str(s: &str) -> Script {
         Script {
             txt: s.to_string(),
@@ -42,7 +58,21 @@ impl Script {
         }
     }
 
-    /// Set a different root.
+    /// Set a different root. By default, the root is set to zero.
+    /// If the root is changed, each time zero-vertex is mentioned
+    /// in instructions, if will be replaced by this number.
+    ///
+    /// ```
+    /// use sodg::script::Script;
+    /// use sodg::Sodg;
+    /// let mut s = Script::from_str(
+    ///   "ADD(1); BIND(0, 1, foo);"
+    /// );
+    /// s.set_root(42);
+    /// let mut g = Sodg::empty();
+    /// g.add(42).unwrap();
+    /// s.deploy_to(&mut g).unwrap();
+    /// ```
     pub fn set_root(&mut self, v: u32) {
         self.root = v;
     }
