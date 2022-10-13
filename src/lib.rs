@@ -55,12 +55,24 @@ pub struct Sodg {
     vertices: HashMap<u32, Vertex>,
     #[serde(skip_serializing, skip_deserializing)]
     alerts: Vec<Alert>,
+    #[serde(skip_serializing, skip_deserializing)]
+    alerts_active: bool,
 }
 
 impl Sodg {
     /// Attach a new alert to this SODG.
     pub fn alert_on(&mut self, a: Alert) {
         self.alerts.push(a);
+    }
+
+    /// Disable all alerts.
+    pub fn alerts_off(&mut self) {
+        self.alerts_active = false;
+    }
+
+    /// Enable all alerts.
+    pub fn alerts_on(&mut self) {
+        self.alerts_active = true;
     }
 }
 

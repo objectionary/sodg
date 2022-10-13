@@ -211,10 +211,12 @@ impl Sodg {
 
     /// Check all alerts.
     fn validate(&self, vx: Vec<u32>) -> Result<()> {
-        for a in self.alerts.iter() {
-            let msgs = a(self, vx.clone());
-            if !msgs.is_empty() {
-                return Err(anyhow!("{}", msgs.join("; ")));
+        if self.alerts_active {
+            for a in self.alerts.iter() {
+                let msgs = a(self, vx.clone());
+                if !msgs.is_empty() {
+                    return Err(anyhow!("{}", msgs.join("; ")));
+                }
             }
         }
         Ok(())
@@ -320,6 +322,15 @@ fn panic_on_simple_alert() -> Result<()> {
     let mut g = Sodg::empty();
     g.alert_on(|_, _| vec![format!("{}", "oops")]);
     assert!(g.add(0).is_err());
+    Ok(())
+}
+
+#[test]
+fn dont_panic_when_alerts_disabled() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.alert_on(|_, _| vec!["should never happen".to_string()]);
+    g.alerts_off();
+    assert!(!g.add(0).is_err());
     Ok(())
 }
 

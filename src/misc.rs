@@ -46,6 +46,7 @@ impl Sodg {
         let mut g = Sodg {
             vertices: HashMap::new(),
             alerts: vec![],
+            alerts_active: true,
         };
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
