@@ -29,6 +29,7 @@ use std::str::FromStr;
 pub struct Script {
     txt: String,
     vars: HashMap<String, u32>,
+    root: u32,
 }
 
 impl Script {
@@ -37,7 +38,13 @@ impl Script {
         Script {
             txt: s.to_string(),
             vars: HashMap::new(),
+            root: 0,
         }
+    }
+
+    /// Set a different root.
+    pub fn set_root(&mut self, v: u32) {
+        self.root = v;
     }
 
     /// Deploy the entire script to the SODG.
@@ -127,7 +134,11 @@ impl Script {
             let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
             Ok(*self.vars.entry(tail).or_insert_with(|| sodg.max() + 1))
         } else {
-            Ok(u32::from_str(s).context(format!("Parsing of '{s}' failed"))?)
+            let mut v = u32::from_str(s).context(format!("Parsing of '{s}' failed"))?;
+            if v == 0 {
+                v = self.root;
+            }
+            Ok(v)
         }
     }
 }
@@ -149,5 +160,21 @@ fn simple_command() -> Result<()> {
     assert_eq!(4, total);
     assert_eq!("привет", str::from_utf8(g.data(1)?.as_slice())?);
     assert_eq!(1, g.kid(0, "foo").unwrap());
+    Ok(())
+}
+
+#[test]
+fn deploy_to_another_root() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(42)?;
+    let mut s = Script::from_str(
+        "
+        ADD($ν1);
+        BIND(0, $ν1, foo);
+        ",
+    );
+    s.set_root(42);
+    s.deploy_to(&mut g)?;
+    assert_eq!(43, g.kid(42, "foo").unwrap());
     Ok(())
 }
