@@ -46,7 +46,7 @@ impl Script {
         for cmd in self.commands().iter() {
             trace!("#deploy_to: deploying command no.{} '{}'...", pos + 1, cmd);
             self.deploy_one(cmd, sodg)
-                .context(format!("Failure at the command no.{}: '{}'", pos, cmd))?;
+                .context(format!("Failure at the command no.{pos}: '{cmd}'"))?;
             pos += 1;
         }
         Ok(pos)
@@ -72,9 +72,7 @@ impl Script {
         lazy_static! {
             static ref LINE: Regex = Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap();
         }
-        let cap = LINE
-            .captures(cmd)
-            .context(format!("Can't parse '{}'", cmd))?;
+        let cap = LINE.captures(cmd).context(format!("Can't parse '{cmd}'"))?;
         let args: Vec<String> = (&cap[2])
             .split(',')
             .map(|t| t.trim())
@@ -100,7 +98,7 @@ impl Script {
                 sodg.put(v, Self::parse_data(&args[1])?)
                     .context(format!("Failed to DATA({})", &args[0]))
             }
-            _cmd => Err(anyhow!("Unknown command: {}", _cmd)),
+            _cmd => Err(anyhow!("Unknown command: {_cmd}")),
         }
     }
 
@@ -118,7 +116,7 @@ impl Script {
                 .collect();
             Ok(bytes)
         } else {
-            Err(anyhow!("Can't parse data '{}'", s))
+            Err(anyhow!("Can't parse data '{s}'"))
         }
     }
 
@@ -129,7 +127,7 @@ impl Script {
             let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
             Ok(*self.vars.entry(tail).or_insert_with(|| sodg.max() + 1))
         } else {
-            Ok(u32::from_str(s).context(format!("Parsing of '{}' failed", s))?)
+            Ok(u32::from_str(s).context(format!("Parsing of '{s}' failed"))?)
         }
     }
 }

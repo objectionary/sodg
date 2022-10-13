@@ -170,7 +170,7 @@ impl Sodg {
         loop {
             let next = locator.pop_front();
             if next.is_none() {
-                trace!("#find: end of locator, we are at ν{}", v);
+                trace!("#find: end of locator, we are at ν{v}");
                 break;
             }
             let k = next.unwrap().to_string();
@@ -180,11 +180,11 @@ impl Sodg {
             if k.starts_with('ν') {
                 let num: String = k.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
                 v = u32::from_str(num.as_str())?;
-                trace!("#find: jumping directly to ν{}", v);
+                trace!("#find: jumping directly to ν{v}");
                 continue;
             }
             if let Some(to) = self.kid(v, k.as_str()) {
-                trace!("#find: ν{}.{} -> ν{}", v, k, to);
+                trace!("#find: ν{v}.{k} -> ν{to}");
                 v = to;
                 continue;
             };
@@ -205,7 +205,7 @@ impl Sodg {
                 others.join(", ")
             ));
         }
-        trace!("#find: found ν{} by '{}'", v1, loc);
+        trace!("#find: found ν{v1} by '{loc}'");
         Ok(v)
     }
 
@@ -340,7 +340,7 @@ fn panic_on_complex_alert() -> Result<()> {
     g.alert_on(|_, vx| {
         let v = 42;
         if vx.contains(&v) {
-            vec![format!("Vertex no.{} is not allowed", v)]
+            vec![format!("Vertex no.{v} is not allowed")]
         } else {
             vec![]
         }

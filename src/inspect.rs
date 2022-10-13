@@ -27,9 +27,7 @@ impl Sodg {
     /// Finds an object by the provided locator and prints its tree
     /// of sub-objects and edges. Mostly used for testing.
     pub fn inspect(&self, loc: &str) -> Result<String> {
-        let v = self
-            .find(0, loc)
-            .context(format!("Can't locate '{}'", loc))?;
+        let v = self.find(0, loc).context(format!("Can't locate '{loc}'"))?;
         let mut seen = HashSet::new();
         Ok(format!(
             "{}/ν{}\n{}",
@@ -44,7 +42,7 @@ impl Sodg {
         let mut lines = vec![];
         self.vertices
             .get(&v)
-            .context(format!("Can't find ν{}", v))?
+            .context(format!("Can't find ν{v}"))?
             .edges
             .iter()
             .sorted()
