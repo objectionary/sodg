@@ -52,6 +52,7 @@ impl Sodg {
         }
         Ok(Sodg {
             vertices: new_vertices,
+            next_v: self.next_v,
             alerts: self.alerts.clone(),
             alerts_active: self.alerts_active,
         })

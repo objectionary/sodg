@@ -19,7 +19,6 @@
 // SOFTWARE.
 
 use crate::Sodg;
-use std::collections::HashMap;
 use std::fmt;
 
 impl fmt::Debug for Sodg {
@@ -40,56 +39,14 @@ impl fmt::Debug for Sodg {
     }
 }
 
-impl Sodg {
-    /// Makes an empty Sodg, with no vertices and no edges.
-    pub fn empty() -> Self {
-        let mut g = Sodg {
-            vertices: HashMap::new(),
-            alerts: vec![],
-            alerts_active: true,
-        };
-        g.alert_on(|g, vx| {
-            let mut errors = Vec::new();
-            for v in vx.iter() {
-                for e in g.vertices.get(v).unwrap().edges.iter() {
-                    if !g.vertices.contains_key(&e.to) {
-                        errors.push(format!("Edge ν{}.{} arrives to lost ν{}", v, e.a, e.to));
-                    }
-                }
-            }
-            errors
-        });
-        g
-    }
-
-    /// Get max ID of a vertex.
-    pub fn max(&self) -> u32 {
-        let mut id = 0;
-        for v in self.vertices.keys() {
-            if *v > id {
-                id = *v;
-            }
-        }
-        id
-    }
-}
-
 #[cfg(test)]
 use anyhow::Result;
 
 #[test]
-fn makes_an_empty_sodg() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    assert_eq!(1, g.vertices.len());
-    Ok(())
-}
-
-#[test]
-fn calculates_max() -> Result<()> {
+fn prints_itself() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
-    assert_eq!(1, g.max());
+    assert_ne!("", format!("{:?}", g));
     Ok(())
 }

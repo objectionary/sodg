@@ -106,7 +106,7 @@ impl Script {
     }
 
     /// Deploy a single command to the sodg.
-    fn deploy_one(&mut self, cmd: &str, sodg: &mut Sodg) -> Result<()> {
+    fn deploy_one(&mut self, cmd: &str, g: &mut Sodg) -> Result<()> {
         lazy_static! {
             static ref LINE: Regex = Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap();
         }
@@ -119,21 +119,21 @@ impl Script {
             .collect();
         match &cap[1] {
             "ADD" => {
-                let v = self.parse(&args[0], sodg)?;
-                sodg.add(v).context(format!("Failed to ADD({})", &args[0]))
+                let v = self.parse(&args[0], g)?;
+                g.add(v).context(format!("Failed to ADD({})", &args[0]))
             }
             "BIND" => {
-                let v1 = self.parse(&args[0], sodg)?;
-                let v2 = self.parse(&args[1], sodg)?;
+                let v1 = self.parse(&args[0], g)?;
+                let v2 = self.parse(&args[1], g)?;
                 let a = &args[2];
-                sodg.bind(v1, v2, a).context(format!(
+                g.bind(v1, v2, a).context(format!(
                     "Failed to BIND({}, {}, {})",
                     &args[0], &args[1], &args[2]
                 ))
             }
             "PUT" => {
-                let v = self.parse(&args[0], sodg)?;
-                sodg.put(v, Self::parse_data(&args[1])?)
+                let v = self.parse(&args[0], g)?;
+                g.put(v, Self::parse_data(&args[1])?)
                     .context(format!("Failed to DATA({})", &args[0]))
             }
             _cmd => Err(anyhow!("Unknown command: {_cmd}")),
@@ -159,11 +159,11 @@ impl Script {
     }
 
     /// Parses `$ν5` into `5`.
-    fn parse(&mut self, s: &str, sodg: &mut Sodg) -> Result<u32> {
+    fn parse(&mut self, s: &str, g: &mut Sodg) -> Result<u32> {
         let head = s.chars().next().context("Empty identifier".to_string())?;
         if head == '$' {
             let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
-            Ok(*self.vars.entry(tail).or_insert_with(|| sodg.max() + 1))
+            Ok(*self.vars.entry(tail).or_insert_with(|| g.next_id()))
         } else {
             let mut v = u32::from_str(s).context(format!("Parsing of '{s}' failed"))?;
             if v == 0 {

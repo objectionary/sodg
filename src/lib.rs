@@ -20,11 +20,12 @@
 
 #![deny(warnings)]
 
+pub mod debug;
 pub mod edge;
 pub mod hex;
 pub mod inspect;
 pub mod merge;
-pub mod misc;
+pub mod next;
 pub mod ops;
 pub mod script;
 pub mod serialization;
@@ -55,12 +56,36 @@ pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
 pub struct Sodg {
     vertices: HashMap<u32, Vertex>,
     #[serde(skip_serializing, skip_deserializing)]
+    next_v: u32,
+    #[serde(skip_serializing, skip_deserializing)]
     alerts: Vec<Alert>,
     #[serde(skip_serializing, skip_deserializing)]
     alerts_active: bool,
 }
 
 impl Sodg {
+    /// Makes an empty Sodg, with no vertices and no edges.
+    pub fn empty() -> Self {
+        let mut g = Sodg {
+            vertices: HashMap::new(),
+            next_v: 0,
+            alerts: vec![],
+            alerts_active: true,
+        };
+        g.alert_on(|g, vx| {
+            let mut errors = Vec::new();
+            for v in vx.iter() {
+                for e in g.vertices.get(v).unwrap().edges.iter() {
+                    if !g.vertices.contains_key(&e.to) {
+                        errors.push(format!("Edge ν{}.{} arrives to lost ν{}", v, e.a, e.to));
+                    }
+                }
+            }
+            errors
+        });
+        g
+    }
+
     /// Attach a new alert to this SODG.
     pub fn alert_on(&mut self, a: Alert) {
         self.alerts.push(a);
@@ -91,4 +116,15 @@ fn init() {
         .with_level(LevelFilter::Trace)
         .init()
         .unwrap();
+}
+
+#[cfg(test)]
+use anyhow::Result;
+
+#[test]
+fn makes_an_empty_sodg() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    assert_eq!(1, g.vertices.len());
+    Ok(())
 }

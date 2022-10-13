@@ -19,33 +19,20 @@
 // SOFTWARE.
 
 use crate::Sodg;
-use log::debug;
-use std::collections::HashMap;
 
 impl Sodg {
-    /// Merge this new graph into itself.
-    pub fn merge(&mut self, g: &Sodg) {
-        let mut matcher: HashMap<u32, u32> = HashMap::new();
-        let mut next = self.next_id();
-        for (v, vtx) in g.vertices.iter() {
-            let mut id = 0;
-            if *v != 0 {
-                id = next;
-                next += 1;
-            }
-            matcher.insert(*v, id);
-            self.vertices.insert(id, vtx.clone());
-        }
-        for v in matcher.values() {
-            let vtx = self.vertices.get_mut(v).unwrap();
-            for e in vtx.edges.iter_mut() {
-                e.to = *matcher.get(v).unwrap();
+    /// Get next unique ID of a vertex. This ID will never be
+    /// returned by `next()` again. Also, this ID will not
+    /// be equal to any of existing IDs of vertices.
+    pub fn next_id(&mut self) -> u32 {
+        let mut id = self.next_v;
+        for v in self.vertices.keys() {
+            if *v >= id {
+                id = *v + 1;
             }
         }
-        debug!(
-            "Merged {} vertices into the existing Sodg",
-            g.vertices.len()
-        );
+        self.next_v = id + 1;
+        id
     }
 }
 
@@ -53,16 +40,19 @@ impl Sodg {
 use anyhow::Result;
 
 #[test]
-fn merges_two_sodgs() -> Result<()> {
+fn simple_next_id() -> Result<()> {
+    let mut g = Sodg::empty();
+    assert_eq!(0, g.next_id());
+    assert_eq!(1, g.next_id());
+    Ok(())
+}
+
+#[test]
+fn calculates_next_id() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "foo")?;
-    let mut extra = Sodg::empty();
-    extra.add(0)?;
-    extra.add(1)?;
-    extra.bind(0, 1, "bar")?;
-    g.merge(&extra);
-    assert_eq!(3, g.vertices.len());
+    g.add(42)?;
+    assert_eq!(43, g.next_id());
+    assert_eq!(44, g.next_id());
     Ok(())
 }
