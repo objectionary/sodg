@@ -50,6 +50,7 @@ impl Script {
     /// let total = s.deploy_to(&mut g).unwrap();
     /// assert_eq!(1, g.kid(0, "foo").unwrap());
     /// ```
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Script {
         Script {
             txt: s.to_string(),

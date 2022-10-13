@@ -88,6 +88,7 @@ impl Hex {
     }
 
     /// From STR.
+    #[allow(clippy::should_implement_trait)]
     pub fn from_str(d: &str) -> Self {
         Self::from_vec(d.to_string().as_bytes().to_vec())
     }
