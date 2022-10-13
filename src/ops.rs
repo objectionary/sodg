@@ -193,6 +193,7 @@ impl Sodg {
             let others: Vec<String> = self
                 .vertices
                 .get(&v)
+                .context(format!("Can't find ν{v}"))
                 .unwrap()
                 .edges
                 .iter()
