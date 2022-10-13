@@ -26,26 +26,26 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::str::FromStr;
 
-struct Script {
+pub struct Script {
     txt: String,
     vars: HashMap<String, u32>,
 }
 
 impl Script {
     /// Make a new one.
-    pub fn new(s: &str) -> Script {
+    pub fn from_str(s: &str) -> Script {
         Script {
             txt: s.to_string(),
             vars: HashMap::new(),
         }
     }
 
-    /// Deploy the entire script to the Sodg.
-    pub fn deploy_to(&mut self, sodg: &mut Sodg) -> Result<usize> {
+    /// Deploy the entire script to the SODG.
+    pub fn deploy_to(&mut self, g: &mut Sodg) -> Result<usize> {
         let mut pos = 0;
         for cmd in self.commands().iter() {
             trace!("#deploy_to: deploying command no.{} '{}'...", pos + 1, cmd);
-            self.deploy_one(cmd, sodg)
+            self.deploy_one(cmd, g)
                 .context(format!("Failure at the command no.{pos}: '{cmd}'"))?;
             pos += 1;
         }
@@ -132,28 +132,21 @@ impl Script {
     }
 }
 
-impl Sodg {
-    /// Parse string with instructions.
-    pub fn from_str(txt: &str) -> Result<Sodg> {
-        let mut sodg = Sodg::empty();
-        let mut script = Script::new(txt);
-        script.deploy_to(&mut sodg)?;
-        Ok(sodg)
-    }
-}
-
 #[cfg(test)]
 use std::str;
 
 #[test]
 fn simple_command() -> Result<()> {
-    let g = Sodg::from_str(
+    let mut g = Sodg::empty();
+    let mut s = Script::from_str(
         "
         ADD(0);  ADD($ν1); # adding two vertices
         BIND(0, $ν1, foo  );
         PUT($ν1  , d0-bf-D1-80-d0-B8-d0-b2-d0-b5-d1-82);
         ",
-    )?;
+    );
+    let total = s.deploy_to(&mut g)?;
+    assert_eq!(4, total);
     assert_eq!("привет", str::from_utf8(g.data(1)?.as_slice())?);
     assert_eq!(1, g.kid(0, "foo").unwrap());
     Ok(())

@@ -25,7 +25,7 @@ mod inspect;
 mod merge;
 mod misc;
 mod ops;
-mod parse;
+pub mod script;
 mod serialization;
 mod slice;
 mod vertex;
