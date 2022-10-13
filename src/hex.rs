@@ -175,6 +175,11 @@ impl Hex {
     pub fn to_vec(&self) -> Vec<u8> {
         self.bytes.clone()
     }
+
+    /// Return a reference to the vec.
+    pub fn as_vec(&self) -> &Vec<u8> {
+        &self.bytes
+    }
 }
 
 #[test]
@@ -243,5 +248,12 @@ fn broken_float_from_small_data() -> Result<()> {
     let d = Hex::from_vec([0x00].to_vec());
     let ret = d.to_f64();
     assert!(ret.is_err());
+    Ok(())
+}
+
+#[test]
+fn direct_access_to_vec() -> Result<()> {
+    let d = Hex::from_vec([0x1F, 0x01].to_vec());
+    assert_eq!(0x1F, *d.as_vec().get(0).unwrap());
     Ok(())
 }
