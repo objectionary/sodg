@@ -32,7 +32,7 @@ impl fmt::Debug for Sodg {
                 .map(|e| format!("\n\t{} ➞ ν{}", e.a, e.to))
                 .collect::<Vec<String>>();
             if !&v.data.is_empty() {
-                attrs.push(format!("{}b", v.data.len()));
+                attrs.push(format!("{}", v.data));
             }
             lines.push(format!("ν{} -> ⟦{}⟧", i, attrs.join(", ")));
         }

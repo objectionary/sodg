@@ -24,7 +24,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Vertex {
     pub edges: Vec<Edge>,
-    pub data: Vec<u8>,
+    pub data: Hex,
 }
 
 impl Vertex {
@@ -38,11 +38,12 @@ impl Vertex {
     pub fn empty() -> Self {
         Vertex {
             edges: vec![],
-            data: vec![],
+            data: Hex::empty(),
         }
     }
 }
 
+use crate::hex::Hex;
 #[cfg(test)]
 use anyhow::Result;
 

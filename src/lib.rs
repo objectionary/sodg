@@ -20,16 +20,17 @@
 
 #![deny(warnings)]
 
-mod edge;
-mod inspect;
-mod merge;
-mod misc;
-mod ops;
+pub mod edge;
+pub mod hex;
+pub mod inspect;
+pub mod merge;
+pub mod misc;
+pub mod ops;
 pub mod script;
-mod serialization;
-mod slice;
-mod vertex;
-mod xml;
+pub mod serialization;
+pub mod slice;
+pub mod vertex;
+pub mod xml;
 
 use crate::vertex::Vertex;
 use serde::{Deserialize, Serialize};

@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 use crate::edge::Edge;
+use crate::hex::Hex;
 use crate::Sodg;
 use crate::Vertex;
 use anyhow::{anyhow, Context, Result};
@@ -89,33 +90,35 @@ impl Sodg {
     /// Set vertex data.
     ///
     /// ```
+    /// use sodg::hex::Hex;
     /// use sodg::Sodg;
     /// let mut sodg = Sodg::empty();
     /// sodg.add(42).unwrap();
-    /// sodg.put(42, "hello, world!".as_bytes().to_vec()).unwrap();
+    /// sodg.put(42, Hex::from_str("hello, world!")).unwrap();
     /// ```
-    pub fn put(&mut self, v: u32, d: Vec<u8>) -> Result<()> {
+    pub fn put(&mut self, v: u32, d: Hex) -> Result<()> {
         let vtx = self
             .vertices
             .get_mut(&v)
             .context(format!("Can't find ν{}", v))?;
         vtx.data = d.clone();
         self.validate(vec![v])?;
-        trace!("#data: data of ν{} set to {}b", v, d.len());
+        trace!("#data: data of ν{} set to {}", v, d);
         Ok(())
     }
 
     /// Read vertex data.
     ///
     /// ```
+    /// use sodg::hex::Hex;
     /// use sodg::Sodg;
     /// let mut sodg = Sodg::empty();
     /// sodg.add(42).unwrap();
-    /// let data : &[u8] = "hello, world!".as_bytes();
-    /// sodg.put(42, data.to_vec()).unwrap();
+    /// let data = Hex::from_str("hello, world!");
+    /// sodg.put(42, data.clone()).unwrap();
     /// assert_eq!(data, sodg.data(42).unwrap());
     /// ```
-    pub fn data(&self, v: u32) -> Result<Vec<u8>> {
+    pub fn data(&self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
             .get(&v)
@@ -294,7 +297,7 @@ fn binds_to_root() -> Result<()> {
 #[test]
 fn sets_simple_data() -> Result<()> {
     let mut g = Sodg::empty();
-    let data = "hello".as_bytes().to_vec();
+    let data = Hex::from_str("hello");
     g.add(0)?;
     g.put(0, data.clone())?;
     assert_eq!(data, g.data(0)?);

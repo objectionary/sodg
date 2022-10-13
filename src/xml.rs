@@ -47,13 +47,7 @@ impl Sodg {
             if !vtx.data.is_empty() {
                 let mut data_node = XMLElement::new("data");
                 data_node
-                    .add_text(
-                        vtx.data
-                            .iter()
-                            .map(|b| format!("{:02X}", b))
-                            .collect::<Vec<String>>()
-                            .join(" "),
-                    )
+                    .add_text(vtx.data.print().replace('-', " "))
                     .unwrap();
                 v_node.add_child(data_node).unwrap();
             }
@@ -69,11 +63,14 @@ impl Sodg {
 #[cfg(test)]
 use sxd_xpath::evaluate_xpath;
 
+#[cfg(test)]
+use crate::hex::Hex;
+
 #[test]
 fn prints_simple_graph() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    g.put(0, "hello".as_bytes().to_vec())?;
+    g.put(0, Hex::from_str("hello"))?;
     g.add(1)?;
     g.bind(0, 1, "foo")?;
     let xml = g.to_xml()?;

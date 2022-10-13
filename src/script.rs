@@ -140,7 +140,7 @@ impl Script {
     }
 
     /// Parse data
-    fn parse_data(s: &str) -> Result<Vec<u8>> {
+    fn parse_data(s: &str) -> Result<Hex> {
         lazy_static! {
             static ref DATA_STRIP: Regex = Regex::new("[ \t\n\r\\-]").unwrap();
             static ref DATA: Regex = Regex::new("^[0-9A-Fa-f]{2}([0-9A-Fa-f]{2})*$").unwrap();
@@ -151,7 +151,7 @@ impl Script {
                 .step_by(2)
                 .map(|i| u8::from_str_radix(&d[i..i + 2], 16).unwrap())
                 .collect();
-            Ok(bytes)
+            Ok(Hex::from_vec(bytes))
         } else {
             Err(anyhow!("Can't parse data '{s}'"))
         }
@@ -173,6 +173,7 @@ impl Script {
     }
 }
 
+use crate::hex::Hex;
 #[cfg(test)]
 use std::str;
 
@@ -188,7 +189,7 @@ fn simple_command() -> Result<()> {
     );
     let total = s.deploy_to(&mut g)?;
     assert_eq!(4, total);
-    assert_eq!("привет", str::from_utf8(g.data(1)?.as_slice())?);
+    assert_eq!("привет", g.data(1)?.to_string()?);
     assert_eq!(1, g.kid(0, "foo").unwrap());
     Ok(())
 }
