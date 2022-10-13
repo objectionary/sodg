@@ -129,7 +129,7 @@ impl Sodg {
         Ok(vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect())
     }
 
-    /// Find kid.
+    /// Find a kid of a vertex, by its edge name.
     ///
     /// ```
     /// use sodg::Sodg;
@@ -138,10 +138,12 @@ impl Sodg {
     /// sodg.add(42).unwrap();
     /// sodg.bind(0, 42, "k").unwrap();
     /// assert_eq!(42, sodg.kid(0, "k").unwrap());
+    /// assert!(sodg.kid(0, "another").is_none());
     /// ```
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         self.vertices
             .get(&v)
+            .context(format!("Can't find ν{v}"))
             .unwrap()
             .edges
             .iter()
