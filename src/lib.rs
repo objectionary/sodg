@@ -55,7 +55,7 @@ mod xml;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// Instances of this type can be used in `Sodg::alert_on` method,
+/// Instances of this type can be used in [`Sodg::alert_on`] method,
 /// in order to ensure runtime consistency of data inside the graph.
 pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
 
