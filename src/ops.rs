@@ -322,35 +322,3 @@ fn finds_all_kids() -> Result<()> {
     assert_eq!(2, g.kids(0)?.iter().count());
     Ok(())
 }
-
-#[test]
-fn panic_on_simple_alert() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.alert_on(|_, _| vec![format!("{}", "oops")]);
-    assert!(g.add(0).is_err());
-    Ok(())
-}
-
-#[test]
-fn dont_panic_when_alerts_disabled() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.alert_on(|_, _| vec!["should never happen".to_string()]);
-    g.alerts_off();
-    assert!(!g.add(0).is_err());
-    Ok(())
-}
-
-#[test]
-fn panic_on_complex_alert() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.alert_on(|_, vx| {
-        let v = 42;
-        if vx.contains(&v) {
-            vec![format!("Vertex no.{v} is not allowed")]
-        } else {
-            vec![]
-        }
-    });
-    assert!(g.add(42).is_err());
-    Ok(())
-}

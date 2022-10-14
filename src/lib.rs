@@ -18,8 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+//! This is a memory structure with vertices and edges between them,
+//! which we call Surging Object DiGraph (SODG), because it expects
+//! modifications comping from a user (through [`Sodg::add`],
+//! [`Sodg::bind`], and [`Sodg::put`]) and then decides itself when
+//! it's time to delete some vertices (something similar to
+//! "garbage collection"). For example, here is how you create a simple
+//! graph:
+//!
+//! ```
+//! ```
+
+#![doc(html_root_url = "https://docs.rs/sodg/0.0.0")]
 #![deny(warnings)]
 
+mod alerts;
+mod ctors;
 mod debug;
 mod edge;
 mod hex;
@@ -36,10 +50,13 @@ mod xml;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+/// Instances of this type can be used in `Sodg::alert_on` method,
+/// in order to ensure runtime consistency of data inside the graph.
 pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
 
-/// This struct represents a Simple Object DiGraph (SODG). You add vertices
-/// to it, bind them one to one with edges
+/// This struct represents a Surging Object DiGraph (SODG). You add vertices
+/// to it, bind them one to one with edges, put data into some of them,
+/// and read data back:
 ///
 /// ```
 /// use sodg::Sodg;
@@ -51,6 +68,9 @@ pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
 /// sodg.bind(1, 2, "b").unwrap();
 /// assert_eq!(2, sodg.find(0, "a.b").unwrap());
 /// ```
+///
+/// This package is used in [reo](https://github.com/objectionary/reo)
+/// project, as a memory model for objects and dependencies between them.
 #[derive(Serialize, Deserialize)]
 pub struct Sodg {
     vertices: HashMap<u32, Vertex>,
@@ -62,6 +82,8 @@ pub struct Sodg {
     alerts_active: bool,
 }
 
+/// It is an object-oriented representation of binary data
+/// in hexadecimal format, which can be put into vertices of the graph.
 #[derive(Serialize, Deserialize)]
 pub struct Hex {
     bytes: Vec<u8>,
@@ -85,45 +107,6 @@ pub struct Script {
     root: u32,
 }
 
-impl Sodg {
-    /// Makes an empty Sodg, with no vertices and no edges.
-    pub fn empty() -> Self {
-        let mut g = Sodg {
-            vertices: HashMap::new(),
-            next_v: 0,
-            alerts: vec![],
-            alerts_active: true,
-        };
-        g.alert_on(|g, vx| {
-            let mut errors = Vec::new();
-            for v in vx.iter() {
-                for e in g.vertices.get(v).unwrap().edges.iter() {
-                    if !g.vertices.contains_key(&e.to) {
-                        errors.push(format!("Edge ν{}.{} arrives to lost ν{}", v, e.a, e.to));
-                    }
-                }
-            }
-            errors
-        });
-        g
-    }
-
-    /// Attach a new alert to this SODG.
-    pub fn alert_on(&mut self, a: Alert) {
-        self.alerts.push(a);
-    }
-
-    /// Disable all alerts.
-    pub fn alerts_off(&mut self) {
-        self.alerts_active = false;
-    }
-
-    /// Enable all alerts.
-    pub fn alerts_on(&mut self) {
-        self.alerts_active = true;
-    }
-}
-
 #[cfg(test)]
 use simple_logger::SimpleLogger;
 
@@ -138,15 +121,4 @@ fn init() {
         .with_level(LevelFilter::Trace)
         .init()
         .unwrap();
-}
-
-#[cfg(test)]
-use anyhow::Result;
-
-#[test]
-fn makes_an_empty_sodg() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    assert_eq!(1, g.vertices.len());
-    Ok(())
 }
