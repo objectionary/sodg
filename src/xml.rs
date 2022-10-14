@@ -24,7 +24,34 @@ use itertools::Itertools;
 use xml_builder::{XMLBuilder, XMLElement, XMLVersion};
 
 impl Sodg {
-    /// Make XML graph.
+    /// Make XML graph. For example, for this code:
+    ///
+    /// ```
+    /// use sodg::hex::Hex;
+    /// use sodg::Sodg;
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.put(0, Hex::from_str("hello")).unwrap();
+    /// g.add(1).unwrap();
+    /// g.bind(0, 1, "foo").unwrap();
+    /// g.bind(0, 1, "bar").unwrap();
+    /// let xml = g.to_xml().unwrap();
+    /// println!("{}", xml);
+    /// ```
+    ///
+    /// The printout will look like this:
+    ///
+    /// ```xml
+    /// <?xml version="1.1" encoding="UTF-8"?>
+    /// <sodg>
+    ///     <v id="0">
+    ///         <e a="foo" to="1" />
+    ///         <e a="bar" to="1" />
+    ///         <data>68 65 6C 6C 6F</data>
+    ///     </v>
+    ///     <v id="1" />
+    /// </sodg>
+    /// ```
     pub fn to_xml(&self) -> Result<String> {
         let mut xml = XMLBuilder::new()
             .version(XMLVersion::XML1_1)
@@ -74,6 +101,7 @@ fn prints_simple_graph() -> Result<()> {
     g.add(1)?;
     g.bind(0, 1, "foo")?;
     let xml = g.to_xml()?;
+    println!("{}", xml);
     let parser = sxd_document::parser::parse(xml.as_str())?;
     let doc = parser.as_document();
     assert_eq!(
