@@ -121,7 +121,7 @@ impl Hex {
             .bytes
             .as_slice()
             .try_into()
-            .context("There is no data, can't make INT")?;
+            .context("There is not enough data, can't make INT")?;
         Ok(i64::from_be_bytes(*a))
     }
 
@@ -255,5 +255,26 @@ fn broken_float_from_small_data() -> Result<()> {
 fn direct_access_to_vec() -> Result<()> {
     let d = Hex::from_vec([0x1F, 0x01].to_vec());
     assert_eq!(0x1F, *d.as_vec().get(0).unwrap());
+    Ok(())
+}
+
+#[test]
+fn not_enough_data_for_int() -> Result<()> {
+    let d = Hex::from_vec(vec![0x00, 0x2A]);
+    assert!(d.to_i64().is_err());
+    Ok(())
+}
+
+#[test]
+fn not_enough_data_for_float() -> Result<()> {
+    let d = Hex::from_vec(vec![0x00, 0x2A]);
+    assert!(d.to_f64().is_err());
+    Ok(())
+}
+
+#[test]
+fn too_much_data_for_int() -> Result<()> {
+    let d = Hex::from_vec(vec![0x00, 0x2A, 0x00, 0x2A, 0x00, 0x2A, 0x00, 0x2A, 0x11]);
+    assert!(d.to_i64().is_err());
     Ok(())
 }
