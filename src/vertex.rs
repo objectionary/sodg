@@ -18,14 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::edge::Edge;
-use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Serialize, Deserialize)]
-pub struct Vertex {
-    pub edges: Vec<Edge>,
-    pub data: Hex,
-}
+use crate::Hex;
+use crate::Vertex;
 
 impl Vertex {
     /// Make an empty one.
@@ -43,7 +37,6 @@ impl Vertex {
     }
 }
 
-use crate::hex::Hex;
 #[cfg(test)]
 use anyhow::Result;
 

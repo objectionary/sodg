@@ -20,20 +20,19 @@
 
 #![deny(warnings)]
 
-pub mod debug;
-pub mod edge;
-pub mod hex;
-pub mod inspect;
-pub mod merge;
-pub mod next;
-pub mod ops;
-pub mod script;
-pub mod serialization;
-pub mod slice;
-pub mod vertex;
-pub mod xml;
+mod debug;
+mod edge;
+mod hex;
+mod inspect;
+mod merge;
+mod next;
+mod ops;
+mod script;
+mod serialization;
+mod slice;
+mod vertex;
+mod xml;
 
-use crate::vertex::Vertex;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -61,6 +60,29 @@ pub struct Sodg {
     alerts: Vec<Alert>,
     #[serde(skip_serializing, skip_deserializing)]
     alerts_active: bool,
+}
+
+#[derive(Serialize, Deserialize)]
+pub struct Hex {
+    bytes: Vec<u8>,
+}
+
+#[derive(Clone, Serialize, Deserialize, Eq, PartialOrd, PartialEq, Ord)]
+struct Edge {
+    pub to: u32,
+    pub a: String,
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+struct Vertex {
+    pub edges: Vec<Edge>,
+    pub data: Hex,
+}
+
+pub struct Script {
+    txt: String,
+    vars: HashMap<String, u32>,
+    root: u32,
 }
 
 impl Sodg {

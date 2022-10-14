@@ -18,13 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Serialize, Deserialize, Eq, PartialOrd, PartialEq, Ord)]
-pub struct Edge {
-    pub to: u32,
-    pub a: String,
-}
+use crate::Edge;
 
 impl Edge {
     pub fn new(to: u32, a: &str) -> Edge {

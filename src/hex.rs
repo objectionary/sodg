@@ -18,14 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+use crate::Hex;
 use anyhow::{Context, Result};
-use serde::{Deserialize, Serialize};
 use std::fmt::{Debug, Display, Formatter};
-
-#[derive(Serialize, Deserialize)]
-pub struct Hex {
-    bytes: Vec<u8>,
-}
 
 impl Clone for Hex {
     fn clone(&self) -> Self {
@@ -102,7 +97,7 @@ impl Hex {
     /// Turn it into `bool`.
     ///
     /// ```
-    /// use sodg::hex::Hex;
+    /// use sodg::Hex;
     /// let d = Hex::from_vec([0x01].to_vec());
     /// assert_eq!(true, d.to_bool().unwrap());
     /// ```
@@ -113,7 +108,7 @@ impl Hex {
     /// Turn it into `i64`.
     ///
     /// ```
-    /// use sodg::hex::Hex;
+    /// use sodg::Hex;
     /// let d = Hex::from_vec([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A].to_vec());
     /// assert_eq!(42, d.to_i64().unwrap());
     /// ```
@@ -129,7 +124,7 @@ impl Hex {
     /// Turn it into `f64`.
     ///
     /// ```
-    /// use sodg::hex::Hex;
+    /// use sodg::Hex;
     /// let d = Hex::from_vec([0x40, 0x09, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18].to_vec());
     /// assert_eq!(std::f64::consts::PI, d.to_f64().unwrap());
     /// ```
@@ -145,7 +140,7 @@ impl Hex {
     /// Turn it into `string`.
     ///
     /// ```
-    /// use sodg::hex::Hex;
+    /// use sodg::Hex;
     /// let d = Hex::from_vec([0x41, 0x42].to_vec());
     /// assert_eq!("AB", d.to_utf8().unwrap());
     /// ```
@@ -159,7 +154,7 @@ impl Hex {
     /// Turn it into a hexadecimal string.
     ///
     /// ```
-    /// use sodg::hex::Hex;
+    /// use sodg::Hex;
     /// let d = Hex::from_vec([0xCA, 0xFE].to_vec());
     /// assert_eq!("CA-FE", d.print());
     /// ```

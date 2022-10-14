@@ -27,7 +27,7 @@ impl Sodg {
     /// Make XML graph. For example, for this code:
     ///
     /// ```
-    /// use sodg::hex::Hex;
+    /// use sodg::Hex;
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
@@ -91,7 +91,7 @@ impl Sodg {
 use sxd_xpath::evaluate_xpath;
 
 #[cfg(test)]
-use crate::hex::Hex;
+use crate::Hex;
 
 #[test]
 fn prints_simple_graph() -> Result<()> {
@@ -101,7 +101,6 @@ fn prints_simple_graph() -> Result<()> {
     g.add(1)?;
     g.bind(0, 1, "foo")?;
     let xml = g.to_xml()?;
-    println!("{}", xml);
     let parser = sxd_document::parser::parse(xml.as_str())?;
     let doc = parser.as_document();
     assert_eq!(

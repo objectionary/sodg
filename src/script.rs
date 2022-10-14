@@ -18,19 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
+use crate::Hex;
+use crate::{Script, Sodg};
 use anyhow::{anyhow, Context, Result};
 use lazy_static::lazy_static;
 use log::trace;
 use regex::Regex;
 use std::collections::HashMap;
 use std::str::FromStr;
-
-pub struct Script {
-    txt: String,
-    vars: HashMap<String, u32>,
-    root: u32,
-}
 
 impl Script {
     /// Make a new one, parsing a string with instructions. Instructions
@@ -41,7 +36,7 @@ impl Script {
     /// 4) data in `XX-XX-...` hexadecimal format.
     ///
     /// ```
-    /// use sodg::script::Script;
+    /// use sodg::Script;
     /// use sodg::Sodg;
     /// let mut s = Script::from_str(
     ///   "ADD(0); ADD($ν1); BIND(0, $ν1, foo);"
@@ -64,7 +59,7 @@ impl Script {
     /// in instructions, if will be replaced by this number.
     ///
     /// ```
-    /// use sodg::script::Script;
+    /// use sodg::Script;
     /// use sodg::Sodg;
     /// let mut s = Script::from_str(
     ///   "ADD(1); BIND(0, 1, foo);"
@@ -174,7 +169,6 @@ impl Script {
     }
 }
 
-use crate::hex::Hex;
 #[cfg(test)]
 use std::str;
 

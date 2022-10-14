@@ -72,7 +72,7 @@ impl Sodg {
 }
 
 #[cfg(test)]
-use crate::hex::Hex;
+use crate::Hex;
 
 #[test]
 fn inspects_simple_object() -> Result<()> {

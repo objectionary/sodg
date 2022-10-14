@@ -65,7 +65,7 @@ impl Sodg {
 use tempfile::TempDir;
 
 #[cfg(test)]
-use crate::hex::Hex;
+use crate::Hex;
 
 #[test]
 fn saves_and_loads() -> Result<()> {

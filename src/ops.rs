@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::edge::Edge;
-use crate::hex::Hex;
+use crate::Edge;
+use crate::Hex;
 use crate::Sodg;
 use crate::Vertex;
 use anyhow::{anyhow, Context, Result};
@@ -90,7 +90,7 @@ impl Sodg {
     /// Set vertex data.
     ///
     /// ```
-    /// use sodg::hex::Hex;
+    /// use sodg::Hex;
     /// use sodg::Sodg;
     /// let mut sodg = Sodg::empty();
     /// sodg.add(42).unwrap();
@@ -110,7 +110,7 @@ impl Sodg {
     /// Read vertex data.
     ///
     /// ```
-    /// use sodg::hex::Hex;
+    /// use sodg::Hex;
     /// use sodg::Sodg;
     /// let mut sodg = Sodg::empty();
     /// sodg.add(42).unwrap();
