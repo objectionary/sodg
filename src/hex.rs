@@ -52,42 +52,43 @@ impl Display for Hex {
 }
 
 impl Hex {
+    /// Make an empty `Hex`.
     pub fn empty() -> Self {
         Self::from_vec(Vec::new())
     }
 
-    /// From BYTES.
+    /// From `Vec<u8>`.
     pub fn from_vec(bytes: Vec<u8>) -> Self {
         Hex { bytes }
     }
 
-    /// From BYTES as HEX.
+    /// From `String` as HEX, for example `DE-AD-BE-EF-20-22`.
     pub fn parse(hex: String) -> Self {
         let s = hex.replace('-', "");
         Self::from_vec(hex::decode(s).unwrap())
     }
 
-    /// From INT.
+    /// From `i64`.
     pub fn from_i64(d: i64) -> Self {
         Self::from_vec(d.to_be_bytes().to_vec())
     }
 
-    /// From BOOL.
+    /// From `bool`.
     pub fn from_bool(d: bool) -> Self {
         Self::from_vec(if d { [1] } else { [0] }.to_vec())
     }
 
-    /// From FLOAT.
+    /// From `f64`.
     pub fn from_f64(d: f64) -> Self {
         Self::from_vec(d.to_be_bytes().to_vec())
     }
 
-    /// From STRING.
+    /// From `String`.
     pub fn from_string(d: String) -> Self {
         Self::from_vec(d.as_bytes().to_vec())
     }
 
-    /// From STR.
+    /// From `&str`.
     #[allow(clippy::should_implement_trait)]
     pub fn from_str(d: &str) -> Self {
         Self::from_vec(d.to_string().as_bytes().to_vec())
@@ -174,12 +175,12 @@ impl Hex {
         }
     }
 
-    /// Turn it into a vector of bytes.
+    /// Turn it into a vector of bytes (making a clone).
     pub fn to_vec(&self) -> Vec<u8> {
         self.bytes.clone()
     }
 
-    /// Return a reference to the vec.
+    /// Return a reference to the encapsulated immutable vec.
     pub fn as_vec(&self) -> &Vec<u8> {
         &self.bytes
     }
