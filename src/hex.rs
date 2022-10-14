@@ -146,10 +146,13 @@ impl Hex {
     /// ```
     /// use sodg::hex::Hex;
     /// let d = Hex::from_vec([0x41, 0x42].to_vec());
-    /// assert_eq!("AB", d.to_string().unwrap());
+    /// assert_eq!("AB", d.to_utf8().unwrap());
     /// ```
-    pub fn to_string(&self) -> Result<String> {
-        Ok(String::from_utf8(self.bytes.clone())?)
+    pub fn to_utf8(&self) -> Result<String> {
+        String::from_utf8(self.bytes.clone()).context(format!(
+            "The string inside Hex is not UTF-8 ({} bytes)",
+            self.bytes.len()
+        ))
     }
 
     /// Turn it into a hexadecimal string.
@@ -223,7 +226,7 @@ fn prints_bytes() -> Result<()> {
     let txt = "привет";
     let d = Hex::from_str(txt);
     assert_eq!("D0-BF-D1-80-D0-B8-D0-B2-D0-B5-D1-82", d.print());
-    assert_eq!(txt, Hex::parse(d.print()).to_string()?);
+    assert_eq!(txt, Hex::parse(d.print()).to_utf8()?);
     Ok(())
 }
 
@@ -276,5 +279,26 @@ fn not_enough_data_for_float() -> Result<()> {
 fn too_much_data_for_int() -> Result<()> {
     let d = Hex::from_vec(vec![0x00, 0x2A, 0x00, 0x2A, 0x00, 0x2A, 0x00, 0x2A, 0x11]);
     assert!(d.to_i64().is_err());
+    Ok(())
+}
+
+#[test]
+fn makes_string() -> Result<()> {
+    let d = Hex::from_vec(vec![0x41, 0x42, 0x43]);
+    assert_eq!("ABC", d.to_utf8()?.as_str());
+    Ok(())
+}
+
+#[test]
+fn empty_string() -> Result<()> {
+    let d = Hex::from_vec(vec![]);
+    assert_eq!("", d.to_utf8()?.as_str());
+    Ok(())
+}
+
+#[test]
+fn non_utf8_string() -> Result<()> {
+    let d = Hex::from_vec(vec![0x00, 0xEF]);
+    assert!(d.to_utf8().is_err());
     Ok(())
 }
