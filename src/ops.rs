@@ -37,6 +37,8 @@ impl Sodg {
     /// sodg.add(42).unwrap();
     /// sodg.bind(0, 42, "hello").unwrap();
     /// ```
+    ///
+    /// If vertex `v1` already exists in the graph, an `Err` will be returned.
     pub fn add(&mut self, v1: u32) -> Result<()> {
         if self.vertices.contains_key(&v1) {
             return Err(anyhow!("Vertex ν{} already exists", v1));
@@ -59,6 +61,14 @@ impl Sodg {
     /// sodg.bind(0, 42, "forward").unwrap();
     /// sodg.bind(42, 0, "backward").unwrap();
     /// ```
+    ///
+    /// If an edge with this label already exists, it will be replaced with a new edge.
+    ///
+    /// If either vertex `v1` or `v2` is absent, an `Err` will be returned.
+    ///
+    /// If `v1` equals to `v2`, an `Err` will be returned.
+    ///
+    /// The label `a` can't be empty. If it's empty, an `Err` will be returned.
     pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
         if v1 == v2 {
             return Err(anyhow!(
@@ -96,6 +106,8 @@ impl Sodg {
     /// sodg.add(42).unwrap();
     /// sodg.put(42, Hex::from_str("hello, world!")).unwrap();
     /// ```
+    ///
+    /// If vertex `v1` is absent, an `Err` will be returned.
     pub fn put(&mut self, v: u32, d: Hex) -> Result<()> {
         let vtx = self
             .vertices
@@ -118,6 +130,8 @@ impl Sodg {
     /// sodg.put(42, data.clone()).unwrap();
     /// assert_eq!(data, sodg.data(42).unwrap());
     /// ```
+    ///
+    /// If vertex `v1` is absent, an `Err` will be returned.
     pub fn data(&self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
@@ -143,6 +157,8 @@ impl Sodg {
     /// assert_eq!(42, sodg.kid(0, "k").unwrap());
     /// assert!(sodg.kid(0, "another").is_none());
     /// ```
+    ///
+    /// If vertex `v1` is absent, an `Err` will be returned.
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         self.vertices
             .get(&v)
@@ -166,6 +182,9 @@ impl Sodg {
     /// sodg.bind(1, 2, "b").unwrap();
     /// assert_eq!(2, sodg.find(0, "a.b").unwrap());
     /// ```
+    ///
+    /// If target vertex is not found or `v1` is absent,
+    /// an `Err` will be returned.
     pub fn find(&self, v1: u32, loc: &str) -> Result<u32> {
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
