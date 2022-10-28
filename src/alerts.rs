@@ -21,7 +21,28 @@
 use crate::{Alert, Sodg};
 
 impl Sodg {
-    /// Attach a new alert to this SODG.
+    /// Attach a new alert to this SODG. For example, you don't want
+    /// more than one edge to depart from any vertex:
+    ///
+    /// ```
+    /// use sodg::Sodg;
+    /// let mut sodg = Sodg::empty();
+    /// sodg.alert_on(|g, vx| {
+    ///   for v in vx {
+    ///     if g.kids(v).unwrap().len() > 1 {
+    ///       return vec![format!("Too many kids at ν{v}")];
+    ///     }
+    ///   }
+    ///   return vec![];
+    /// });
+    /// sodg.add(0).unwrap();
+    /// sodg.add(1).unwrap();
+    /// sodg.add(2).unwrap();
+    /// sodg.bind(0, 1, "first").unwrap();
+    /// assert!(sodg.bind(0, 2, "second").is_err());
+    /// ```
+    ///
+    /// If vertex `v1` already exists in the graph, an `Err` will be returned.
     pub fn alert_on(&mut self, a: Alert) {
         self.alerts.push(a);
     }
@@ -63,7 +84,7 @@ fn panic_on_complex_alert() -> Result<()> {
     g.alert_on(|_, vx| {
         let v = 42;
         if vx.contains(&v) {
-            vec![format!("Vertex no.{v} is not allowed")]
+            vec![format!("Vertex ν{v} is not allowed")]
         } else {
             vec![]
         }
