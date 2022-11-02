@@ -95,6 +95,12 @@ impl Hex {
     }
 
     /// From `bool`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_bool(true);
+    /// assert_eq!("01", d.print());
+    /// ```
     pub fn from_bool(d: bool) -> Self {
         Self::from_vec(if d { [1] } else { [0] }.to_vec())
     }
