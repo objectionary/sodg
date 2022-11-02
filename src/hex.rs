@@ -230,6 +230,18 @@ impl Hex {
     pub fn as_vec(&self) -> &Vec<u8> {
         &self.bytes
     }
+
+    /// Skip a few bytes at the beginning and return the rest
+    /// as a new instance of `Hex`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_str("Hello, world!");
+    /// assert_eq!("world!", d.tail(7).to_utf8().unwrap());
+    /// ```
+    pub fn tail(&self, skip: usize) -> Self {
+        Self::from_vec(self.bytes[skip..].to_vec())
+    }
 }
 
 #[test]
@@ -347,5 +359,12 @@ fn empty_string() -> Result<()> {
 fn non_utf8_string() -> Result<()> {
     let d = Hex::from_vec(vec![0x00, 0xEF]);
     assert!(d.to_utf8().is_err());
+    Ok(())
+}
+
+#[test]
+fn takes_tail() -> Result<()> {
+    let d = Hex::from_str("Hello, world!");
+    assert_eq!("world!", d.tail(7).to_utf8()?);
     Ok(())
 }
