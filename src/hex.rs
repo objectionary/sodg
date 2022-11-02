@@ -231,6 +231,18 @@ impl Hex {
         &self.bytes
     }
 
+    /// Take one byte.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_str("你好");
+    /// assert_eq!("E4-BD-A0-E5-A5-BD", d.print());
+    /// assert_eq!(0xA0, d.byte_at(2));
+    /// ```
+    pub fn byte_at(&self, pos: usize) -> u8 {
+        self.bytes[pos]
+    }
+
     /// Skip a few bytes at the beginning and return the rest
     /// as a new instance of `Hex`.
     ///
@@ -366,5 +378,13 @@ fn non_utf8_string() -> Result<()> {
 fn takes_tail() -> Result<()> {
     let d = Hex::from_str("Hello, world!");
     assert_eq!("world!", d.tail(7).to_utf8()?);
+    Ok(())
+}
+
+#[test]
+fn takes_one_byte() -> Result<()> {
+    let d = Hex::from_str("Ура!");
+    assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
+    assert_eq!(0xD1, d.byte_at(2));
     Ok(())
 }
