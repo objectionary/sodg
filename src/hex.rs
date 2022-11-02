@@ -48,22 +48,48 @@ impl Display for Hex {
 
 impl Hex {
     /// Make an empty `Hex`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::empty();
+    /// assert!(d.is_empty());
+    /// assert_eq!("--", d.print());
+    /// ```
     pub fn empty() -> Self {
         Self::from_vec(Vec::new())
     }
 
     /// From `Vec<u8>`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_vec(vec![0xCA, 0xFE]);
+    /// assert_eq!("CA-FE", d.print());
+    /// ```
     pub fn from_vec(bytes: Vec<u8>) -> Self {
         Hex { bytes }
     }
 
     /// From `String` as HEX, for example `DE-AD-BE-EF-20-22`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let hex = "DE-AD-BE-EF-20-22";
+    /// let d = Hex::parse(hex.to_string());
+    /// assert_eq!("DE-AD-BE-EF-20-22", d.print());
+    /// ```
     pub fn parse(hex: String) -> Self {
         let s = hex.replace('-', "");
         Self::from_vec(hex::decode(s).unwrap())
     }
 
-    /// From `i64`.
+    /// Make `Hex` from `i64`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_i64(65536);
+    /// assert_eq!("00-00-00-00-00-01-00-00", d.print());
+    /// ```
     pub fn from_i64(d: i64) -> Self {
         Self::from_vec(d.to_be_bytes().to_vec())
     }
@@ -73,12 +99,25 @@ impl Hex {
         Self::from_vec(if d { [1] } else { [0] }.to_vec())
     }
 
-    /// From `f64`.
+    /// Make `Hex` from `f64`.
+    ///
+    /// ```
+    /// use std::f64::consts::PI;
+    /// use sodg::Hex;
+    /// let d = Hex::from_f64(PI);
+    /// assert_eq!("40-09-21-FB-54-44-2D-18", d.print());
+    /// ```
     pub fn from_f64(d: f64) -> Self {
         Self::from_vec(d.to_be_bytes().to_vec())
     }
 
-    /// From `String`.
+    /// Make `Hex` from `String`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_string("Ура!".to_string());
+    /// assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
+    /// ```
     pub fn from_string(d: String) -> Self {
         Self::from_vec(d.as_bytes().to_vec())
     }
@@ -90,6 +129,12 @@ impl Hex {
     }
 
     /// It's empty and no data?
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_vec(vec![]);
+    /// assert_eq!(true, d.is_empty());
+    /// ```
     pub fn is_empty(&self) -> bool {
         self.bytes.len() == 0
     }
