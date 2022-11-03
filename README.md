@@ -10,6 +10,7 @@
 [![Hits-of-Code](https://hitsofcode.com/github/objectionary/sodg)](https://hitsofcode.com/view/github/objectionary/sodg)
 ![Lines of code](https://img.shields.io/tokei/lines/github/objectionary/sodg)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/objectionary/sodg/blob/master/LICENSE.txt)
+[![docs.rs](https://img.shields.io/docsrs/sodg)](https://docs.rs/crate/sodg/latest)
 
 This Rust library helps you build a Surging Object DiGraph (SODG) for
 [reo](https://github.com/objectionary/reo) compiler of
