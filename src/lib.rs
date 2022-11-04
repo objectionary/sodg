@@ -129,12 +129,14 @@ pub struct Script {
     root: u32,
 }
 
+/// Edge between vertices in the graph.
 #[derive(Clone, Serialize, Deserialize, Eq, PartialOrd, PartialEq, Ord)]
 struct Edge {
     pub to: u32,
     pub a: String,
 }
 
+/// A vertex in the graph.
 #[derive(Clone, Serialize, Deserialize)]
 struct Vertex {
     pub edges: Vec<Edge>,
