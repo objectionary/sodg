@@ -44,6 +44,7 @@ mod edge;
 mod hex;
 mod inspect;
 mod merge;
+mod misc;
 mod next;
 mod ops;
 mod script;
