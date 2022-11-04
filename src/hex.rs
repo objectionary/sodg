@@ -59,6 +59,17 @@ impl Hex {
         Self::from_vec(Vec::new())
     }
 
+    /// How many bytes in there.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::empty();
+    /// assert_eq!(0, d.len());
+    /// ```
+    pub fn len(&self) -> usize {
+        self.bytes.len()
+    }
+
     /// From `Vec<u8>`.
     ///
     /// ```
@@ -386,5 +397,12 @@ fn takes_one_byte() -> Result<()> {
     let d = Hex::from_str("Ура!");
     assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
     assert_eq!(0xD1, d.byte_at(2));
+    Ok(())
+}
+
+#[test]
+fn measures_length() -> Result<()> {
+    let d = Hex::from_str("Ура!");
+    assert_eq!(7, d.len());
     Ok(())
 }
