@@ -70,9 +70,6 @@ impl Sodg {
     ///
     /// The label `a` can't be empty. If it's empty, an `Err` will be returned.
     pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
-        if !self.vertices.contains_key(&v2) {
-            return Err(anyhow!("Can't arrive to ν{}, it's absent", v2));
-        }
         let vtx1 = self
             .vertices
             .get_mut(&v1)

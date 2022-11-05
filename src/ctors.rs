@@ -63,6 +63,20 @@ impl Sodg {
             }
             errors
         });
+        g.alert_on(|g, vx| {
+            let mut errors = Vec::new();
+            for v in vx.iter() {
+                for e in g.vertices.get(v).unwrap().edges.iter() {
+                    if !g.vertices.contains_key(&e.to) {
+                        errors.push(format!(
+                            "Edge ν{}.{} points to ν{}, which doesn't exist",
+                            v, e.a, e.to
+                        ));
+                    }
+                }
+            }
+            errors
+        });
         g
     }
 }
@@ -95,6 +109,16 @@ fn prohibits_empty_labels() -> Result<()> {
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "")?;
+    assert!(g.alerts_on().is_err());
+    Ok(())
+}
+
+#[test]
+fn prohibits_orphan_edges() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.alerts_off();
+    g.add(0)?;
+    g.bind(0, 1, "foo")?;
     assert!(g.alerts_on().is_err());
     Ok(())
 }
