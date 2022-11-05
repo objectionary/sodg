@@ -186,9 +186,27 @@ impl Sodg {
     /// ```
     ///
     /// If vertex `v1` is absent, `None` will be returned.
+    ///
+    /// The name of the edge may be a composite of two parts, for example
+    /// `π/Φ.test` or `foo/ν13.print.me`. The parts are separated by the
+    /// forward slash. In this case, the search will only take into account
+    /// the first part:
+    ///
+    /// ```
+    /// use sodg::Sodg;
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(42).unwrap();
+    /// g.bind(0, 42, "π/Φ.test").unwrap();
+    /// assert_eq!(Some(42), g.kid(0, "π"));
+    /// ```
+    ///
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         if let Some(vtx) = self.vertices.get(&v) {
-            vtx.edges.iter().find(|e| e.a == a).map(|e| e.to)
+            vtx.edges
+                .iter()
+                .find(|e| e.a == a || e.a.starts_with(format!("{a}/").as_str()))
+                .map(|e| e.to)
         } else {
             None
         }
@@ -401,5 +419,15 @@ fn gets_absent_kid() -> Result<()> {
 fn gets_kid_from_absent_vertex() -> Result<()> {
     let g = Sodg::empty();
     assert!(g.kid(0, "hello").is_none());
+    Ok(())
+}
+
+#[test]
+fn finds_kid_by_prefix() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "π/Φ.test")?;
+    assert_eq!(Some(1), g.kid(0, "π"));
     Ok(())
 }

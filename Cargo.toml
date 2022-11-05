@@ -8,7 +8,7 @@ readme = "README.md"
 license-file = "LICENSE.txt"
 homepage = "https://github.com/objectionary/sodg"
 keywords = ["graph", "oop"]
-categories = ["graph"]
+categories = ["data-structures", "memory-management"]
 
 [dependencies]
 anyhow = "1.0.65"
