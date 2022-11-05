@@ -74,7 +74,12 @@ impl Sodg {
             .vertices
             .get_mut(&v1)
             .context(format!("Can't depart from ν{}, it's absent", v1))?;
-        vtx1.edges.retain(|e| e.a != a);
+        let prefix = format!(
+            "{}/",
+            a.splitn(2, '/').collect::<Vec<&str>>().first().unwrap()
+        );
+        vtx1.edges
+            .retain(|e| e.a != a && !e.a.starts_with(prefix.as_str()));
         vtx1.edges.push(Edge::new(v2, a));
         self.validate(vec![v1, v2])?;
         trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
@@ -470,5 +475,16 @@ fn adds_twice() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     assert!(g.add(0).is_ok());
+    Ok(())
+}
+
+#[test]
+fn replaces_ignoring_locator() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "π/Φ.one")?;
+    g.bind(0, 1, "π/Φ.two")?;
+    assert_eq!(1, g.kids(0)?.len());
     Ok(())
 }
