@@ -141,6 +141,19 @@ impl Sodg {
     }
 
     /// Find all kids of a vertex.
+    ///
+    /// ```
+    /// use sodg::Sodg;
+    /// let mut sodg = Sodg::empty();
+    /// sodg.add(0).unwrap();
+    /// sodg.add(42).unwrap();
+    /// sodg.bind(0, 42, "k").unwrap();
+    /// let (a, to) = sodg.kids(0).unwrap().first().unwrap().clone();
+    /// assert_eq!("k", a);
+    /// assert_eq!(42, to);
+    /// ```
+    ///
+    /// If vertex `v1` is absent, `None` will be returned.
     pub fn kids(&self, v: u32) -> Result<Vec<(String, u32)>> {
         let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
         Ok(vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect())
@@ -158,16 +171,13 @@ impl Sodg {
     /// assert!(sodg.kid(0, "another").is_none());
     /// ```
     ///
-    /// If vertex `v1` is absent, an `Err` will be returned.
+    /// If vertex `v1` is absent, `None` will be returned.
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
-        self.vertices
-            .get(&v)
-            .context(format!("Can't find ν{v}"))
-            .unwrap()
-            .edges
-            .iter()
-            .find(|e| e.a == a)
-            .map(|e| e.to)
+        if let Some(vtx) = self.vertices.get(&v) {
+            vtx.edges.iter().find(|e| e.a == a).map(|e| e.to)
+        } else {
+            None
+        }
     }
 
     /// Find a vertex in the Sodg by its locator.
@@ -339,6 +349,9 @@ fn finds_all_kids() -> Result<()> {
     g.bind(0, 1, "one")?;
     g.bind(0, 1, "two")?;
     assert_eq!(2, g.kids(0)?.iter().count());
+    let (a, to) = g.kids(0)?.first().unwrap().clone();
+    assert_eq!("one", a);
+    assert_eq!(1, to);
     Ok(())
 }
 
@@ -347,5 +360,20 @@ fn gets_data_from_empty_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     assert!(g.data(0)?.is_empty());
+    Ok(())
+}
+
+#[test]
+fn gets_absent_kid() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    assert!(g.kid(0, "hello").is_none());
+    Ok(())
+}
+
+#[test]
+fn gets_kid_from_absent_vertex() -> Result<()> {
+    let g = Sodg::empty();
+    assert!(g.kid(0, "hello").is_none());
     Ok(())
 }
