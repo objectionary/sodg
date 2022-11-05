@@ -54,6 +54,11 @@ impl Script {
         }
     }
 
+    /// Make a new one, parsing a `String` with instructions.
+    pub fn from_string(s: String) -> Script {
+        Script::from_str(s.as_str())
+    }
+
     /// Set a different root. By default, the root is set to zero.
     /// If the root is changed, each time zero-vertex is mentioned
     /// in instructions, if will be replaced by this number.
