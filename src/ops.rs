@@ -32,10 +32,10 @@ impl Sodg {
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
-    /// sodg.add(0).unwrap();
-    /// sodg.add(42).unwrap();
-    /// sodg.bind(0, 42, "hello").unwrap();
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(42).unwrap();
+    /// g.bind(0, 42, "hello").unwrap();
     /// ```
     ///
     /// If vertex `v1` already exists in the graph, an `Err` will be returned.
@@ -55,11 +55,11 @@ impl Sodg {
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
-    /// sodg.add(0).unwrap();
-    /// sodg.add(42).unwrap();
-    /// sodg.bind(0, 42, "forward").unwrap();
-    /// sodg.bind(42, 0, "backward").unwrap();
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(42).unwrap();
+    /// g.bind(0, 42, "forward").unwrap();
+    /// g.bind(42, 0, "backward").unwrap();
     /// ```
     ///
     /// If an edge with this label already exists, it will be replaced with a new edge.
@@ -102,9 +102,9 @@ impl Sodg {
     /// ```
     /// use sodg::Hex;
     /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
-    /// sodg.add(42).unwrap();
-    /// sodg.put(42, Hex::from_str("hello, world!")).unwrap();
+    /// let mut g = Sodg::empty();
+    /// g.add(42).unwrap();
+    /// g.put(42, Hex::from_str("hello, world!")).unwrap();
     /// ```
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
@@ -124,11 +124,11 @@ impl Sodg {
     /// ```
     /// use sodg::Hex;
     /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
-    /// sodg.add(42).unwrap();
+    /// let mut g = Sodg::empty();
+    /// g.add(42).unwrap();
     /// let data = Hex::from_str("hello, world!");
-    /// sodg.put(42, data.clone()).unwrap();
-    /// assert_eq!(data, sodg.data(42).unwrap());
+    /// g.put(42, data.clone()).unwrap();
+    /// assert_eq!(data, g.data(42).unwrap());
     /// ```
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
@@ -144,16 +144,30 @@ impl Sodg {
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
-    /// sodg.add(0).unwrap();
-    /// sodg.add(42).unwrap();
-    /// sodg.bind(0, 42, "k").unwrap();
-    /// let (a, to) = sodg.kids(0).unwrap().first().unwrap().clone();
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(42).unwrap();
+    /// g.bind(0, 42, "k").unwrap();
+    /// let (a, to) = g.kids(0).unwrap().first().unwrap().clone();
     /// assert_eq!("k", a);
     /// assert_eq!(42, to);
     /// ```
     ///
     /// If vertex `v1` is absent, `None` will be returned.
+    ///
+    /// Just in case, if you need to put all names into a single line:
+    ///
+    /// ```
+    /// use itertools::Itertools;
+    /// use sodg::Sodg;
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(42).unwrap();
+    /// g.bind(0, 42, "a").unwrap();
+    /// g.bind(0, 42, "b").unwrap();
+    /// g.bind(0, 42, "c").unwrap();
+    /// assert_eq!("a,b,c", g.kids(0).unwrap().into_iter().map(|(a, _)| a).collect::<Vec<String>>().join(","));
+    /// ```
     pub fn kids(&self, v: u32) -> Result<Vec<(String, u32)>> {
         let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
         Ok(vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect())
@@ -163,12 +177,12 @@ impl Sodg {
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
-    /// sodg.add(0).unwrap();
-    /// sodg.add(42).unwrap();
-    /// sodg.bind(0, 42, "k").unwrap();
-    /// assert_eq!(42, sodg.kid(0, "k").unwrap());
-    /// assert!(sodg.kid(0, "another").is_none());
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(42).unwrap();
+    /// g.bind(0, 42, "k").unwrap();
+    /// assert_eq!(42, g.kid(0, "k").unwrap());
+    /// assert!(g.kid(0, "another").is_none());
     /// ```
     ///
     /// If vertex `v1` is absent, `None` will be returned.
@@ -184,13 +198,13 @@ impl Sodg {
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
-    /// sodg.add(0).unwrap();
-    /// sodg.add(1).unwrap();
-    /// sodg.bind(0, 1, "a").unwrap();
-    /// sodg.add(2).unwrap();
-    /// sodg.bind(1, 2, "b").unwrap();
-    /// assert_eq!(2, sodg.find(0, "a.b").unwrap());
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(1).unwrap();
+    /// g.bind(0, 1, "a").unwrap();
+    /// g.add(2).unwrap();
+    /// g.bind(1, 2, "b").unwrap();
+    /// assert_eq!(2, g.find(0, "a.b").unwrap());
     /// ```
     ///
     /// If target vertex is not found or `v1` is absent,
@@ -352,6 +366,18 @@ fn finds_all_kids() -> Result<()> {
     let (a, to) = g.kids(0)?.first().unwrap().clone();
     assert_eq!("one", a);
     assert_eq!(1, to);
+    Ok(())
+}
+
+#[test]
+fn builds_list_of_kids() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "one")?;
+    g.bind(0, 1, "two")?;
+    let names: Vec<String> = g.kids(0)?.into_iter().map(|(a, _)| a).collect();
+    assert_eq!("one,two", names.join(","));
     Ok(())
 }
 
