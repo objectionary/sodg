@@ -19,6 +19,8 @@
 // SOFTWARE.
 
 use crate::{Alert, Sodg};
+use anyhow::anyhow;
+use anyhow::Result;
 
 impl Sodg {
     /// Attach a new alert to this SODG. For example, you don't want
@@ -52,14 +54,28 @@ impl Sodg {
         self.alerts_active = false;
     }
 
-    /// Enable all alerts.
-    pub fn alerts_on(&mut self) {
+    /// Enable all alerts. This function also runs all vertices through
+    /// all checks and returns the list of errors found. If everything
+    /// was fine, an empty vector is returned.
+    pub fn alerts_on(&mut self) -> Result<()> {
         self.alerts_active = true;
+        self.validate(self.vertices.keys().cloned().collect())
+    }
+
+    /// Check all alerts for the given list of vertices. If any of them
+    /// have any issues, `Err` is returned.
+    pub fn validate(&self, vx: Vec<u32>) -> Result<()> {
+        if self.alerts_active {
+            for a in self.alerts.iter() {
+                let msgs = a(self, vx.clone());
+                if !msgs.is_empty() {
+                    return Err(anyhow!("{}", msgs.join("; ")));
+                }
+            }
+        }
+        Ok(())
     }
 }
-
-#[cfg(test)]
-use anyhow::Result;
 
 #[test]
 fn panic_on_simple_alert() -> Result<()> {

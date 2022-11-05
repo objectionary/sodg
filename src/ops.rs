@@ -70,12 +70,6 @@ impl Sodg {
     ///
     /// The label `a` can't be empty. If it's empty, an `Err` will be returned.
     pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
-        if v1 == v2 {
-            return Err(anyhow!(
-                "An edge can't depart from ν{} and arrive to itself",
-                v1
-            ));
-        }
         if a.is_empty() {
             return Err(anyhow!(
                 "Edge label can't be empty, from ν{} to ν{}",
@@ -316,19 +310,6 @@ impl Sodg {
         }
         trace!("#find: found ν{v1} by '{loc}'");
         Ok(v)
-    }
-
-    /// Check all alerts.
-    fn validate(&self, vx: Vec<u32>) -> Result<()> {
-        if self.alerts_active {
-            for a in self.alerts.iter() {
-                let msgs = a(self, vx.clone());
-                if !msgs.is_empty() {
-                    return Err(anyhow!("{}", msgs.join("; ")));
-                }
-            }
-        }
-        Ok(())
     }
 }
 

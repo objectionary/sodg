@@ -41,6 +41,17 @@ impl Sodg {
             }
             errors
         });
+        g.alert_on(|g, vx| {
+            let mut errors = Vec::new();
+            for v in vx.iter() {
+                for e in g.vertices.get(v).unwrap().edges.iter() {
+                    if e.to == *v {
+                        errors.push(format!("Edge ν{}.{} arrives to ν{} (loop)", v, e.a, e.to));
+                    }
+                }
+            }
+            errors
+        });
         g
     }
 }
@@ -53,5 +64,15 @@ fn makes_an_empty_sodg() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     assert_eq!(1, g.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn prohibits_loops() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.alerts_off();
+    g.add(0)?;
+    g.bind(0, 0, "foo")?;
+    assert!(g.alerts_on().is_err());
     Ok(())
 }
