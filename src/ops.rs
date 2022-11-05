@@ -38,10 +38,10 @@ impl Sodg {
     /// g.bind(0, 42, "hello").unwrap();
     /// ```
     ///
-    /// If vertex `v1` already exists in the graph, an `Err` will be returned.
+    /// If vertex `v1` already exists in the graph, `Ok` will be returned.
     pub fn add(&mut self, v1: u32) -> Result<()> {
         if self.vertices.contains_key(&v1) {
-            return Err(anyhow!("Vertex ν{} already exists", v1));
+            return Ok(());
         }
         self.vertices.insert(v1, Vertex::empty());
         self.validate(vec![v1])?;
@@ -472,5 +472,13 @@ fn finds_empty_locator() -> Result<()> {
     g.add(1)?;
     g.bind(0, 1, "π")?;
     assert_eq!(Some("".to_string()), g.loc(0, "π"));
+    Ok(())
+}
+
+#[test]
+fn adds_twice() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    assert!(g.add(0).is_ok());
     Ok(())
 }
