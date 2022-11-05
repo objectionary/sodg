@@ -212,6 +212,48 @@ impl Sodg {
         }
     }
 
+    /// Get a locator of an edge, if it exists.
+    /// The name of the edge may be a composite of two parts, for example
+    /// `π/Φ.foo` or `foo/ν6.boom.x.y`. The parts are separated by the
+    /// forward slash. This function returns the second part if it exists:
+    ///
+    /// ```
+    /// use sodg::Sodg;
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(42).unwrap();
+    /// g.bind(0, 42, "π/Φ.test").unwrap();
+    /// assert_eq!(Some("Φ.test".to_string()), g.loc(0, "π"));
+    /// assert_eq!(None, g.loc(0, "foo"));
+    /// ```
+    ///
+    /// If there is no second part, but the edge is present, an empty string
+    /// will be returned:
+    ///
+    /// ```
+    /// use sodg::Sodg;
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(42).unwrap();
+    /// g.bind(0, 42, "π").unwrap();
+    /// assert_eq!(Some("".to_string()), g.loc(0, "π"));
+    /// ```
+    ///
+    pub fn loc(&self, v: u32, a: &str) -> Option<String> {
+        if let Some(vtx) = self.vertices.get(&v) {
+            vtx.edges
+                .iter()
+                .map(|e| {
+                    let p = e.a.splitn(2, '/').collect::<Vec<&str>>();
+                    (*p.first().unwrap(), *p.get(1).unwrap_or(&""))
+                })
+                .find(|(l, _)| l == &a)
+                .map(|(_, r)| r.to_string())
+        } else {
+            None
+        }
+    }
+
     /// Find a vertex in the Sodg by its locator.
     ///
     /// ```
@@ -429,5 +471,25 @@ fn finds_kid_by_prefix() -> Result<()> {
     g.add(1)?;
     g.bind(0, 1, "π/Φ.test")?;
     assert_eq!(Some(1), g.kid(0, "π"));
+    Ok(())
+}
+
+#[test]
+fn finds_locator() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "π/Φ.test")?;
+    assert_eq!(Some("Φ.test".to_string()), g.loc(0, "π"));
+    Ok(())
+}
+
+#[test]
+fn finds_empty_locator() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "π")?;
+    assert_eq!(Some("".to_string()), g.loc(0, "π"));
     Ok(())
 }
