@@ -341,3 +341,11 @@ fn finds_all_kids() -> Result<()> {
     assert_eq!(2, g.kids(0)?.iter().count());
     Ok(())
 }
+
+#[test]
+fn gets_data_from_empty_vertex() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    assert!(g.data(0)?.is_empty());
+    Ok(())
+}
