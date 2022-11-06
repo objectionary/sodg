@@ -18,14 +18,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Hex;
+use crate::{Deserialize, Serialize};
 use anyhow::{Context, Result};
 use std::fmt::{Debug, Display, Formatter};
 
-impl Clone for Hex {
-    fn clone(&self) -> Self {
-        Hex::from_vec(self.bytes.clone())
-    }
+/// It is an object-oriented representation of binary data
+/// in hexadecimal format, which can be put into vertices of the graph.
+/// You can create it from Rust primitives:
+///
+/// ```
+/// use sodg::Hex;
+/// let d = Hex::from_i64(65534);
+/// assert_eq!("00-00-00-00-00-00-FF-FE", d.print());
+/// ```
+///
+/// Then, you can turn it back to Rust primitives:
+///
+/// ```
+/// use sodg::Hex;
+/// let d = Hex::from_i64(65534);
+/// assert_eq!(65534, d.to_i64().unwrap());
+/// ```
+#[derive(Serialize, Deserialize, Clone)]
+pub enum Hex {
+    Vector(Vec<u8>),
+    Bytes([u8; 24], usize),
 }
 
 impl Debug for Hex {
@@ -59,6 +76,20 @@ impl Hex {
         Self::from_vec(Vec::new())
     }
 
+    /// Bytes contained.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_i64(2);
+    /// assert_eq!(8, d.len())
+    /// ```
+    pub fn bytes(&self) -> &[u8] {
+        match self {
+            Hex::Vector(v) => v,
+            Hex::Bytes(array, size) => &array[..*size],
+        }
+    }
+
     /// How many bytes in there.
     ///
     /// ```
@@ -67,7 +98,34 @@ impl Hex {
     /// assert_eq!(0, d.len());
     /// ```
     pub fn len(&self) -> usize {
-        self.bytes.len()
+        match self {
+            Hex::Vector(x) => x.len(),
+            Hex::Bytes(_, size) => *size,
+        }
+    }
+
+    /// Create from slice, in appropriate mode.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_slice(&[0xDE, 0xAD]);
+    /// assert_eq!("DE-AD", d.print());
+    /// let v = Hex::from_slice(&vec![0xBE, 0xEF]);
+    /// assert_eq!("BE-EF", v.print());
+    /// ```
+    pub fn from_slice(slice: &[u8]) -> Self {
+        if slice.len() <= 24 {
+            Self::Bytes(
+                {
+                    let mut x = [0; 24];
+                    x[..slice.len()].copy_from_slice(slice);
+                    x
+                },
+                slice.len(),
+            )
+        } else {
+            Self::Vector(slice.to_vec())
+        }
     }
 
     /// From `Vec<u8>`.
@@ -78,7 +136,11 @@ impl Hex {
     /// assert_eq!("CA-FE", d.print());
     /// ```
     pub fn from_vec(bytes: Vec<u8>) -> Self {
-        Hex { bytes }
+        if bytes.len() <= 24 {
+            Self::from_slice(&bytes)
+        } else {
+            Self::Vector(bytes)
+        }
     }
 
     /// From `String` as HEX, for example `DE-AD-BE-EF-20-22`.
@@ -102,7 +164,7 @@ impl Hex {
     /// assert_eq!("00-00-00-00-00-01-00-00", d.print());
     /// ```
     pub fn from_i64(d: i64) -> Self {
-        Self::from_vec(d.to_be_bytes().to_vec())
+        Self::from_slice(&d.to_be_bytes())
     }
 
     /// From `bool`.
@@ -113,7 +175,7 @@ impl Hex {
     /// assert_eq!("01", d.print());
     /// ```
     pub fn from_bool(d: bool) -> Self {
-        Self::from_vec(if d { [1] } else { [0] }.to_vec())
+        Self::from_slice(&(if d { [1] } else { [0] }))
     }
 
     /// Make `Hex` from `f64`.
@@ -125,7 +187,7 @@ impl Hex {
     /// assert_eq!("40-09-21-FB-54-44-2D-18", d.print());
     /// ```
     pub fn from_f64(d: f64) -> Self {
-        Self::from_vec(d.to_be_bytes().to_vec())
+        Self::from_slice(&d.to_be_bytes())
     }
 
     /// Make `Hex` from `String`.
@@ -136,13 +198,13 @@ impl Hex {
     /// assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
     /// ```
     pub fn from_string(d: String) -> Self {
-        Self::from_vec(d.as_bytes().to_vec())
+        Self::from_slice(d.as_bytes())
     }
 
     /// From `&str`.
     #[allow(clippy::should_implement_trait)]
     pub fn from_str(d: &str) -> Self {
-        Self::from_vec(d.to_string().as_bytes().to_vec())
+        Self::from_slice(d.to_string().as_bytes())
     }
 
     /// It's empty and no data?
@@ -153,7 +215,7 @@ impl Hex {
     /// assert_eq!(true, d.is_empty());
     /// ```
     pub fn is_empty(&self) -> bool {
-        self.bytes.len() == 0
+        self.len() == 0
     }
 
     /// Turn it into `bool`.
@@ -164,7 +226,7 @@ impl Hex {
     /// assert_eq!(true, d.to_bool().unwrap());
     /// ```
     pub fn to_bool(&self) -> Result<bool> {
-        Ok(self.bytes[0] == 0x01)
+        Ok(self.bytes()[0] == 0x01)
     }
 
     /// Turn it into `i64`.
@@ -176,8 +238,7 @@ impl Hex {
     /// ```
     pub fn to_i64(&self) -> Result<i64> {
         let a: &[u8; 8] = &self
-            .bytes
-            .as_slice()
+            .bytes()
             .try_into()
             .context("There is not enough data, can't make INT")?;
         Ok(i64::from_be_bytes(*a))
@@ -192,8 +253,7 @@ impl Hex {
     /// ```
     pub fn to_f64(&self) -> Result<f64> {
         let a: &[u8; 8] = &self
-            .bytes
-            .as_slice()
+            .bytes()
             .try_into()
             .context("There is no data, can't make FLOAT")?;
         Ok(f64::from_be_bytes(*a))
@@ -207,9 +267,9 @@ impl Hex {
     /// assert_eq!("AB", d.to_utf8().unwrap());
     /// ```
     pub fn to_utf8(&self) -> Result<String> {
-        String::from_utf8(self.bytes.clone()).context(format!(
+        String::from_utf8(self.bytes().to_vec()).context(format!(
             "The string inside Hex is not UTF-8 ({} bytes)",
-            self.bytes.len()
+            self.len()
         ))
     }
 
@@ -221,10 +281,10 @@ impl Hex {
     /// assert_eq!("CA-FE", d.print());
     /// ```
     pub fn print(&self) -> String {
-        if self.bytes.is_empty() {
+        if self.bytes().is_empty() {
             "--".to_string()
         } else {
-            self.bytes
+            self.bytes()
                 .iter()
                 .map(|b| format!("{:02X}", b))
                 .collect::<Vec<String>>()
@@ -234,13 +294,13 @@ impl Hex {
 
     /// Turn it into a vector of bytes (making a clone).
     pub fn to_vec(&self) -> Vec<u8> {
-        self.bytes.clone()
+        self.bytes().to_vec()
     }
 
-    /// Return a reference to the encapsulated immutable vec.
-    pub fn as_vec(&self) -> &Vec<u8> {
-        &self.bytes
-    }
+    // /// Return a reference to the encapsulated immutable vec.
+    // pub fn as_vec(&self) -> &Vec<u8> {
+    //     &self.bytes
+    // }
 
     /// Take one byte.
     ///
@@ -251,7 +311,7 @@ impl Hex {
     /// assert_eq!(0xA0, d.byte_at(2));
     /// ```
     pub fn byte_at(&self, pos: usize) -> u8 {
-        self.bytes[pos]
+        self.bytes()[pos]
     }
 
     /// Skip a few bytes at the beginning and return the rest
@@ -263,7 +323,7 @@ impl Hex {
     /// assert_eq!("world!", d.tail(7).to_utf8().unwrap());
     /// ```
     pub fn tail(&self, skip: usize) -> Self {
-        Self::from_vec(self.bytes[skip..].to_vec())
+        Self::from_vec(self.bytes()[skip..].to_vec())
     }
 }
 
@@ -339,7 +399,7 @@ fn broken_float_from_small_data() -> Result<()> {
 #[test]
 fn direct_access_to_vec() -> Result<()> {
     let d = Hex::from_vec([0x1F, 0x01].to_vec());
-    assert_eq!(0x1F, *d.as_vec().get(0).unwrap());
+    assert_eq!(0x1F, *d.bytes().first().unwrap());
     Ok(())
 }
 

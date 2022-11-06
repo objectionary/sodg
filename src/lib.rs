@@ -56,6 +56,7 @@ mod xml;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+pub use crate::hex::Hex;
 /// Instances of this type can be used in [`Sodg::alert_on`] method,
 /// in order to ensure runtime consistency of data inside the graph.
 pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
@@ -86,28 +87,6 @@ pub struct Sodg {
     alerts: Vec<Alert>,
     #[serde(skip_serializing, skip_deserializing)]
     alerts_active: bool,
-}
-
-/// It is an object-oriented representation of binary data
-/// in hexadecimal format, which can be put into vertices of the graph.
-/// You can create it from Rust primitives:
-///
-/// ```
-/// use sodg::Hex;
-/// let d = Hex::from_i64(65534);
-/// assert_eq!("00-00-00-00-00-00-FF-FE", d.print());
-/// ```
-///
-/// Then, you can turn it back to Rust primitives:
-///
-/// ```
-/// use sodg::Hex;
-/// let d = Hex::from_i64(65534);
-/// assert_eq!(65534, d.to_i64().unwrap());
-/// ```
-#[derive(Serialize, Deserialize)]
-pub struct Hex {
-    bytes: Vec<u8>,
 }
 
 /// It is a wrapper of a plain text with graph-modifying
