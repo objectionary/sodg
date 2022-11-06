@@ -18,7 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Edge;
+use crate::{Deserialize, Serialize};
+
+/// Edge between vertices in the graph.
+#[derive(Clone, Serialize, Deserialize, Eq, PartialOrd, PartialEq, Ord)]
+pub(crate) struct Edge {
+    pub to: u32,
+    pub a: String,
+}
 
 impl Edge {
     pub fn new(to: u32, a: &str) -> Edge {

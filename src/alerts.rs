@@ -18,9 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Alert, Sodg};
+use crate::Sodg;
 use anyhow::anyhow;
 use anyhow::Result;
+
+/// Instances of this type can be used in [`Sodg::alert_on`] method,
+/// in order to ensure runtime consistency of data inside the graph.
+pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
 
 impl Sodg {
     /// Attach a new alert to this SODG. For example, you don't want

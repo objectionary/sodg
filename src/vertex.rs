@@ -18,8 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Hex;
-use crate::Vertex;
+use crate::{Deserialize, Edge, Hex, Serialize};
+
+/// A vertex in the graph.
+#[derive(Clone, Serialize, Deserialize)]
+pub(crate) struct Vertex {
+    pub edges: Vec<Edge>,
+    pub data: Hex,
+}
 
 impl Vertex {
     /// Make an empty one.
