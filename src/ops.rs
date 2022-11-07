@@ -24,6 +24,7 @@ use crate::Sodg;
 use crate::Vertex;
 use anyhow::{anyhow, Context, Result};
 use log::trace;
+use rstest::rstest;
 use std::collections::VecDeque;
 use std::str::FromStr;
 
@@ -74,15 +75,8 @@ impl Sodg {
             .vertices
             .get_mut(&v1)
             .context(format!("Can't depart from ν{}, it's absent", v1))?;
-        let head = a
-            .splitn(2, '/')
-            .collect::<Vec<&str>>()
-            .first()
-            .unwrap()
-            .to_string();
-        let prefix = format!("{}/", head);
         vtx1.edges
-            .retain(|e| e.a != head && !e.a.starts_with(prefix.as_str()));
+            .retain(|e| Self::split_a(e.a.clone()).0 != Self::split_a(a.to_string()).0);
         vtx1.edges.push(Edge::new(v2, a));
         self.validate(vec![v1, v2])?;
         trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
@@ -167,12 +161,8 @@ impl Sodg {
             .edges
             .iter()
             .map(|x| {
-                let p = x.a.splitn(2, '/').collect::<Vec<&str>>();
-                (
-                    p.first().unwrap().to_string(),
-                    p.get(1).unwrap_or(&"").to_string(),
-                    x.to,
-                )
+                let p = Self::split_a(x.a.clone());
+                (p.0, p.1, x.to)
             })
             .collect();
         Ok(kids)
@@ -210,7 +200,7 @@ impl Sodg {
         if let Some(vtx) = self.vertices.get(&v) {
             vtx.edges
                 .iter()
-                .find(|e| e.a == a || e.a.starts_with(format!("{a}/").as_str()))
+                .find(|e| Self::split_a(e.a.clone()).0 == Self::split_a(a.to_string()).0)
                 .map(|e| e.to)
         } else {
             None
@@ -248,12 +238,9 @@ impl Sodg {
         if let Some(vtx) = self.vertices.get(&v) {
             vtx.edges
                 .iter()
-                .map(|e| {
-                    let p = e.a.splitn(2, '/').collect::<Vec<&str>>();
-                    (*p.first().unwrap(), *p.get(1).unwrap_or(&""))
-                })
-                .find(|(l, _)| l == &a)
-                .map(|(_, r)| r.to_string())
+                .map(|e| Self::split_a(e.a.clone()))
+                .find(|(l, _)| l == a)
+                .map(|(_, r)| r)
         } else {
             None
         }
@@ -322,6 +309,26 @@ impl Sodg {
         trace!("#find: found ν{v1} by '{loc}'");
         Ok(v)
     }
+
+    /// Split label into two parts.
+    fn split_a(a: String) -> (String, String) {
+        let s = a.splitn(2, '/').collect::<Vec<&str>>();
+        (
+            s.first().unwrap().to_string(),
+            s.get(1).unwrap_or(&"").to_string(),
+        )
+    }
+}
+
+#[rstest]
+#[case("hello", "hello", "")]
+#[case("hello/", "hello", "")]
+#[case("hello/a-1", "hello", "a-1")]
+#[case("π/Φ.x.Δ", "π", "Φ.x.Δ")]
+fn splits_label_correctly(#[case] a: &str, #[case] head: &str, #[case] tail: &str) {
+    let s = Sodg::split_a(a.to_string());
+    assert_eq!(head, s.0);
+    assert_eq!(tail, s.1);
 }
 
 #[test]
@@ -365,16 +372,33 @@ fn binds_two_names() -> Result<()> {
     Ok(())
 }
 
+#[rstest]
+#[case("hello", "hello")]
+#[case("hello/a.b.c", "hello")]
+#[case("hello", "hello/f.f")]
+#[case("hello", "hello/")]
+#[case("hello/", "hello")]
+fn overwrites_edges(#[case] before: &str, #[case] after: &str) {
+    let mut g = Sodg::empty();
+    g.add(1).unwrap();
+    g.add(2).unwrap();
+    g.bind(1, 2, before).unwrap();
+    g.add(3).unwrap();
+    g.bind(1, 3, after).unwrap();
+    assert_eq!(3, g.kid(1, after).unwrap());
+    assert_eq!(3, g.kid(1, before).unwrap());
+}
+
 #[test]
 fn overwrites_edge() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
-    let label = "hello";
-    g.bind(1, 2, label)?;
+    g.bind(1, 2, "foo")?;
     g.add(3)?;
-    g.bind(1, 3, format!("{label}/boom").as_str())?;
-    assert_eq!(3, g.find(1, label)?);
+    g.bind(1, 3, "foo/ee")?;
+    assert_eq!(3, g.kid(1, "foo").unwrap());
+    assert_eq!(3, g.kid(1, "foo/ee").unwrap());
     Ok(())
 }
 
