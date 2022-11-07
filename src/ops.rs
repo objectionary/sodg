@@ -137,8 +137,9 @@ impl Sodg {
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// g.bind(0, 42, "k").unwrap();
-    /// let (a, to) = g.kids(0).unwrap().first().unwrap().clone();
+    /// let (a, tail, to) = g.kids(0).unwrap().first().unwrap().clone();
     /// assert_eq!("k", a);
+    /// assert_eq!("", tail);
     /// assert_eq!(42, to);
     /// ```
     ///
@@ -153,13 +154,25 @@ impl Sodg {
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// g.bind(0, 42, "a").unwrap();
-    /// g.bind(0, 42, "b").unwrap();
-    /// g.bind(0, 42, "c").unwrap();
-    /// assert_eq!("a,b,c", g.kids(0).unwrap().into_iter().map(|(a, _)| a).collect::<Vec<String>>().join(","));
+    /// g.bind(0, 42, "b/d.f.e").unwrap();
+    /// g.bind(0, 42, "c/hello-world").unwrap();
+    /// assert_eq!("a,b,c", g.kids(0).unwrap().into_iter().map(|(a, _, _)| a).collect::<Vec<String>>().join(","));
     /// ```
-    pub fn kids(&self, v: u32) -> Result<Vec<(String, u32)>> {
+    pub fn kids(&self, v: u32) -> Result<Vec<(String, String, u32)>> {
         let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
-        Ok(vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect())
+        let kids = vtx
+            .edges
+            .iter()
+            .map(|x| {
+                let p = x.a.splitn(2, '/').collect::<Vec<&str>>();
+                (
+                    p.first().unwrap().to_string(),
+                    p.get(1).unwrap_or(&"").to_string(),
+                    x.to,
+                )
+            })
+            .collect();
+        Ok(kids)
     }
 
     /// Find a kid of a vertex, by its edge name.
@@ -396,11 +409,12 @@ fn finds_all_kids() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
-    g.bind(0, 1, "one")?;
+    g.bind(0, 1, "one/f.d")?;
     g.bind(0, 1, "two")?;
     assert_eq!(2, g.kids(0)?.iter().count());
-    let (a, to) = g.kids(0)?.first().unwrap().clone();
+    let (a, tail, to) = g.kids(0)?.first().unwrap().clone();
     assert_eq!("one", a);
+    assert_eq!("f.d", tail);
     assert_eq!(1, to);
     Ok(())
 }
@@ -411,9 +425,10 @@ fn builds_list_of_kids() -> Result<()> {
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "one")?;
-    g.bind(0, 1, "two")?;
-    let names: Vec<String> = g.kids(0)?.into_iter().map(|(a, _)| a).collect();
-    assert_eq!("one,two", names.join(","));
+    g.bind(0, 1, "two/d.f.hello-world")?;
+    g.bind(0, 1, "three/")?;
+    let names: Vec<String> = g.kids(0)?.into_iter().map(|(a, _, _)| a).collect();
+    assert_eq!("one,two,three", names.join(","));
     Ok(())
 }
 
