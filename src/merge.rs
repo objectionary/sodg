@@ -53,7 +53,7 @@ impl Sodg {
 use anyhow::Result;
 
 #[test]
-fn merges_two_sodgs() -> Result<()> {
+fn merges_two_graphs() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
