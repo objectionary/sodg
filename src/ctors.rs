@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 use crate::Sodg;
+use rstest::rstest;
 use std::collections::HashMap;
 
 impl Sodg {
@@ -77,6 +78,32 @@ impl Sodg {
             }
             errors
         });
+        g.alert_on(|g, vx| {
+            let mut errors = Vec::new();
+            for v in vx.iter() {
+                for e in g.vertices.get(v).unwrap().edges.iter() {
+                    if e.a.is_empty() {
+                        errors.push(format!(
+                            "Edge label from ν{} to ν{} is an empty string",
+                            v, e.to
+                        ));
+                    }
+                    if e.a.contains(' ') {
+                        errors.push(format!(
+                            "Edge label from ν{} to ν{} has prohibited spaces",
+                            v, e.to
+                        ));
+                    }
+                    if e.a.split('/').count() > 2 {
+                        errors.push(format!(
+                            "Edge label from ν{} to ν{} has more than one slash",
+                            v, e.to
+                        ));
+                    }
+                }
+            }
+            errors
+        });
         g
     }
 }
@@ -121,4 +148,16 @@ fn prohibits_orphan_edges() -> Result<()> {
     g.bind(0, 1, "foo")?;
     assert!(g.alerts_on().is_err());
     Ok(())
+}
+
+#[rstest]
+#[case("")]
+#[case("with spaces")]
+#[case("with/two/slashes")]
+fn prohibits_labels_of_broken_format(#[case] a: &str) {
+    let mut g = Sodg::empty();
+    g.alerts_off();
+    g.add(0).unwrap();
+    g.bind(0, 1, a).unwrap();
+    assert!(g.alerts_on().is_err());
 }
