@@ -8,6 +8,7 @@ merge:
   script: |
     cargo --color=never test -vv
     cargo --color=never fmt --check
+    cargo doc --no-deps
     cargo clippy
 release:
   script: |-
