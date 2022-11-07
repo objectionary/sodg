@@ -74,12 +74,15 @@ impl Sodg {
             .vertices
             .get_mut(&v1)
             .context(format!("Can't depart from ν{}, it's absent", v1))?;
-        let prefix = format!(
-            "{}/",
-            a.splitn(2, '/').collect::<Vec<&str>>().first().unwrap()
-        );
+        let head = a
+            .splitn(2, '/')
+            .collect::<Vec<&str>>()
+            .first()
+            .unwrap()
+            .to_string();
+        let prefix = format!("{}/", head);
         vtx1.edges
-            .retain(|e| e.a != a && !e.a.starts_with(prefix.as_str()));
+            .retain(|e| e.a != head && !e.a.starts_with(prefix.as_str()));
         vtx1.edges.push(Edge::new(v2, a));
         self.validate(vec![v1, v2])?;
         trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
@@ -370,7 +373,7 @@ fn overwrites_edge() -> Result<()> {
     let label = "hello";
     g.bind(1, 2, label)?;
     g.add(3)?;
-    g.bind(1, 3, label)?;
+    g.bind(1, 3, format!("{label}/boom").as_str())?;
     assert_eq!(3, g.find(1, label)?);
     Ok(())
 }
