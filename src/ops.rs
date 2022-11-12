@@ -310,6 +310,89 @@ impl Sodg {
         Ok(v)
     }
 
+    /// Find a vertex in the Sodg by its locator using a closure to provide alternative edge names.
+    ///
+    /// ```
+    /// use sodg::Sodg;
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(1).unwrap();
+    /// g.bind(0, 1, "foo").unwrap();
+    /// assert!(g.find(0, "bar").is_err());
+    /// let v = g.find_with_closure(0, "bar", |v, a, b| {
+    ///     assert_eq!(a, "bar");
+    ///     assert_eq!(b, "");
+    ///     "foo".to_string()
+    /// }).unwrap();
+    /// assert_eq!(1, v);
+    /// ```
+    ///
+    /// If target vertex is not found or `v1` is absent,
+    /// an `Err` will be returned.
+    pub fn find_with_closure(
+        &self,
+        v1: u32,
+        loc: &str,
+        cl: fn(u32, &str, &str) -> String,
+    ) -> Result<u32> {
+        let mut v = v1;
+        let mut locator: VecDeque<String> = VecDeque::new();
+        let (head, tail) = {
+            let mut iter = loc.split('/');
+            (iter.next().unwrap_or(""), iter.next().unwrap_or(""))
+        };
+        loc.split('.')
+            .filter(|k| !k.is_empty())
+            .for_each(|k| locator.push_back(k.to_string()));
+        loop {
+            let next = locator.pop_front();
+            if next.is_none() {
+                trace!("#find: end of locator, we are at ν{v}");
+                break;
+            }
+            let k = next.unwrap().to_string();
+            if k.is_empty() {
+                return Err(anyhow!("System error, the locator is empty"));
+            }
+            if k.starts_with('ν') {
+                let num: String = k.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
+                v = u32::from_str(num.as_str())?;
+                trace!("#find: jumping directly to ν{v}");
+                continue;
+            }
+            if let Some(to) = self.kid(v, k.as_str()) {
+                trace!("#find: ν{v}.{k} -> ν{to}");
+                v = to;
+                continue;
+            };
+            let other_name = cl(v, head, tail);
+            if let Some(to) = self.kid(v, other_name.as_str()) {
+                trace!("#find: ν{v}.{k} -> ν{to}");
+                v = to;
+                continue;
+            };
+            let others: Vec<String> = self
+                .vertices
+                .get(&v)
+                .context(format!("Can't find ν{v}"))
+                .unwrap()
+                .edges
+                .iter()
+                .map(|e| e.a.clone())
+                .collect();
+            return Err(anyhow!(
+                "Can't find .{} in ν{} among other {} attribute{}: {}",
+                k,
+                v,
+                others.len(),
+                if others.len() == 1 { "" } else { "s" },
+                others.join(", ")
+            ));
+        }
+        trace!("#find: found ν{v1} by '{loc}'");
+        Ok(v)
+    }
+
     /// Split label into two parts.
     fn split_a(a: String) -> (String, String) {
         let s = a.splitn(2, '/').collect::<Vec<&str>>();
@@ -438,7 +521,7 @@ fn finds_all_kids() -> Result<()> {
     g.add(1)?;
     g.bind(0, 1, "one/f.d")?;
     g.bind(0, 1, "two")?;
-    assert_eq!(2, g.kids(0)?.iter().count());
+    assert_eq!(2, g.kids(0)?.len());
     let (a, tail, to) = g.kids(0)?.first().unwrap().clone();
     assert_eq!("one", a);
     assert_eq!("f.d", tail);
