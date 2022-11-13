@@ -76,7 +76,7 @@ impl Sodg {
             .get_mut(&v1)
             .context(format!("Can't depart from ν{}, it's absent", v1))?;
         vtx1.edges
-            .retain(|e| Self::split_a(e.a.clone()).0 != Self::split_a(a.to_string()).0);
+            .retain(|e| Self::split_a(&e.a).0 != Self::split_a(a).0);
         vtx1.edges.push(Edge::new(v2, a));
         self.validate(vec![v1, v2])?;
         trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
@@ -161,7 +161,7 @@ impl Sodg {
             .edges
             .iter()
             .map(|x| {
-                let p = Self::split_a(x.a.clone());
+                let p = Self::split_a(&x.a);
                 (p.0, p.1, x.to)
             })
             .collect();
@@ -200,7 +200,7 @@ impl Sodg {
         if let Some(vtx) = self.vertices.get(&v) {
             vtx.edges
                 .iter()
-                .find(|e| Self::split_a(e.a.clone()).0 == Self::split_a(a.to_string()).0)
+                .find(|e| Self::split_a(&e.a).0 == Self::split_a(a).0)
                 .map(|e| e.to)
         } else {
             None
@@ -238,7 +238,7 @@ impl Sodg {
         if let Some(vtx) = self.vertices.get(&v) {
             vtx.edges
                 .iter()
-                .map(|e| Self::split_a(e.a.clone()))
+                .map(|e| Self::split_a(&e.a))
                 .find(|(l, _)| l == a)
                 .map(|(_, r)| r)
         } else {
@@ -394,7 +394,7 @@ impl Sodg {
     }
 
     /// Split label into two parts.
-    fn split_a(a: String) -> (String, String) {
+    fn split_a(a: &str) -> (String, String) {
         let s = a.splitn(2, '/').collect::<Vec<&str>>();
         (
             s.first().unwrap().to_string(),
@@ -409,7 +409,7 @@ impl Sodg {
 #[case("hello/a-1", "hello", "a-1")]
 #[case("π/Φ.x.Δ", "π", "Φ.x.Δ")]
 fn splits_label_correctly(#[case] a: &str, #[case] head: &str, #[case] tail: &str) {
-    let s = Sodg::split_a(a.to_string());
+    let s = Sodg::split_a(a);
     assert_eq!(head, s.0);
     assert_eq!(tail, s.1);
 }
