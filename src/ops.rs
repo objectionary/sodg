@@ -337,10 +337,6 @@ impl Sodg {
     ) -> Result<u32> {
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
-        let (head, tail) = {
-            let mut iter = loc.split('/');
-            (iter.next().unwrap_or(""), iter.next().unwrap_or(""))
-        };
         loc.split('.')
             .filter(|k| !k.is_empty())
             .for_each(|k| locator.push_back(k.to_string()));
@@ -365,7 +361,8 @@ impl Sodg {
                 v = to;
                 continue;
             };
-            let other_name = cl(v, head, tail);
+            let (head, tail) = Self::split_a(&k);
+            let other_name = cl(v, &head, &tail);
             if let Some(to) = self.kid(v, other_name.as_str()) {
                 trace!("#find: ν{v}.{k} -> ν{to}");
                 v = to;
@@ -452,6 +449,30 @@ fn binds_two_names() -> Result<()> {
     g.bind(1, 2, "first")?;
     g.bind(1, 2, "second")?;
     assert_eq!(2, g.find(1, "first")?);
+    Ok(())
+}
+
+#[test]
+fn finds_with_closure() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    g.add(3)?;
+    g.bind(1, 2, "first")?;
+    g.bind(2, 3, "something_else")?;
+    assert_eq!(
+        3,
+        g.find_with_closure(1, "first.second/abc", |v, head, tail| {
+            if v == 1 && !tail.is_empty() {
+                panic!();
+            }
+            if v == 2 && head == "second" && tail == "abc" {
+                "something_else".to_string()
+            } else {
+                "".to_string()
+            }
+        })?
+    );
     Ok(())
 }
 
