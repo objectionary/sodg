@@ -263,7 +263,7 @@ impl Sodg {
     /// an `Err` will be returned.
     pub fn find(&self, v1: u32, loc: &str) -> Result<u32> {
         self.find_with_closure(v1, loc, |v, head, tail| {
-            Err(anyhow!("Can't find attribute {head}/{tail} in {v}"))
+            Err(anyhow!("Can't find attribute {head}/{tail} in ν{v}"))
         })
     }
 
@@ -277,9 +277,9 @@ impl Sodg {
     /// g.bind(0, 1, "foo").unwrap();
     /// assert!(g.find(0, "bar").is_err());
     /// let v = g.find_with_closure(0, "bar", |v, a, b| {
-    ///     assert_eq!(a, "bar");
-    ///     assert_eq!(b, "");
-    ///     Ok("foo".to_string())
+    ///   assert_eq!(a, "bar");
+    ///   assert_eq!(b, "");
+    ///   Ok("foo".to_string())
     /// }).unwrap();
     /// assert_eq!(1, v);
     /// ```
