@@ -262,52 +262,9 @@ impl Sodg {
     /// If target vertex is not found or `v1` is absent,
     /// an `Err` will be returned.
     pub fn find(&self, v1: u32, loc: &str) -> Result<u32> {
-        let mut v = v1;
-        let mut locator: VecDeque<String> = VecDeque::new();
-        loc.split('.')
-            .filter(|k| !k.is_empty())
-            .for_each(|k| locator.push_back(k.to_string()));
-        loop {
-            let next = locator.pop_front();
-            if next.is_none() {
-                trace!("#find: end of locator, we are at ν{v}");
-                break;
-            }
-            let k = next.unwrap().to_string();
-            if k.is_empty() {
-                return Err(anyhow!("System error, the locator is empty"));
-            }
-            if k.starts_with('ν') {
-                let num: String = k.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
-                v = u32::from_str(num.as_str())?;
-                trace!("#find: jumping directly to ν{v}");
-                continue;
-            }
-            if let Some(to) = self.kid(v, k.as_str()) {
-                trace!("#find: ν{v}.{k} -> ν{to}");
-                v = to;
-                continue;
-            };
-            let others: Vec<String> = self
-                .vertices
-                .get(&v)
-                .context(format!("Can't find ν{v}"))
-                .unwrap()
-                .edges
-                .iter()
-                .map(|e| e.a.clone())
-                .collect();
-            return Err(anyhow!(
-                "Can't find .{} in ν{} among other {} attribute{}: {}",
-                k,
-                v,
-                others.len(),
-                if others.len() == 1 { "" } else { "s" },
-                others.join(", ")
-            ));
-        }
-        trace!("#find: found ν{v1} by '{loc}'");
-        Ok(v)
+        self.find_with_closure(v1, loc, |v, head, tail| {
+            Err(anyhow!("Can't find attribute {head}/{tail} in {v}"))
+        })
     }
 
     /// Find a vertex in the Sodg by its locator using a closure to provide alternative edge names.
@@ -322,7 +279,7 @@ impl Sodg {
     /// let v = g.find_with_closure(0, "bar", |v, a, b| {
     ///     assert_eq!(a, "bar");
     ///     assert_eq!(b, "");
-    ///     "foo".to_string()
+    ///     Ok("foo".to_string())
     /// }).unwrap();
     /// assert_eq!(1, v);
     /// ```
@@ -333,7 +290,7 @@ impl Sodg {
         &self,
         v1: u32,
         loc: &str,
-        cl: fn(u32, &str, &str) -> String,
+        cl: fn(u32, &str, &str) -> Result<String>,
     ) -> Result<u32> {
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
@@ -362,7 +319,7 @@ impl Sodg {
                 continue;
             };
             let (head, tail) = Self::split_a(&k);
-            let other_name = cl(v, &head, &tail);
+            let other_name = cl(v, &head, &tail)?;
             if let Some(to) = self.kid(v, other_name.as_str()) {
                 trace!("#find: ν{v}.{k} -> ν{to}");
                 v = to;
@@ -467,9 +424,9 @@ fn finds_with_closure() -> Result<()> {
                 panic!();
             }
             if v == 2 && head == "second" && tail == "abc" {
-                "something_else".to_string()
+                Ok("something_else".to_string())
             } else {
-                "".to_string()
+                Ok("".to_string())
             }
         })?
     );
