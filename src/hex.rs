@@ -28,7 +28,7 @@ use std::fmt::{Debug, Display, Formatter};
 ///
 /// ```
 /// use sodg::Hex;
-/// let d = Hex::from_i64(65534);
+/// let d = Hex::from(65534);
 /// assert_eq!("00-00-00-00-00-00-FF-FE", d.print());
 /// ```
 ///
@@ -36,7 +36,7 @@ use std::fmt::{Debug, Display, Formatter};
 ///
 /// ```
 /// use sodg::Hex;
-/// let d = Hex::from_i64(65534);
+/// let d = Hex::from(65534);
 /// assert_eq!(65534, d.to_i64().unwrap());
 /// ```
 #[derive(Serialize, Deserialize, Clone)]
@@ -80,7 +80,7 @@ impl Hex {
     ///
     /// ```
     /// use sodg::Hex;
-    /// let d = Hex::from_i64(2);
+    /// let d = Hex::from(2);
     /// assert_eq!(8, d.len())
     /// ```
     pub fn bytes(&self) -> &[u8] {
@@ -154,40 +154,6 @@ impl Hex {
     pub fn parse(hex: String) -> Self {
         let s = hex.replace('-', "");
         Self::from_vec(hex::decode(s).unwrap())
-    }
-
-    /// Make `Hex` from `i64`.
-    ///
-    /// ```
-    /// use sodg::Hex;
-    /// let d = Hex::from_i64(65536);
-    /// assert_eq!("00-00-00-00-00-01-00-00", d.print());
-    /// ```
-    pub fn from_i64(d: i64) -> Self {
-        Self::from_slice(&d.to_be_bytes())
-    }
-
-    /// From `bool`.
-    ///
-    /// ```
-    /// use sodg::Hex;
-    /// let d = Hex::from_bool(true);
-    /// assert_eq!("01", d.print());
-    /// ```
-    pub fn from_bool(d: bool) -> Self {
-        Self::from_slice(&(if d { [1] } else { [0] }))
-    }
-
-    /// Make `Hex` from `f64`.
-    ///
-    /// ```
-    /// use std::f64::consts::PI;
-    /// use sodg::Hex;
-    /// let d = Hex::from_f64(PI);
-    /// assert_eq!("40-09-21-FB-54-44-2D-18", d.print());
-    /// ```
-    pub fn from_f64(d: f64) -> Self {
-        Self::from_slice(&d.to_be_bytes())
     }
 
     /// Make `Hex` from `String`.
@@ -327,10 +293,50 @@ impl Hex {
     }
 }
 
+impl From<i64> for Hex {
+    /// Make `Hex` from `i64`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from(65536);
+    /// assert_eq!("00-00-00-00-00-01-00-00", d.print());
+    /// ```
+    fn from(d: i64) -> Self {
+        Self::from_slice(&d.to_be_bytes())
+    }
+}
+
+impl From<f64> for Hex {
+    /// Make `Hex` from `f64`.
+    ///
+    /// ```
+    /// use std::f64::consts::PI;
+    /// use sodg::Hex;
+    /// let d = Hex::from(PI);
+    /// assert_eq!("40-09-21-FB-54-44-2D-18", d.print());
+    /// ```
+    fn from(d: f64) -> Self {
+        Self::from_slice(&d.to_be_bytes())
+    }
+}
+
+impl From<bool> for Hex {
+    /// From `bool`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from(true);
+    /// assert_eq!("01", d.print());
+    /// ```
+    fn from(d: bool) -> Self {
+        Self::from_slice(&(if d { [1] } else { [0] }))
+    }
+}
+
 #[test]
 fn simple_int() -> Result<()> {
     let i = 42;
-    let d = Hex::from_i64(i);
+    let d = Hex::from(i);
     assert_eq!(i, d.to_i64()?);
     assert_eq!("00-00-00-00-00-00-00-2A", d.print());
     Ok(())
@@ -339,7 +345,7 @@ fn simple_int() -> Result<()> {
 #[test]
 fn simple_bool() -> Result<()> {
     let b = true;
-    let d = Hex::from_bool(b);
+    let d = Hex::from(b);
     assert_eq!(b, d.to_bool()?);
     assert_eq!("01", d.print());
     Ok(())
@@ -348,7 +354,7 @@ fn simple_bool() -> Result<()> {
 #[test]
 fn simple_float() -> Result<()> {
     let f = std::f64::consts::PI;
-    let d = Hex::from_f64(f);
+    let d = Hex::from(f);
     assert_eq!(f, d.to_f64()?);
     assert_eq!("40-09-21-FB-54-44-2D-18", d.print());
     Ok(())
@@ -357,8 +363,8 @@ fn simple_float() -> Result<()> {
 #[test]
 fn compares_with_data() -> Result<()> {
     let i = 42;
-    let left = Hex::from_i64(i);
-    let right = Hex::from_i64(i);
+    let left = Hex::from(i);
+    let right = Hex::from(i);
     assert_eq!(left, right);
     Ok(())
 }
