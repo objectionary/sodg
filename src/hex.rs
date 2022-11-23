@@ -54,9 +54,11 @@ impl Debug for Hex {
 
 impl PartialEq for Hex {
     fn eq(&self, other: &Self) -> bool {
-        self.print() == other.print()
+        self.bytes() == other.bytes()
     }
 }
+
+impl Eq for Hex {}
 
 impl Display for Hex {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -478,5 +480,16 @@ fn takes_one_byte() -> Result<()> {
 fn measures_length() -> Result<()> {
     let d = Hex::from_str_bytes("Ура!");
     assert_eq!(7, d.len());
+    Ok(())
+}
+
+#[test]
+fn correct_equality() -> Result<()> {
+    let d = Hex::from_str("DE-AD-BE-EF")?;
+    let d1 = Hex::from_str("AA-BB")?;
+    let d2 = Hex::from_str("DE-AD-BE-EF")?;
+    assert_eq!(d, d);
+    assert_ne!(d, d1);
+    assert_eq!(d, d2);
     Ok(())
 }
