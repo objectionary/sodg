@@ -21,6 +21,7 @@
 use crate::{Deserialize, Serialize};
 use anyhow::{Context, Result};
 use std::fmt::{Debug, Display, Formatter};
+use std::str::FromStr;
 
 /// It is an object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
@@ -143,34 +144,20 @@ impl Hex {
         }
     }
 
-    /// From `String` as HEX, for example `DE-AD-BE-EF-20-22`.
-    ///
-    /// ```
-    /// use sodg::Hex;
-    /// let hex = "DE-AD-BE-EF-20-22";
-    /// let d = Hex::parse(hex.to_string());
-    /// assert_eq!("DE-AD-BE-EF-20-22", d.print());
-    /// ```
-    pub fn parse(hex: String) -> Self {
-        let s = hex.replace('-', "");
-        Self::from_vec(hex::decode(s).unwrap())
-    }
-
     /// Make `Hex` from `String`.
     ///
     /// ```
     /// use sodg::Hex;
-    /// let d = Hex::from_string("Ура!".to_string());
+    /// let d = Hex::from_string_bytes("Ура!".to_string());
     /// assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
     /// ```
-    pub fn from_string(d: String) -> Self {
+    pub fn from_string_bytes(d: String) -> Self {
         Self::from_slice(d.as_bytes())
     }
 
-    /// From `&str`.
-    #[allow(clippy::should_implement_trait)]
-    pub fn from_str(d: &str) -> Self {
-        Self::from_slice(d.to_string().as_bytes())
+    /// Make hex from the bytes composing `&str`.
+    pub fn from_str_bytes(d: &str) -> Self {
+        Self::from_slice(d.as_bytes())
     }
 
     /// It's empty and no data?
@@ -272,7 +259,7 @@ impl Hex {
     ///
     /// ```
     /// use sodg::Hex;
-    /// let d = Hex::from_str("你好");
+    /// let d = Hex::from_str_bytes("你好");
     /// assert_eq!("E4-BD-A0-E5-A5-BD", d.print());
     /// assert_eq!(0xA0, d.byte_at(2));
     /// ```
@@ -285,7 +272,7 @@ impl Hex {
     ///
     /// ```
     /// use sodg::Hex;
-    /// let d = Hex::from_str("Hello, world!");
+    /// let d = Hex::from_str_bytes("Hello, world!");
     /// assert_eq!("world!", d.tail(7).to_utf8().unwrap());
     /// ```
     pub fn tail(&self, skip: usize) -> Self {
@@ -333,6 +320,27 @@ impl From<bool> for Hex {
     }
 }
 
+impl FromStr for Hex {
+    type Err = anyhow::Error;
+
+    /// Creeate a `Hex` from a `&str` containing a hexadecimal representation of some data,
+    /// for example, `DE-AD-BE-EF-20-22`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// use std::str::FromStr;
+    /// let hex = "DE-AD-BE-EF-20-22";
+    /// let d: Hex = hex.parse().unwrap();
+    /// let d2 = Hex::from_str(hex).unwrap();
+    /// assert_eq!("DE-AD-BE-EF-20-22", d.print());
+    /// assert_eq!("DE-AD-BE-EF-20-22", d2.print());
+    /// ```
+    fn from_str(hex: &str) -> std::result::Result<Self, Self::Err> {
+        let s = hex.replace('-', "");
+        Ok(Self::from_vec(hex::decode(s)?))
+    }
+}
+
 #[test]
 fn simple_int() -> Result<()> {
     let i = 42;
@@ -372,16 +380,16 @@ fn compares_with_data() -> Result<()> {
 #[test]
 fn prints_bytes() -> Result<()> {
     let txt = "привет";
-    let d = Hex::from_str(txt);
+    let d = Hex::from_str_bytes(txt);
     assert_eq!("D0-BF-D1-80-D0-B8-D0-B2-D0-B5-D1-82", d.print());
-    assert_eq!(txt, Hex::parse(d.print()).to_utf8()?);
+    assert_eq!(txt, Hex::from_str(&d.print())?.to_utf8()?);
     Ok(())
 }
 
 #[test]
 fn prints_empty_bytes() -> Result<()> {
     let txt = "";
-    let d = Hex::from_str(txt);
+    let d = Hex::from_str_bytes(txt);
     assert_eq!("--", d.print());
     Ok(())
 }
@@ -453,14 +461,14 @@ fn non_utf8_string() -> Result<()> {
 
 #[test]
 fn takes_tail() -> Result<()> {
-    let d = Hex::from_str("Hello, world!");
+    let d = Hex::from_str_bytes("Hello, world!");
     assert_eq!("world!", d.tail(7).to_utf8()?);
     Ok(())
 }
 
 #[test]
 fn takes_one_byte() -> Result<()> {
-    let d = Hex::from_str("Ура!");
+    let d = Hex::from_str_bytes("Ура!");
     assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
     assert_eq!(0xD1, d.byte_at(2));
     Ok(())
@@ -468,7 +476,7 @@ fn takes_one_byte() -> Result<()> {
 
 #[test]
 fn measures_length() -> Result<()> {
-    let d = Hex::from_str("Ура!");
+    let d = Hex::from_str_bytes("Ура!");
     assert_eq!(7, d.len());
     Ok(())
 }

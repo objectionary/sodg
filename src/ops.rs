@@ -90,7 +90,7 @@ impl Sodg {
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(42).unwrap();
-    /// g.put(42, Hex::from_str("hello, world!")).unwrap();
+    /// g.put(42, Hex::from_str_bytes("hello, world!")).unwrap();
     /// ```
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
@@ -112,7 +112,7 @@ impl Sodg {
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(42).unwrap();
-    /// let data = Hex::from_str("hello, world!");
+    /// let data = Hex::from_str_bytes("hello, world!");
     /// g.put(42, data.clone()).unwrap();
     /// assert_eq!(data, g.data(42).unwrap());
     /// ```
@@ -477,7 +477,7 @@ fn binds_to_root() -> Result<()> {
 #[test]
 fn sets_simple_data() -> Result<()> {
     let mut g = Sodg::empty();
-    let data = Hex::from_str("hello");
+    let data = Hex::from_str_bytes("hello");
     g.add(0)?;
     g.put(0, data.clone())?;
     assert_eq!(data, g.data(0)?);

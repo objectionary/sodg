@@ -78,7 +78,7 @@ use crate::Hex;
 fn inspects_simple_object() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    g.put(0, Hex::from_str("hello"))?;
+    g.put(0, Hex::from_str_bytes("hello"))?;
     g.add(1)?;
     g.bind(0, 1, "foo")?;
     let txt = g.inspect("")?;

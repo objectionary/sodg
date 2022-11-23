@@ -31,7 +31,7 @@ impl Sodg {
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
-    /// g.put(0, Hex::from_str("hello")).unwrap();
+    /// g.put(0, Hex::from_str_bytes("hello")).unwrap();
     /// g.add(1).unwrap();
     /// g.bind(0, 1, "foo").unwrap();
     /// g.bind(0, 1, "bar").unwrap();
@@ -97,7 +97,7 @@ use crate::Hex;
 fn prints_simple_graph() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    g.put(0, Hex::from_str("hello"))?;
+    g.put(0, Hex::from_str_bytes("hello"))?;
     g.add(1)?;
     g.bind(0, 1, "foo")?;
     let xml = g.to_xml()?;
