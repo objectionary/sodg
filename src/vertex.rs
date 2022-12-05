@@ -19,12 +19,14 @@
 // SOFTWARE.
 
 use crate::{Deserialize, Edge, Hex, Serialize};
+use std::collections::HashSet;
 
 /// A vertex in the graph.
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct Vertex {
     pub edges: Vec<Edge>,
     pub data: Hex,
+    pub parents: HashSet<u32>,
 }
 
 impl Vertex {
@@ -39,6 +41,7 @@ impl Vertex {
         Vertex {
             edges: vec![],
             data: Hex::empty(),
+            parents: HashSet::new(),
         }
     }
 }

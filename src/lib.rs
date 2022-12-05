@@ -41,6 +41,7 @@ mod alerts;
 mod ctors;
 mod debug;
 mod edge;
+mod gc;
 mod hex;
 mod inspect;
 mod merge;
