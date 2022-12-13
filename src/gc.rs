@@ -3,7 +3,7 @@ use anyhow::{Context, Result};
 use std::collections::VecDeque;
 
 impl Sodg {
-    pub fn collect(&mut self, v: u32) -> Result<()> {
+    pub(crate) fn collect(&mut self, v: u32) -> Result<()> {
         let mut queue = VecDeque::new();
         queue.push_back(v);
         while !queue.is_empty() {

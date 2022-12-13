@@ -110,27 +110,6 @@ impl Sodg {
         Ok(())
     }
 
-    /// Read vertex data without submitting the vertex to garbage collection.
-    ///
-    /// ```
-    /// use sodg::Hex;
-    /// use sodg::Sodg;
-    /// let mut g = Sodg::empty();
-    /// g.add(42).unwrap();
-    /// let data = Hex::from_str_bytes("hello, world!");
-    /// g.put(42, data.clone()).unwrap();
-    /// assert_eq!(data, g.peek_data(42).unwrap());
-    /// ```
-    ///
-    /// If vertex `v1` is absent, an `Err` will be returned.
-    pub fn peek_data(&self, v: u32) -> Result<Hex> {
-        let vtx = self
-            .vertices
-            .get(&v)
-            .context(format!("Can't find ν{}", v))?;
-        Ok(vtx.data.clone())
-    }
-
     /// Read vertex data, and then submit the vertex to garbage collection.
     ///
     /// ```
@@ -509,7 +488,7 @@ fn sets_simple_data() -> Result<()> {
     let data = Hex::from_str_bytes("hello");
     g.add(0)?;
     g.put(0, data.clone())?;
-    assert_eq!(data, g.peek_data(0)?);
+    assert_eq!(data, g.data(0)?);
     Ok(())
 }
 
@@ -564,7 +543,7 @@ fn builds_list_of_kids() -> Result<()> {
 fn gets_data_from_empty_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    assert!(g.peek_data(0)?.is_empty());
+    assert!(g.data(0)?.is_empty());
     Ok(())
 }
 
