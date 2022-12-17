@@ -11,7 +11,7 @@ keywords = ["graph", "oop"]
 categories = ["data-structures", "memory-management"]
 
 [dependencies]
-anyhow = "1.0.66"
+anyhow = "1.0.67"
 log = "0.4.17"
 regex = "1.7.0"
 lazy_static = "1.4.0"
