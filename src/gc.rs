@@ -3,6 +3,24 @@ use anyhow::{Context, Result};
 use std::collections::VecDeque;
 
 impl Sodg {
+    /// Attempts to collect the vertex `v`.
+    ///
+    /// If there are no edges leading to `v`, then it is deleted and all its children are collected.
+    /// Otherwise, nothing happens.
+    ///
+    /// ```
+    /// use sodg::{Hex, Sodg};
+    /// let mut g = Sodg::empty();
+    /// g.add(1).unwrap();
+    /// g.put(1, Hex::from(0)).unwrap();
+    /// g.add(2).unwrap();
+    /// g.put(2, Hex::from(0)).unwrap();
+    /// g.bind(1, 2, "x").unwrap();
+    /// g.data(2).unwrap(); // Try to collect 2
+    /// assert!(g.data(2).is_ok());
+    /// g.data(1).unwrap(); // Successfully collect 1
+    /// assert!(g.data(1).is_err());
+    /// ```
     pub(crate) fn collect(&mut self, v: u32) -> Result<()> {
         let mut queue = VecDeque::new();
         queue.push_back(v);
@@ -15,9 +33,7 @@ impl Sodg {
                 .get(&collected_vertex_id)
                 .context(format!("Failed to get v{collected_vertex_id}"))?
                 .clone();
-            if !collected_vertex.parents.is_empty() {
-                continue;
-            } else {
+            if collected_vertex.parents.is_empty() {
                 for edge in &collected_vertex.edges {
                     queue.push_back(edge.to);
                     self.vertices
