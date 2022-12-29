@@ -29,5 +29,5 @@ rstest = "0.16.0"
 [dev-dependencies]
 fsutils = "0.1.7"
 tempfile = "3.3.0"
-predicates = "2.1.4"
+predicates = "2.1.5"
 clippy = "0.0.302"
