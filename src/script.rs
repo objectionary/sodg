@@ -153,7 +153,7 @@ impl Script {
             "PUT" => {
                 let v = self.parse(&args[0], g)?;
                 g.put(v, Self::parse_data(&args[1])?)
-                    .context(format!("Failed to DATA({})", &args[0]))
+                    .context(format!("Failed to PUT({})", &args[0]))
             }
             _cmd => Err(anyhow!("Unknown command: {_cmd}")),
         }
