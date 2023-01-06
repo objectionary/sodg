@@ -33,7 +33,7 @@ impl Sodg {
                 .get(&v)
                 .context(format!("Failed to get v{v}"))?
                 .clone();
-            if vtx.parents.is_empty() {
+            if vtx.parents.is_empty() && vtx.taken {
                 for edge in &vtx.edges {
                     queue.push_back(edge.to);
                     self.vertices
@@ -70,7 +70,10 @@ fn collects_simple_graph() -> Result<()> {
     g.bind(1, 2, "x")?;
     g.bind(1, 3, "y")?;
     g.bind(2, 4, "z")?;
-    g.collect(1)?;
+    g.data(4)?;
+    g.data(2)?;
+    g.data(1)?;
+    g.data(3)?;
     assert!(g.is_empty());
     Ok(())
 }
@@ -86,7 +89,10 @@ fn collects_complicated_graph() -> Result<()> {
     g.bind(2, 4, "z")?;
     g.bind(3, 5, "a")?;
     g.bind(4, 3, "b")?;
-    g.collect(1)?;
+    for i in 1..=5 {
+        g.data(i)?;
+    }
+    // g.collect(1)?;
     assert!(g.is_empty());
     Ok(())
 }

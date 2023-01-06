@@ -127,9 +127,10 @@ impl Sodg {
     pub fn data(&mut self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
-            .get(&v)
+            .get_mut(&v)
             .context(format!("Can't find ν{}", v))?;
         let data = vtx.data.clone();
+        vtx.taken = true;
         self.collect(v)?;
         Ok(data)
     }

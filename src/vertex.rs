@@ -27,6 +27,7 @@ pub(crate) struct Vertex {
     pub edges: Vec<Edge>,
     pub data: Hex,
     pub parents: HashSet<u32>,
+    pub taken: bool,
 }
 
 impl Vertex {
@@ -42,6 +43,7 @@ impl Vertex {
             edges: vec![],
             data: Hex::empty(),
             parents: HashSet::new(),
+            taken: false,
         }
     }
 }
