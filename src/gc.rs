@@ -3,9 +3,9 @@ use anyhow::{Context, Result};
 use std::collections::VecDeque;
 
 impl Sodg {
-    /// Attempts to collect the vertex `v`.
+    /// Attempts to collect the vertex.
     ///
-    /// If there are no edges leading to `v`, then it is deleted and all its children are collected.
+    /// If there are no edges leading to it, then it is deleted and all its children are collected.
     /// Otherwise, nothing happens.
     ///
     /// ```
@@ -21,28 +21,28 @@ impl Sodg {
     /// g.data(1).unwrap(); // Successfully collect 1
     /// assert!(g.data(1).is_err());
     /// ```
-    pub(crate) fn collect(&mut self, v: u32) -> Result<()> {
+    pub(crate) fn collect(&mut self, start: u32) -> Result<()> {
         let mut queue = VecDeque::new();
-        queue.push_back(v);
+        queue.push_back(start);
         while !queue.is_empty() {
-            let collected_vertex_id = queue
+            let v = queue
                 .pop_front()
                 .context("A non-empty queue failed to yield an element, this shouldn't happen.")?;
-            let collected_vertex = self
+            let vtx = self
                 .vertices
-                .get(&collected_vertex_id)
-                .context(format!("Failed to get v{collected_vertex_id}"))?
+                .get(&v)
+                .context(format!("Failed to get v{v}"))?
                 .clone();
-            if collected_vertex.parents.is_empty() {
-                for edge in &collected_vertex.edges {
+            if vtx.parents.is_empty() {
+                for edge in &vtx.edges {
                     queue.push_back(edge.to);
                     self.vertices
                         .get_mut(&edge.to)
                         .context(format!("Failed to get v{}", edge.to))?
                         .parents
-                        .remove(&collected_vertex_id);
+                        .remove(&v);
                 }
-                self.vertices.remove(&collected_vertex_id);
+                self.vertices.remove(&v);
             }
         }
         Ok(())
