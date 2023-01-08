@@ -78,6 +78,11 @@ impl Sodg {
         vtx1.edges
             .retain(|e| Self::split_a(&e.a).0 != Self::split_a(a).0);
         vtx1.edges.push(Edge::new(v2, a));
+        let vtx2 = self
+            .vertices
+            .get_mut(&v2)
+            .context(format!("Can't arrive at ν{}, it's absent", v2))?;
+        vtx2.parents.insert(v1);
         self.validate(vec![v1, v2])?;
         trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
         Ok(())
@@ -105,7 +110,7 @@ impl Sodg {
         Ok(())
     }
 
-    /// Read vertex data.
+    /// Read vertex data, and then submit the vertex to garbage collection.
     ///
     /// ```
     /// use sodg::Hex;
@@ -115,15 +120,19 @@ impl Sodg {
     /// let data = Hex::from_str_bytes("hello, world!");
     /// g.put(42, data.clone()).unwrap();
     /// assert_eq!(data, g.data(42).unwrap());
+    /// assert!(g.is_empty());
     /// ```
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
-    pub fn data(&self, v: u32) -> Result<Hex> {
+    pub fn data(&mut self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
-            .get(&v)
+            .get_mut(&v)
             .context(format!("Can't find ν{}", v))?;
-        Ok(vtx.data.clone())
+        let data = vtx.data.clone();
+        vtx.taken = true;
+        self.collect(v)?;
+        Ok(data)
     }
 
     /// Find all kids of a vertex.
@@ -481,6 +490,17 @@ fn sets_simple_data() -> Result<()> {
     g.add(0)?;
     g.put(0, data.clone())?;
     assert_eq!(data, g.data(0)?);
+    Ok(())
+}
+
+#[test]
+fn simple_data_gc() -> Result<()> {
+    let mut g = Sodg::empty();
+    let data = Hex::from_str_bytes("hello");
+    g.add(0)?;
+    g.put(0, data.clone())?;
+    assert_eq!(data, g.data(0)?);
+    assert!(g.is_empty());
     Ok(())
 }
 

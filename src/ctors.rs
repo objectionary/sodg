@@ -145,8 +145,7 @@ fn prohibits_orphan_edges() -> Result<()> {
     let mut g = Sodg::empty();
     g.alerts_off();
     g.add(0)?;
-    g.bind(0, 1, "foo")?;
-    assert!(g.alerts_on().is_err());
+    assert!(g.bind(0, 1, "foo").is_err());
     Ok(())
 }
 
@@ -158,6 +157,7 @@ fn prohibits_labels_of_broken_format(#[case] a: &str) {
     let mut g = Sodg::empty();
     g.alerts_off();
     g.add(0).unwrap();
+    g.add(1).unwrap();
     g.bind(0, 1, a).unwrap();
     assert!(g.alerts_on().is_err());
 }
