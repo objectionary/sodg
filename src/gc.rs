@@ -27,7 +27,7 @@ impl Sodg {
         while !queue.is_empty() {
             let v = queue
                 .pop_front()
-                .context("A non-empty queue failed to yield an element, this shouldn't happen.")?;
+                .context("A non-empty queue failed to yield an element, this shouldn't happen")?;
             let vtx = self
                 .vertices
                 .get(&v)
