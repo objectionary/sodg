@@ -338,9 +338,9 @@ impl Sodg {
                 continue;
             };
             let (head, tail) = Self::split_a(&k);
-            let other_name = cl(v, &head, &tail)?;
-            if let Some(to) = self.kid(v, other_name.as_str()) {
-                trace!("#find: ν{v}.{k} -> ν{to}");
+            let redirect = cl(v, &head, &tail)?;
+            if let Some(to) = self.kid(v, redirect.as_str()) {
+                trace!("#find: ν{v}.{k} -> ν{to} (redirect to {redirect})");
                 v = to;
                 continue;
             };
@@ -354,7 +354,7 @@ impl Sodg {
                 .map(|e| e.a.clone())
                 .collect();
             return Err(anyhow!(
-                "Can't find .{} in ν{} among other {} attribute{}: {}",
+                "Can't find .{} in ν{} among other {} attribute{}: {} (redirect to {redirect} didn't help)",
                 k,
                 v,
                 others.len(),
