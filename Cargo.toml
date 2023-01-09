@@ -13,7 +13,7 @@ categories = ["data-structures", "memory-management"]
 [dependencies]
 anyhow = "1.0.68"
 log = "0.4.17"
-regex = "1.7.0"
+regex = "1.7.1"
 lazy_static = "1.4.0"
 simple_logger = "4.0.0"
 sxd-xpath = "0.4.2"
