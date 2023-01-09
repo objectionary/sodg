@@ -124,6 +124,16 @@ impl Sodg {
     /// ```
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
+    ///
+    /// If there is no data, an empty `Hex` will be returned, for example:
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// use sodg::Sodg;
+    /// let mut g = Sodg::empty();
+    /// g.add(42).unwrap();
+    /// assert!(g.data(42).unwrap().is_empty());
+    /// ```
     pub fn data(&mut self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
