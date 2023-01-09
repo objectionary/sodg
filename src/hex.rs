@@ -158,6 +158,12 @@ impl Hex {
     }
 
     /// Make hex from the bytes composing `&str`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_str_bytes("Ура!");
+    /// assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
+    /// ```
     pub fn from_str_bytes(d: &str) -> Self {
         Self::from_slice(d.as_bytes())
     }
