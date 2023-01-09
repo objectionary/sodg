@@ -354,7 +354,7 @@ impl Sodg {
                 .map(|e| e.a.clone())
                 .collect();
             return Err(anyhow!(
-                "Can't find .{} in ν{} among other {} attribute{}: {} (redirect to {redirect} didn't help)",
+                "Can't find .{} in ν{} among other {} attribute{}: {} (redirect to .{redirect} didn't help)",
                 k,
                 v,
                 others.len(),
