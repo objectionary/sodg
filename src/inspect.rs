@@ -64,7 +64,7 @@ impl Sodg {
                     self.inspect_v(e.to, seen)
                         .unwrap()
                         .iter()
-                        .for_each(|t| lines.push(format!("  {}", t)));
+                        .for_each(|t| lines.push(format!("  {t}")));
                 }
             });
         Ok(lines)

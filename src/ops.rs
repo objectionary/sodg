@@ -74,14 +74,14 @@ impl Sodg {
         let vtx1 = self
             .vertices
             .get_mut(&v1)
-            .context(format!("Can't depart from ν{}, it's absent", v1))?;
+            .context(format!("Can't depart from ν{v1}, it's absent"))?;
         vtx1.edges
             .retain(|e| Self::split_a(&e.a).0 != Self::split_a(a).0);
         vtx1.edges.push(Edge::new(v2, a));
         let vtx2 = self
             .vertices
             .get_mut(&v2)
-            .context(format!("Can't arrive at ν{}, it's absent", v2))?;
+            .context(format!("Can't arrive at ν{v2}, it's absent"))?;
         vtx2.parents.insert(v1);
         self.validate(vec![v1, v2])?;
         trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
@@ -103,10 +103,10 @@ impl Sodg {
         let vtx = self
             .vertices
             .get_mut(&v)
-            .context(format!("Can't find ν{}", v))?;
+            .context(format!("Can't find ν{v}"))?;
         vtx.data = d.clone();
         self.validate(vec![v])?;
-        trace!("#data: data of ν{} set to {}", v, d);
+        trace!("#data: data of ν{v} set to {d}");
         Ok(())
     }
 
@@ -138,7 +138,7 @@ impl Sodg {
         let vtx = self
             .vertices
             .get_mut(&v)
-            .context(format!("Can't find ν{}", v))?;
+            .context(format!("Can't find ν{v}"))?;
         let data = vtx.data.clone();
         vtx.taken = true;
         self.collect(v)?;
