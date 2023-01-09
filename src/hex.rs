@@ -286,6 +286,37 @@ impl Hex {
     pub fn tail(&self, skip: usize) -> Self {
         Self::from_vec(self.bytes()[skip..].to_vec())
     }
+
+    /// Create a new `Hex`, which is a concatenation of `self` and `h`.
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let a = Hex::from_slice("dead".as_bytes());
+    /// let b = Hex::from_slice("beef".as_bytes());
+    /// let c = a.concat(b);
+    /// assert_eq!(c, Hex::from_slice("deadbeef".as_bytes()));
+    /// ```
+    pub fn concat(&self, h: Self) -> Self {
+        match &self {
+            Hex::Vector(v) => {
+                let mut vx = v.clone();
+                vx.extend_from_slice(h.bytes());
+                Hex::Vector(vx)
+            }
+            Hex::Bytes(b, l) => {
+                if l + h.len() <= 24 {
+                    let mut bytes = *b;
+                    bytes[*l..*l + h.len()].copy_from_slice(h.bytes());
+                    Hex::Bytes(bytes, l + h.len())
+                } else {
+                    let mut v = Vec::new();
+                    v.extend_from_slice(b);
+                    v.extend_from_slice(h.bytes());
+                    Hex::Vector(v)
+                }
+            }
+        }
+    }
 }
 
 impl From<i64> for Hex {
@@ -497,5 +528,13 @@ fn correct_equality() -> Result<()> {
     assert_eq!(d, d);
     assert_ne!(d, d1);
     assert_eq!(d, d2);
+    Ok(())
+}
+
+#[test]
+fn concat_test() -> Result<()> {
+    let a = Hex::from_str("DE-AD")?;
+    let b = Hex::from_str("BE-EF")?;
+    assert_eq!(a.concat(b), Hex::from_str("DE-AD-BE-EF")?);
     Ok(())
 }
