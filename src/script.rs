@@ -43,14 +43,14 @@ use std::str::FromStr;
 pub struct Script {
     txt: String,
     vars: HashMap<String, u32>,
-    root: u32,
 }
 
 impl Script {
     /// Make a new one, parsing a string with instructions. Instructions
     /// must be separated by semicolon. There are just three of them
     /// possible: `ADD`, `BIND`, and `PUT`. The arguments must be
-    /// separated by a comma. An argument may either be 1) a positive integer,
+    /// separated by a comma. An argument may either be 1) a positive integer
+    /// (possibly prepended by `ν`),
     /// 2) a variable started with `$`, 3) an attribute name, or
     /// 4) data in `XX-XX-...` hexadecimal format.
     ///
@@ -58,7 +58,7 @@ impl Script {
     /// use sodg::Script;
     /// use sodg::Sodg;
     /// let mut s = Script::from_str(
-    ///   "ADD(0); ADD($ν1); BIND(0, $ν1, foo);"
+    ///   "ADD(0); ADD($ν1); BIND(ν0, $ν1, foo);"
     /// );
     /// let mut g = Sodg::empty();
     /// let total = s.deploy_to(&mut g).unwrap();
@@ -69,32 +69,12 @@ impl Script {
         Script {
             txt: s.to_string(),
             vars: HashMap::new(),
-            root: 0,
         }
     }
 
     /// Make a new one, parsing a `String` with instructions.
     pub fn from_string(s: String) -> Script {
         Script::from_str(s.as_str())
-    }
-
-    /// Set a different root. By default, the root is set to zero.
-    /// If the root is changed, each time zero-vertex is mentioned
-    /// in instructions, if will be replaced by this number.
-    ///
-    /// ```
-    /// use sodg::Script;
-    /// use sodg::Sodg;
-    /// let mut s = Script::from_str(
-    ///   "ADD(1); BIND(0, 1, foo);"
-    /// );
-    /// s.set_root(42);
-    /// let mut g = Sodg::empty();
-    /// g.add(42).unwrap();
-    /// s.deploy_to(&mut g).unwrap();
-    /// ```
-    pub fn set_root(&mut self, v: u32) {
-        self.root = v;
     }
 
     /// Deploy the entire script to the SODG.
@@ -159,7 +139,7 @@ impl Script {
         }
     }
 
-    /// Parse data
+    /// Parse data.
     fn parse_data(s: &str) -> Result<Hex> {
         lazy_static! {
             static ref DATA_STRIP: Regex = Regex::new("[ \t\n\r\\-]").unwrap();
@@ -177,17 +157,18 @@ impl Script {
         }
     }
 
-    /// Parses `$ν5` into `5`.
+    /// Parses `$ν5` into `5`, and `ν23` into `23`, and `42` into `42`.
     fn parse(&mut self, s: &str, g: &mut Sodg) -> Result<u32> {
         let head = s.chars().next().context("Empty identifier".to_string())?;
-        if head == '$' {
+        if head == '$' || head == 'ν' {
             let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
-            Ok(*self.vars.entry(tail).or_insert_with(|| g.next_id()))
-        } else {
-            let mut v = u32::from_str(s).context(format!("Parsing of '{s}' failed"))?;
-            if v == 0 {
-                v = self.root;
+            if head == '$' {
+                Ok(*self.vars.entry(tail).or_insert_with(|| g.next_id()))
+            } else {
+                Ok(u32::from_str(tail.as_str()).context(format!("Parsing of '{s}' failed"))?)
             }
+        } else {
+            let v = u32::from_str(s).context(format!("Parsing of '{s}' failed"))?;
             Ok(v)
         }
     }
@@ -202,7 +183,7 @@ fn simple_command() -> Result<()> {
     let mut s = Script::from_str(
         "
         ADD(0);  ADD($ν1); # adding two vertices
-        BIND(0, $ν1, foo  );
+        BIND(ν0, $ν1, foo  );
         PUT($ν1  , d0-bf-D1-80-d0-B8-d0-b2-d0-b5-d1-82);
         ",
     );
@@ -210,21 +191,5 @@ fn simple_command() -> Result<()> {
     assert_eq!(4, total);
     assert_eq!("привет", g.data(1)?.to_utf8()?);
     assert_eq!(1, g.kid(0, "foo").unwrap());
-    Ok(())
-}
-
-#[test]
-fn deploy_to_another_root() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(42)?;
-    let mut s = Script::from_str(
-        "
-        ADD($ν1);
-        BIND(0, $ν1, foo);
-        ",
-    );
-    s.set_root(42);
-    s.deploy_to(&mut g)?;
-    assert_eq!(43, g.kid(42, "foo").unwrap());
     Ok(())
 }
