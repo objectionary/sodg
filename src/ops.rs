@@ -339,11 +339,11 @@ impl Sodg {
             };
             let (head, tail) = Self::split_a(&k);
             let redirect = cl(v, &head, &tail, self)?;
-            if let Some(to) = self.kid(v, redirect.as_str()) {
+            if let Ok(to) = self.find(v, redirect.as_str()) {
                 trace!("#find: ν{v}.{k} -> ν{to} (redirect to {redirect})");
                 v = to;
                 continue;
-            };
+            }
             let others: Vec<String> = self
                 .vertices
                 .get(&v)
@@ -620,4 +620,21 @@ fn replaces_ignoring_locator() -> Result<()> {
     g.bind(0, 1, "π/Φ.two")?;
     assert_eq!(1, g.kids(0)?.len());
     Ok(())
+}
+
+#[test]
+fn finds_absolute_coordinates() {
+    let mut g = Sodg::empty();
+    g.add(0).unwrap();
+    g.add(1).unwrap();
+    g.bind(0, 1, "foo").unwrap();
+    assert!(g.find(0, "bar").is_err());
+    let v = g
+        .find_with_closure(0, "bar", |_v, a, b, _| {
+            assert_eq!(a, "bar");
+            assert_eq!(b, "");
+            Ok("ν1".to_string())
+        })
+        .unwrap();
+    assert_eq!(1, v);
 }
