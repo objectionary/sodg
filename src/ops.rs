@@ -623,7 +623,7 @@ fn replaces_ignoring_locator() -> Result<()> {
 }
 
 #[test]
-fn finds_absolute_coordinates() {
+fn closure_return_absolute_vertex() {
     let mut g = Sodg::empty();
     g.add(0).unwrap();
     g.add(1).unwrap();
