@@ -274,11 +274,6 @@ impl Hex {
         self.bytes().to_vec()
     }
 
-    // /// Return a reference to the encapsulated immutable vec.
-    // pub fn as_vec(&self) -> &Vec<u8> {
-    //     &self.bytes
-    // }
-
     /// Take one byte.
     ///
     /// ```
