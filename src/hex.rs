@@ -373,7 +373,7 @@ impl From<bool> for Hex {
 impl FromStr for Hex {
     type Err = anyhow::Error;
 
-    /// Creeate a `Hex` from a `&str` containing a hexadecimal representation of some data,
+    /// Create a `Hex` from a `&str` containing a hexadecimal representation of some data,
     /// for example, `DE-AD-BE-EF-20-22`.
     ///
     /// ```
@@ -384,6 +384,18 @@ impl FromStr for Hex {
     /// let d2 = Hex::from_str(hex).unwrap();
     /// assert_eq!("DE-AD-BE-EF-20-22", d.print());
     /// assert_eq!("DE-AD-BE-EF-20-22", d2.print());
+    /// ```
+    ///
+    /// An empty `Hex` may be created either from an empty string
+    /// or `"--"`:
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// use std::str::FromStr;
+    /// let d1: Hex = Hex::from_str("--").unwrap();
+    /// let d2: Hex = Hex::from_str("").unwrap();
+    /// assert_eq!(Hex::empty(), d1);
+    /// assert_eq!(Hex::empty(), d2);
     /// ```
     fn from_str(hex: &str) -> std::result::Result<Self, Self::Err> {
         let s = hex.replace('-', "");
