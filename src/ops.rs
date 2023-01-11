@@ -341,7 +341,7 @@ impl Sodg {
             let redirect = cl(v, &head, &tail, self);
             let failure = if let Ok(re) = redirect {
                 if let Ok(to) = self.find(v, re.as_str()) {
-                    trace!("#find_with_closure: ν{v}.{k} -> ν{to} (redirect to {re})");
+                    trace!("#find_with_closure: ν{v}.{k} -> ν{to} (redirect to .{re})");
                     v = to;
                     continue;
                 }
