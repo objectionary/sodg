@@ -41,6 +41,7 @@ mod alerts;
 mod ctors;
 mod debug;
 mod edge;
+mod find;
 mod gc;
 mod hex;
 mod inspect;
@@ -54,6 +55,7 @@ mod slice;
 mod vertex;
 mod xml;
 
+use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -69,13 +71,14 @@ pub(crate) use crate::vertex::Vertex;
 ///
 /// ```
 /// use sodg::Sodg;
+/// use sodg::DeadRelay;
 /// let mut sodg = Sodg::empty();
 /// sodg.add(0).unwrap();
 /// sodg.add(1).unwrap();
 /// sodg.bind(0, 1, "a").unwrap();
 /// sodg.add(2).unwrap();
 /// sodg.bind(1, 2, "b").unwrap();
-/// assert_eq!(2, sodg.find(0, "a.b").unwrap());
+/// assert_eq!(2, sodg.find(0, "a.b", DeadRelay {}).unwrap());
 /// ```
 ///
 /// This package is used in [reo](https://github.com/objectionary/reo)
@@ -89,6 +92,28 @@ pub struct Sodg {
     alerts: Vec<Alert>,
     #[serde(skip_serializing, skip_deserializing)]
     alerts_active: bool,
+}
+
+/// A relay that is used with `Sodg::find()` can't find an attribute.
+/// It asks the relay for the name of the attribute to use instead
+/// of the not found one, which is provided in the `a` parameter. The
+/// `v` parameter is the ID of the vertex where the attribute `a` is not
+/// found. The `b` is the locator of the attribute.
+///
+/// A relay may return a new vertex ID as a string `"ν42"`, for example.
+/// Pretty much anything that the relay will return will be used
+/// as a new search string, starting from the `v` vertex.
+pub trait Relay {
+    fn re(&self, v: u32, a: &str, b: &str) -> Result<String>;
+}
+
+/// This `Relay` doesn't even try to find anything, but returns
+/// an error.
+pub struct DeadRelay {}
+
+/// This `Relay` can be made of a lambda function.
+pub struct LambdaRelay {
+    lambda: fn(u32, &str, &str) -> Result<String>,
 }
 
 #[cfg(test)]

@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+use crate::DeadRelay;
 use crate::Sodg;
 use anyhow::Result;
 use std::collections::{HashMap, HashSet};
@@ -28,7 +29,7 @@ impl Sodg {
     pub fn slice(&mut self, loc: &str) -> Result<Sodg> {
         let mut todo = HashSet::new();
         let mut done = HashSet::new();
-        todo.insert(self.find(0, loc)?);
+        todo.insert(self.find(0, loc, DeadRelay {})?);
         loop {
             if todo.is_empty() {
                 break;

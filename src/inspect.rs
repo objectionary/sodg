@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+use crate::DeadRelay;
 use crate::Sodg;
 use anyhow::{Context, Result};
 use itertools::Itertools;
@@ -27,7 +28,9 @@ impl Sodg {
     /// Finds an object by the provided locator and prints its tree
     /// of sub-objects and edges. Mostly used for testing.
     pub fn inspect(&self, loc: &str) -> Result<String> {
-        let v = self.find(0, loc).context(format!("Can't locate '{loc}'"))?;
+        let v = self
+            .find(0, loc, DeadRelay {})
+            .context(format!("Can't locate '{loc}'"))?;
         let mut seen = HashSet::new();
         Ok(format!(
             "{}/ν{}\n{}",

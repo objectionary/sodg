@@ -22,11 +22,9 @@ use crate::Edge;
 use crate::Hex;
 use crate::Sodg;
 use crate::Vertex;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use log::trace;
 use rstest::rstest;
-use std::collections::VecDeque;
-use std::str::FromStr;
 
 impl Sodg {
     /// Add a new vertex `v1` to the Sodg:
@@ -265,114 +263,8 @@ impl Sodg {
         }
     }
 
-    /// Find a vertex in the Sodg by its locator.
-    ///
-    /// ```
-    /// use sodg::Sodg;
-    /// let mut g = Sodg::empty();
-    /// g.add(0).unwrap();
-    /// g.add(1).unwrap();
-    /// g.bind(0, 1, "a").unwrap();
-    /// g.add(2).unwrap();
-    /// g.bind(1, 2, "b").unwrap();
-    /// assert_eq!(2, g.find(0, "a.b").unwrap());
-    /// ```
-    ///
-    /// If target vertex is not found or `v1` is absent,
-    /// an `Err` will be returned.
-    pub fn find(&self, v1: u32, loc: &str) -> Result<u32> {
-        self.find_with_closure(v1, loc, |v, head, tail, _| {
-            Err(anyhow!("Can't find attribute {head}/{tail} in ν{v}"))
-        })
-    }
-
-    /// Find a vertex in the Sodg by its locator using a closure to provide alternative edge names.
-    ///
-    /// ```
-    /// use sodg::Sodg;
-    /// let mut g = Sodg::empty();
-    /// g.add(0).unwrap();
-    /// g.add(1).unwrap();
-    /// g.bind(0, 1, "foo").unwrap();
-    /// assert!(g.find(0, "bar").is_err());
-    /// let v = g.find_with_closure(0, "bar", |v, a, b, _| {
-    ///   assert_eq!(a, "bar");
-    ///   assert_eq!(b, "");
-    ///   Ok("foo".to_string())
-    /// }).unwrap();
-    /// assert_eq!(1, v);
-    /// ```
-    ///
-    /// If target vertex is not found or `v1` is absent,
-    /// an `Err` will be returned.
-    pub fn find_with_closure(
-        &self,
-        v1: u32,
-        loc: &str,
-        cl: fn(u32, &str, &str, &Self) -> Result<String>,
-    ) -> Result<u32> {
-        let mut v = v1;
-        let mut locator: VecDeque<String> = VecDeque::new();
-        loc.split('.')
-            .filter(|k| !k.is_empty())
-            .for_each(|k| locator.push_back(k.to_string()));
-        loop {
-            let next = locator.pop_front();
-            if next.is_none() {
-                trace!("#find_with_closure: end of locator, we are at ν{v}");
-                break;
-            }
-            let k = next.unwrap().to_string();
-            if k.is_empty() {
-                return Err(anyhow!("System error, the locator is empty"));
-            }
-            if k.starts_with('ν') {
-                let num: String = k.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
-                v = u32::from_str(num.as_str())?;
-                trace!("#find_with_closure: jumping directly to ν{v}");
-                continue;
-            }
-            if let Some(to) = self.kid(v, k.as_str()) {
-                trace!("#find_with_closure: ν{v}.{k} -> ν{to}");
-                v = to;
-                continue;
-            };
-            let (head, tail) = Self::split_a(&k);
-            let redirect = cl(v, &head, &tail, self);
-            let failure = if let Ok(re) = redirect {
-                if let Ok(to) = self.find(v, re.as_str()) {
-                    trace!("#find_with_closure: ν{v}.{k} -> ν{to} (redirect to .{re})");
-                    v = to;
-                    continue;
-                }
-                format!("redirect to .{re} didn't help")
-            } else {
-                redirect.err().unwrap().to_string()
-            };
-            let others: Vec<String> = self
-                .vertices
-                .get(&v)
-                .context(format!("Can't find ν{v}"))
-                .unwrap()
-                .edges
-                .iter()
-                .map(|e| e.a.clone())
-                .collect();
-            return Err(anyhow!(
-                "Can't find .{} in ν{} among other {} attribute{}: {} ({failure})",
-                k,
-                v,
-                others.len(),
-                if others.len() == 1 { "" } else { "s" },
-                others.join(", ")
-            ));
-        }
-        trace!("#find_with_closure: found ν{v1} by '{loc}'");
-        Ok(v)
-    }
-
     /// Split label into two parts.
-    fn split_a(a: &str) -> (String, String) {
+    pub(crate) fn split_a(a: &str) -> (String, String) {
         let s = a.splitn(2, '/').collect::<Vec<&str>>();
         (
             s.first().unwrap().to_string(),
@@ -380,6 +272,9 @@ impl Sodg {
         )
     }
 }
+
+#[cfg(test)]
+use crate::DeadRelay;
 
 #[rstest]
 #[case("hello", "hello", "")]
@@ -396,7 +291,7 @@ fn splits_label_correctly(#[case] a: &str, #[case] head: &str, #[case] tail: &st
 fn adds_simple_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
-    assert_eq!(1, g.find(1, "")?);
+    assert_eq!(1, g.find(1, "", DeadRelay {})?);
     Ok(())
 }
 
@@ -407,7 +302,7 @@ fn binds_simple_vertices() -> Result<()> {
     g.add(2)?;
     let k = "hello";
     g.bind(1, 2, k)?;
-    assert_eq!(2, g.find(1, k)?);
+    assert_eq!(2, g.find(1, k, DeadRelay {})?);
     Ok(())
 }
 
@@ -418,7 +313,7 @@ fn pre_defined_ids() -> Result<()> {
     g.add(2)?;
     let k = "a-привет";
     g.bind(1, 2, k)?;
-    assert_eq!(2, g.find(1, k)?);
+    assert_eq!(2, g.find(1, k, DeadRelay {})?);
     Ok(())
 }
 
@@ -429,31 +324,7 @@ fn binds_two_names() -> Result<()> {
     g.add(2)?;
     g.bind(1, 2, "first")?;
     g.bind(1, 2, "second")?;
-    assert_eq!(2, g.find(1, "first")?);
-    Ok(())
-}
-
-#[test]
-fn finds_with_closure() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(1)?;
-    g.add(2)?;
-    g.add(3)?;
-    g.bind(1, 2, "first")?;
-    g.bind(2, 3, "something_else")?;
-    assert_eq!(
-        3,
-        g.find_with_closure(1, "first.second/abc", |v, head, tail, _| {
-            if v == 1 && !tail.is_empty() {
-                panic!();
-            }
-            if v == 2 && head == "second" && tail == "abc" {
-                Ok("something_else".to_string())
-            } else {
-                Ok("".to_string())
-            }
-        })?
-    );
+    assert_eq!(2, g.find(1, "first", DeadRelay {})?);
     Ok(())
 }
 
@@ -516,14 +387,6 @@ fn simple_data_gc() -> Result<()> {
     g.put(0, data.clone())?;
     assert_eq!(data, g.data(0)?);
     assert!(g.is_empty());
-    Ok(())
-}
-
-#[test]
-fn finds_root() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    assert_eq!(0, g.find(0, "")?);
     Ok(())
 }
 
@@ -625,21 +488,4 @@ fn replaces_ignoring_locator() -> Result<()> {
     g.bind(0, 1, "π/Φ.two")?;
     assert_eq!(1, g.kids(0)?.len());
     Ok(())
-}
-
-#[test]
-fn closure_return_absolute_vertex() {
-    let mut g = Sodg::empty();
-    g.add(0).unwrap();
-    g.add(1).unwrap();
-    g.bind(0, 1, "foo").unwrap();
-    assert!(g.find(0, "bar").is_err());
-    let v = g
-        .find_with_closure(0, "bar", |_v, a, b, _| {
-            assert_eq!(a, "bar");
-            assert_eq!(b, "");
-            Ok("ν1".to_string())
-        })
-        .unwrap();
-    assert_eq!(1, v);
 }
