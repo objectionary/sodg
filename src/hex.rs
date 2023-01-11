@@ -220,7 +220,7 @@ impl Hex {
         Ok(f64::from_be_bytes(*a))
     }
 
-    /// Turn it into `string`.
+    /// Turn it into `String` in UTF-8 encoding.
     ///
     /// ```
     /// use sodg::Hex;
@@ -240,6 +240,22 @@ impl Hex {
     /// use sodg::Hex;
     /// let d = Hex::from_vec([0xCA, 0xFE].to_vec());
     /// assert_eq!("CA-FE", d.print());
+    /// ```
+    ///
+    /// A string of one letter will be printed as `xx`, without the trailing dash:
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from_vec([0xCA].to_vec());
+    /// assert_eq!("CA", d.print());
+    /// ```
+    ///
+    /// An empty string will be printed as `--`:
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::empty();
+    /// assert_eq!("--", d.print());
     /// ```
     pub fn print(&self) -> String {
         if self.bytes().is_empty() {
