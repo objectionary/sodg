@@ -65,7 +65,9 @@ pub use crate::hex::Hex;
 pub use crate::script::Script;
 pub(crate) use crate::vertex::Vertex;
 
-/// This struct represents a Surging Object DiGraph (SODG). You add vertices
+/// This struct represents a Surging Object DiGraph (SODG).
+///
+/// You add vertices
 /// to it, bind them one to one with edges, put data into some of them,
 /// and read data back:
 ///
@@ -95,6 +97,7 @@ pub struct Sodg {
 }
 
 /// A relay that is used by [`Sodg::find()`] when it can't find an attribute.
+///
 /// The finding algorithm asks the relay for the name of the attribute to use instead
 /// of the not found one, which is provided as the `a` argument to the relay. The
 /// `v` argument provided to the relay is the ID of the vertex
@@ -109,7 +112,9 @@ pub trait Relay {
 }
 
 /// This `Relay` doesn't even try to find anything, but returns
-/// an error. If you don't know what relay to use, use [`DeadRelay::new()`].
+/// an error.
+///
+/// If you don't know what relay to use, use [`DeadRelay::new()`].
 pub struct DeadRelay {}
 
 /// This `Relay` can be made of a lambda function. The function must
