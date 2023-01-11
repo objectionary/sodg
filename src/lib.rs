@@ -34,7 +34,7 @@
 //! sodg.bind(0, 1, "foo").unwrap();
 //! ```
 
-#![doc(html_root_url = "https://docs.rs/sodg/0.0.0")]
+#![doc(html_root_url = "https://docs.rs/sodg/0.0.14")]
 #![deny(warnings)]
 
 mod alerts;
