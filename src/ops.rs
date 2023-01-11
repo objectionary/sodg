@@ -319,7 +319,7 @@ impl Sodg {
         loop {
             let next = locator.pop_front();
             if next.is_none() {
-                trace!("#find: end of locator, we are at ν{v}");
+                trace!("#find_with_closure: end of locator, we are at ν{v}");
                 break;
             }
             let k = next.unwrap().to_string();
@@ -329,21 +329,26 @@ impl Sodg {
             if k.starts_with('ν') {
                 let num: String = k.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
                 v = u32::from_str(num.as_str())?;
-                trace!("#find: jumping directly to ν{v}");
+                trace!("#find_with_closure: jumping directly to ν{v}");
                 continue;
             }
             if let Some(to) = self.kid(v, k.as_str()) {
-                trace!("#find: ν{v}.{k} -> ν{to}");
+                trace!("#find_with_closure: ν{v}.{k} -> ν{to}");
                 v = to;
                 continue;
             };
             let (head, tail) = Self::split_a(&k);
-            let redirect = cl(v, &head, &tail, self)?;
-            if let Ok(to) = self.find(v, redirect.as_str()) {
-                trace!("#find: ν{v}.{k} -> ν{to} (redirect to {redirect})");
-                v = to;
-                continue;
-            }
+            let redirect = cl(v, &head, &tail, self);
+            let failure = if let Ok(re) = redirect {
+                if let Ok(to) = self.find(v, re.as_str()) {
+                    trace!("#find_with_closure: ν{v}.{k} -> ν{to} (redirect to {re})");
+                    v = to;
+                    continue;
+                }
+                format!("redirect to .{re} didn't help")
+            } else {
+                redirect.err().unwrap().to_string()
+            };
             let others: Vec<String> = self
                 .vertices
                 .get(&v)
@@ -354,7 +359,7 @@ impl Sodg {
                 .map(|e| e.a.clone())
                 .collect();
             return Err(anyhow!(
-                "Can't find .{} in ν{} among other {} attribute{}: {} (redirect to .{redirect} didn't help)",
+                "Can't find .{} in ν{} among other {} attribute{}: {} ({failure})",
                 k,
                 v,
                 others.len(),
@@ -362,7 +367,7 @@ impl Sodg {
                 others.join(", ")
             ));
         }
-        trace!("#find: found ν{v1} by '{loc}'");
+        trace!("#find_with_closure: found ν{v1} by '{loc}'");
         Ok(v)
     }
 
