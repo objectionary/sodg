@@ -23,7 +23,7 @@ use crate::Sodg;
 impl Sodg {
     /// Get next unique ID of a vertex. This ID will never be
     /// returned by `next()` again. Also, this ID will not
-    /// be equal to any of existing IDs of vertices.
+    /// be equal to any of the existing IDs of vertices.
     pub fn next_id(&mut self) -> u32 {
         let mut id = self.next_v;
         for v in self.vertices.keys() {
