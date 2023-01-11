@@ -198,10 +198,10 @@ impl Hex {
     /// assert_eq!(42, d.to_i64().unwrap());
     /// ```
     pub fn to_i64(&self) -> Result<i64> {
-        let a: &[u8; 8] = &self
-            .bytes()
-            .try_into()
-            .context("There is not enough data, can't make INT")?;
+        let a: &[u8; 8] = &self.bytes().try_into().context(format!(
+            "There is not enough bytes, can't make INT (just {} while we need eight)",
+            self.bytes().len()
+        ))?;
         Ok(i64::from_be_bytes(*a))
     }
 
@@ -213,10 +213,10 @@ impl Hex {
     /// assert_eq!(std::f64::consts::PI, d.to_f64().unwrap());
     /// ```
     pub fn to_f64(&self) -> Result<f64> {
-        let a: &[u8; 8] = &self
-            .bytes()
-            .try_into()
-            .context("There is no data, can't make FLOAT")?;
+        let a: &[u8; 8] = &self.bytes().try_into().context(format!(
+            "There is not enough bytes, can't make FLOAT (just {} while we need eight)",
+            self.bytes().len()
+        ))?;
         Ok(f64::from_be_bytes(*a))
     }
 
