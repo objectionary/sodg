@@ -31,6 +31,21 @@ impl Relay for DeadRelay {
     }
 }
 
+impl DeadRelay {
+    /// Make a new one, the empty one.
+    pub fn new() -> Self {
+        DeadRelay {}
+    }
+}
+
+impl Default for DeadRelay {
+    /// The default dead relay.
+    #[allow(dead_code)]
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl LambdaRelay {
     /// Makes a new instance of `LambdaRelay` with the encapsulated
     /// function.
@@ -68,7 +83,7 @@ impl Sodg {
     ///
     /// If target vertex is not found or `v1` is absent,
     /// an `Err` will be returned.
-    pub fn find<T: Relay>(&self, v1: u32, loc: &str, relay: T) -> Result<u32> {
+    pub fn find<T: Relay + Copy>(&self, v1: u32, loc: &str, relay: T) -> Result<u32> {
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
         loc.split('.')
@@ -98,7 +113,7 @@ impl Sodg {
             let (head, tail) = Self::split_a(&k);
             let redirect = relay.re(v, &head, &tail);
             let failure = if let Ok(re) = redirect {
-                if let Ok(to) = self.find(v, re.as_str(), DeadRelay {}) {
+                if let Ok(to) = self.find(v, re.as_str(), relay) {
                     trace!("#find_with_closure: ν{v}.{k} -> ν{to} (redirect to .{re})");
                     v = to;
                     continue;
@@ -162,7 +177,7 @@ fn finds_with_closure() -> Result<()> {
 fn finds_root() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    assert_eq!(0, g.find(0, "", DeadRelay {})?);
+    assert_eq!(0, g.find(0, "", DeadRelay::default())?);
     Ok(())
 }
 
@@ -172,7 +187,7 @@ fn closure_return_absolute_vertex() {
     g.add(0).unwrap();
     g.add(1).unwrap();
     g.bind(0, 1, "foo").unwrap();
-    assert!(g.find(0, "bar", DeadRelay {}).is_err());
+    assert!(g.find(0, "bar", DeadRelay::new()).is_err());
     let v = g
         .find(
             0,

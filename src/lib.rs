@@ -94,24 +94,27 @@ pub struct Sodg {
     alerts_active: bool,
 }
 
-/// A relay that is used with `Sodg::find()` can't find an attribute.
-/// It asks the relay for the name of the attribute to use instead
-/// of the not found one, which is provided in the `a` parameter. The
-/// `v` parameter is the ID of the vertex where the attribute `a` is not
-/// found. The `b` is the locator of the attribute.
+/// A relay that is used by [`Sodg::find()`] when it can't find an attribute.
+/// The finding algorithm asks the relay for the name of the attribute to use instead
+/// of the not found one, which is provided as the `a` argument to the relay. The
+/// `v` argument provided to the relay is the ID of the vertex
+/// where the attribute `a` is not found. The `b` argument
+/// is the locator of the not found attribute.
 ///
 /// A relay may return a new vertex ID as a string `"ν42"`, for example.
-/// Pretty much anything that the relay will return will be used
+/// Pretty much anything that the relay returns will be used
 /// as a new search string, starting from the `v` vertex.
 pub trait Relay {
     fn re(&self, v: u32, a: &str, b: &str) -> Result<String>;
 }
 
 /// This `Relay` doesn't even try to find anything, but returns
-/// an error.
+/// an error. If you don't know what relay to use, use [`DeadRelay::new()`].
+#[derive(Clone, Copy)]
 pub struct DeadRelay {}
 
 /// This `Relay` can be made of a lambda function.
+#[derive(Clone, Copy)]
 pub struct LambdaRelay {
     lambda: fn(u32, &str, &str) -> Result<String>,
 }
