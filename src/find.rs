@@ -26,7 +26,7 @@ use std::collections::VecDeque;
 use std::str::FromStr;
 
 impl Relay for DeadRelay {
-    fn re(&self, v: u32, a: &str, b: &str) -> Result<String> {
+    fn re(&mut self, v: u32, a: &str, b: &str) -> Result<String> {
         Err(anyhow!("Can't find {a}/{b} at ν{v}"))
     }
 }
@@ -56,7 +56,7 @@ impl LambdaRelay {
 }
 
 impl Relay for LambdaRelay {
-    fn re(&self, v: u32, a: &str, b: &str) -> Result<String> {
+    fn re(&mut self, v: u32, a: &str, b: &str) -> Result<String> {
         (self.lambda)(v, a, b)
     }
 }
@@ -83,7 +83,7 @@ impl Sodg {
     ///
     /// If target vertex is not found or `v1` is absent,
     /// an `Err` will be returned.
-    pub fn find<T: Relay + Copy>(&self, v1: u32, loc: &str, relay: T) -> Result<u32> {
+    pub fn find<T: Relay + Copy>(&self, v1: u32, loc: &str, mut relay: T) -> Result<u32> {
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
         loc.split('.')
