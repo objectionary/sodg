@@ -48,7 +48,9 @@ impl Sodg {
         Ok(())
     }
 
-    /// Makes an edge `e1` from vertex `v1` to vertex `v2` and puts `a` label on it. If the
+    /// Makes an edge `e1` from vertex `v1` to vertex `v2` and puts `a` label on it.
+    ///
+    /// If the
     /// label is not equal to `"ρ"`, makes two backward edges from `v2` to `v1`
     /// and label them as `"ρ"` an `"𝜎"`.
     ///
@@ -225,6 +227,7 @@ impl Sodg {
     }
 
     /// Get a locator of an edge, if it exists.
+    ///
     /// The name of the edge may be a composite of two parts, for example
     /// `π/Φ.foo` or `foo/ν6.boom.x.y`. The parts are separated by the
     /// forward slash. This function returns the second part if it exists:

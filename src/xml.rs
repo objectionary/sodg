@@ -24,7 +24,9 @@ use itertools::Itertools;
 use xml_builder::{XMLBuilder, XMLElement, XMLVersion};
 
 impl Sodg {
-    /// Make XML graph. For example, for this code:
+    /// Make XML graph.
+    ///
+    /// For example, for this code:
     ///
     /// ```
     /// use sodg::Hex;

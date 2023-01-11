@@ -46,7 +46,9 @@ pub struct Script {
 }
 
 impl Script {
-    /// Make a new one, parsing a string with instructions. Instructions
+    /// Make a new one, parsing a string with instructions.
+    ///
+    /// Instructions
     /// must be separated by semicolon. There are just three of them
     /// possible: `ADD`, `BIND`, and `PUT`. The arguments must be
     /// separated by a comma. An argument may either be 1) a positive integer

@@ -27,7 +27,9 @@ use std::path::Path;
 use std::time::Instant;
 
 impl Sodg {
-    /// Save the entire Sodg into a binary file. The entire Sodg
+    /// Save the entire Sodg into a binary file.
+    ///
+    /// The entire Sodg
     /// can be restored from the file. Returns the size of the file just saved.
     pub fn save(&mut self, path: &Path) -> Result<usize> {
         let start = Instant::now();

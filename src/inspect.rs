@@ -26,7 +26,9 @@ use std::collections::HashSet;
 
 impl Sodg {
     /// Finds an object by the provided locator and prints its tree
-    /// of sub-objects and edges. Mostly used for testing.
+    /// of sub-objects and edges.
+    ///
+    /// The function is mostly used for testing.
     pub fn inspect(&self, loc: &str) -> Result<String> {
         let v = self
             .find(0, loc, &mut DeadRelay::default())

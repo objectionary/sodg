@@ -27,7 +27,9 @@ use anyhow::Result;
 pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
 
 impl Sodg {
-    /// Attach a new alert to this SODG. For example, you don't want
+    /// Attach a new alert to this SODG.
+    ///
+    /// For example, you don't want
     /// more than one edge to depart from any vertex:
     ///
     /// ```
@@ -58,7 +60,9 @@ impl Sodg {
         self.alerts_active = false;
     }
 
-    /// Enable all alerts. This function also runs all vertices through
+    /// Enable all alerts.
+    ///
+    /// This function also runs all vertices through
     /// all checks and returns the list of errors found. If everything
     /// was fine, an empty vector is returned.
     pub fn alerts_on(&mut self) -> Result<()> {
@@ -66,7 +70,9 @@ impl Sodg {
         self.validate(self.vertices.keys().cloned().collect())
     }
 
-    /// Check all alerts for the given list of vertices. If any of them
+    /// Check all alerts for the given list of vertices.
+    ///
+    /// If any of them
     /// have any issues, `Err` is returned.
     pub fn validate(&self, vx: Vec<u32>) -> Result<()> {
         if self.alerts_active {

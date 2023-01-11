@@ -25,6 +25,7 @@ use std::str::FromStr;
 
 /// It is an object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
+///
 /// You can create it from Rust primitives:
 ///
 /// ```
