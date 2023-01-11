@@ -72,8 +72,8 @@ impl Sodg {
     /// g.add(0).unwrap();
     /// g.add(1).unwrap();
     /// g.bind(0, 1, "foo").unwrap();
-    /// assert!(g.find(0, "bar", DeadRelay {}).is_err());
-    /// let v = g.find(0, "bar", LambdaRelay::new(|v, a, b| {
+    /// assert!(g.find(0, "bar", &mut DeadRelay::default()).is_err());
+    /// let v = g.find(0, "bar", &mut LambdaRelay::new(|v, a, b| {
     ///   assert_eq!(a, "bar");
     ///   assert_eq!(b, "");
     ///   Ok("foo".to_string())
@@ -83,7 +83,7 @@ impl Sodg {
     ///
     /// If target vertex is not found or `v1` is absent,
     /// an `Err` will be returned.
-    pub fn find<T: Relay + Copy>(&self, v1: u32, loc: &str, mut relay: T) -> Result<u32> {
+    pub fn find<T: Relay>(&self, v1: u32, loc: &str, relay: &mut T) -> Result<u32> {
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
         loc.split('.')
@@ -158,7 +158,7 @@ fn finds_with_closure() -> Result<()> {
         g.find(
             1,
             "first.second/abc",
-            LambdaRelay::new(|v, a, b| {
+            &mut LambdaRelay::new(|v, a, b| {
                 if v == 1 && !b.is_empty() {
                     panic!();
                 }
@@ -177,7 +177,7 @@ fn finds_with_closure() -> Result<()> {
 fn finds_root() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    assert_eq!(0, g.find(0, "", DeadRelay::default())?);
+    assert_eq!(0, g.find(0, "", &mut DeadRelay::default())?);
     Ok(())
 }
 
@@ -187,12 +187,12 @@ fn closure_return_absolute_vertex() {
     g.add(0).unwrap();
     g.add(1).unwrap();
     g.bind(0, 1, "foo").unwrap();
-    assert!(g.find(0, "bar", DeadRelay::new()).is_err());
+    assert!(g.find(0, "bar", &mut DeadRelay::new()).is_err());
     let v = g
         .find(
             0,
             "bar",
-            LambdaRelay::new(|_v, a, b| {
+            &mut LambdaRelay::new(|_v, a, b| {
                 assert_eq!(a, "bar");
                 assert_eq!(b, "");
                 Ok("ν1".to_string())

@@ -78,7 +78,7 @@ pub(crate) use crate::vertex::Vertex;
 /// sodg.bind(0, 1, "a").unwrap();
 /// sodg.add(2).unwrap();
 /// sodg.bind(1, 2, "b").unwrap();
-/// assert_eq!(2, sodg.find(0, "a.b", DeadRelay {}).unwrap());
+/// assert_eq!(2, sodg.find(0, "a.b", &mut DeadRelay::default()).unwrap());
 /// ```
 ///
 /// This package is used in [reo](https://github.com/objectionary/reo)
@@ -110,7 +110,6 @@ pub trait Relay {
 
 /// This `Relay` doesn't even try to find anything, but returns
 /// an error. If you don't know what relay to use, use [`DeadRelay::new()`].
-#[derive(Clone, Copy)]
 pub struct DeadRelay {}
 
 /// This `Relay` can be made of a lambda function. The function must
@@ -119,7 +118,6 @@ pub struct DeadRelay {}
 /// of the attribute. The function must return a new locator where the
 /// search algorithm must continue. It can be just a name of a new attribute,
 /// or an absolute locator with dots inside.
-#[derive(Clone, Copy)]
 pub struct LambdaRelay {
     lambda: fn(u32, &str, &str) -> Result<String>,
 }
