@@ -143,11 +143,11 @@ fn finds_with_closure() -> Result<()> {
         g.find(
             1,
             "first.second/abc",
-            LambdaRelay::new(|v, head, tail| {
-                if v == 1 && !tail.is_empty() {
+            LambdaRelay::new(|v, a, b| {
+                if v == 1 && !b.is_empty() {
                     panic!();
                 }
-                if v == 2 && head == "second" && tail == "abc" {
+                if v == 2 && a == "second" && b == "abc" {
                     Ok("something_else".to_string())
                 } else {
                     Ok("".to_string())
