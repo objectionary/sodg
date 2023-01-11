@@ -113,7 +113,12 @@ pub trait Relay {
 #[derive(Clone, Copy)]
 pub struct DeadRelay {}
 
-/// This `Relay` can be made of a lambda function.
+/// This `Relay` can be made of a lambda function. The function must
+/// accept three arguments: `v` is the ID of the vertex where an attribute
+/// is not found, `a` is the name of the attribute, `b` is the optional locator
+/// of the attribute. The function must return a new locator where the
+/// search algorithm must continue. It can be just a name of a new attribute,
+/// or an absolute locator with dots inside.
 #[derive(Clone, Copy)]
 pub struct LambdaRelay {
     lambda: fn(u32, &str, &str) -> Result<String>,
