@@ -182,14 +182,15 @@ fn finds_root() -> Result<()> {
 }
 
 #[test]
-fn closure_return_absolute_vertex() {
+fn closure_return_absolute_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0).unwrap();
     g.add(1).unwrap();
     g.bind(0, 1, "foo").unwrap();
     assert!(g.find(0, "bar", &mut DeadRelay::new()).is_err());
-    let v = g
-        .find(
+    assert_eq!(
+        1,
+        g.find(
             0,
             "bar",
             &mut LambdaRelay::new(|_v, a, b| {
@@ -197,7 +198,44 @@ fn closure_return_absolute_vertex() {
                 assert_eq!(b, "");
                 Ok("ν1".to_string())
             }),
-        )
-        .unwrap();
-    assert_eq!(1, v);
+        )?
+    );
+    Ok(())
+}
+
+#[cfg(test)]
+struct FakeRelay {
+    g: Sodg,
+}
+
+#[cfg(test)]
+impl FakeRelay {
+    pub fn new() -> FakeRelay {
+        let mut g = Sodg::empty();
+        g.add(0).unwrap();
+        g.add(1).unwrap();
+        g.bind(0, 1, "foo").unwrap();
+        let r = FakeRelay { g };
+        r
+    }
+    pub fn find(&mut self, _k: &str) -> Result<u32> {
+        // self.g.find(0, k, self)
+        // if you uncomment the line above, the code won't compile
+        Ok(self.g.next_id())
+    }
+}
+
+#[cfg(test)]
+impl Relay for FakeRelay {
+    fn re(&mut self, _v: u32, _a: &str, _b: &str) -> Result<String> {
+        Ok("bar".to_string())
+    }
+}
+
+#[test]
+#[ignore]
+fn relay_modifies_sodg_back() -> Result<()> {
+    let mut relay = FakeRelay::new();
+    assert_eq!(1, relay.find("bar")?);
+    Ok(())
 }
