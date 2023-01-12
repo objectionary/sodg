@@ -266,6 +266,24 @@ impl Sodg {
         }
     }
 
+    /// Check whether data is there.
+    ///
+    /// With this method you can check whether the data is in the vertex:
+    ///
+    /// ```
+    /// use sodg::{Hex, Sodg};
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.put(0, Hex::from(42)).unwrap();
+    /// assert!(g.full(0).unwrap());
+    /// ```
+    ///
+    /// If the vertex is absent, the method will return `Err`.
+    pub fn full(&self, v: u32) -> Result<bool> {
+        let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
+        Ok(!vtx.data.is_empty())
+    }
+
     /// Split label into two parts.
     pub(crate) fn split_a(a: &str) -> (String, String) {
         let s = a.splitn(2, '/').collect::<Vec<&str>>();
@@ -490,5 +508,22 @@ fn replaces_ignoring_locator() -> Result<()> {
     g.bind(0, 1, "π/Φ.one")?;
     g.bind(0, 1, "π/Φ.two")?;
     assert_eq!(1, g.kids(0)?.len());
+    Ok(())
+}
+
+#[test]
+fn checks_for_data_presence() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.put(0, Hex::from(42)).unwrap();
+    assert!(g.full(0).unwrap());
+    Ok(())
+}
+
+#[test]
+fn checks_for_data_absence() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    assert!(!g.full(0).unwrap());
     Ok(())
 }
