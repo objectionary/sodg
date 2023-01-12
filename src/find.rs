@@ -140,7 +140,7 @@ impl Sodg {
                 others.join(", ")
             ));
         }
-        trace!("#find: found ν{v1} by '{loc}'");
+        trace!("#find: found ν{v} by '{loc}'");
         Ok(v)
     }
 }
