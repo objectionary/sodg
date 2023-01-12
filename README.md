@@ -20,11 +20,12 @@ Create a graph:
 
 ```rust
 use sodg::Sodg;
+use sodg::Hex;
 let mut g = Sodg::empty();
 g.add(0)?; // add a vertex no.0
 g.add(1)?; // add a vertex no.1
 g.bind(0, 1, "foo")?; // connect v0 to v1 with label "foo"
-g.put(1, "Hello, world!".as_bytes().to_vec())?; // attach data to v1
+g.put(1, Hex::from_str_bytes("Hello, world!"))?; // attach data to v1
 ```
 
 You can find a vertex by the label of an edge departing from another vertex:
@@ -42,7 +43,7 @@ let kids: Vec<(String, u32)> = g.kids(0);
 You can read the data of a vertex:
 
 ```rust
-let bytes: Vec<u8> = g.data(1)?; // empty if no data written before
+let bytes: Hex = g.data(1)?.to_i64()?;
 ```
 
 Then, you can print the graph:
