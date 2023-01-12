@@ -221,11 +221,12 @@ impl FakeRelay {
 #[cfg(test)]
 impl Relay for FakeRelay {
     fn re(&self, _v: u32, _a: &str, _b: &str) -> Result<String> {
-        // It's impossible to do what the following two lines are
-        // doing, because "self" is immutable:
-        // self.g.add(42).unwrap();
-        // Ok("ν42".to_string())
-        Ok("ν1".to_string())
+        let cp = self as *const Self;
+        let mp = cp as *mut Self;
+        unsafe {
+            (&mut *mp).g.add(42).unwrap();
+        }
+        Ok("ν42".to_string())
     }
 }
 
@@ -236,6 +237,6 @@ fn relay_modifies_sodg_back() -> Result<()> {
     g.add(1).unwrap();
     g.bind(0, 1, "foo").unwrap();
     let mut relay = FakeRelay::new(g);
-    assert_eq!(1, relay.find("bar")?);
+    assert_eq!(42, relay.find("bar")?);
     Ok(())
 }
