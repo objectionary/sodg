@@ -210,13 +210,8 @@ struct FakeRelay {
 
 #[cfg(test)]
 impl FakeRelay {
-    pub fn new() -> FakeRelay {
-        let mut g = Sodg::empty();
-        g.add(0).unwrap();
-        g.add(1).unwrap();
-        g.bind(0, 1, "foo").unwrap();
-        let r = FakeRelay { g };
-        r
+    pub fn new(g: Sodg) -> FakeRelay {
+        FakeRelay { g }
     }
     pub fn find(&mut self, _k: &str) -> Result<u32> {
         // self.g.find(0, k, self)
@@ -235,7 +230,11 @@ impl Relay for FakeRelay {
 #[test]
 #[ignore]
 fn relay_modifies_sodg_back() -> Result<()> {
-    let mut relay = FakeRelay::new();
+    let mut g = Sodg::empty();
+    g.add(0).unwrap();
+    g.add(1).unwrap();
+    g.bind(0, 1, "foo").unwrap();
+    let mut relay = FakeRelay::new(g);
     assert_eq!(1, relay.find("bar")?);
     Ok(())
 }
