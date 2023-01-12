@@ -108,7 +108,7 @@ pub struct Sodg {
 /// Pretty much anything that the relay returns will be used
 /// as a new search string, starting from the `v` vertex.
 pub trait Relay {
-    fn re(&mut self, v: u32, a: &str, b: &str) -> Result<String>;
+    fn re(&self, v: u32, a: &str, b: &str) -> Result<String>;
 }
 
 /// This `Relay` doesn't even try to find anything, but returns

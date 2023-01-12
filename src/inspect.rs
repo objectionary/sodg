@@ -31,7 +31,7 @@ impl Sodg {
     /// The function is mostly used for testing.
     pub fn inspect(&self, loc: &str) -> Result<String> {
         let v = self
-            .find(0, loc, &mut DeadRelay::default())
+            .find(0, loc, &DeadRelay::default())
             .context(format!("Can't locate '{loc}'"))?;
         let mut seen = HashSet::new();
         Ok(format!(

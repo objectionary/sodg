@@ -26,7 +26,7 @@ use std::collections::VecDeque;
 use std::str::FromStr;
 
 impl Relay for DeadRelay {
-    fn re(&mut self, v: u32, a: &str, b: &str) -> Result<String> {
+    fn re(&self, v: u32, a: &str, b: &str) -> Result<String> {
         Err(anyhow!("Can't find {a}/{b} at ν{v}"))
     }
 }
@@ -56,7 +56,7 @@ impl LambdaRelay {
 }
 
 impl Relay for LambdaRelay {
-    fn re(&mut self, v: u32, a: &str, b: &str) -> Result<String> {
+    fn re(&self, v: u32, a: &str, b: &str) -> Result<String> {
         (self.lambda)(v, a, b)
     }
 }
@@ -83,7 +83,7 @@ impl Sodg {
     ///
     /// If target vertex is not found or `v1` is absent,
     /// an `Err` will be returned.
-    pub fn find<T: Relay>(&self, v1: u32, loc: &str, relay: &mut T) -> Result<u32> {
+    pub fn find<T: Relay>(&self, v1: u32, loc: &str, relay: &T) -> Result<u32> {
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
         loc.split('.')
@@ -213,22 +213,19 @@ impl FakeRelay {
     pub fn new(g: Sodg) -> FakeRelay {
         FakeRelay { g }
     }
-    pub fn find(&mut self, _k: &str) -> Result<u32> {
-        // self.g.find(0, k, self)
-        // if you uncomment the line above, the code won't compile
-        Ok(self.g.next_id())
+    pub fn find(&mut self, k: &str) -> Result<u32> {
+        self.g.find(0, k, self)
     }
 }
 
 #[cfg(test)]
 impl Relay for FakeRelay {
-    fn re(&mut self, _v: u32, _a: &str, _b: &str) -> Result<String> {
-        Ok("bar".to_string())
+    fn re(&self, _v: u32, _a: &str, _b: &str) -> Result<String> {
+        Ok("ν1".to_string())
     }
 }
 
 #[test]
-#[ignore]
 fn relay_modifies_sodg_back() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0).unwrap();

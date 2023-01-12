@@ -29,7 +29,7 @@ impl Sodg {
     pub fn slice(&mut self, loc: &str) -> Result<Sodg> {
         let mut todo = HashSet::new();
         let mut done = HashSet::new();
-        todo.insert(self.find(0, loc, &mut DeadRelay::default())?);
+        todo.insert(self.find(0, loc, &DeadRelay::default())?);
         loop {
             if todo.is_empty() {
                 break;
