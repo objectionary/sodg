@@ -221,6 +221,10 @@ impl FakeRelay {
 #[cfg(test)]
 impl Relay for FakeRelay {
     fn re(&self, _v: u32, _a: &str, _b: &str) -> Result<String> {
+        // It's impossible to do what the following two lines are
+        // doing, because "self" is immutable:
+        // self.g.add(42).unwrap();
+        // Ok("ν42".to_string())
         Ok("ν1".to_string())
     }
 }
