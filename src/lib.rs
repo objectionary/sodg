@@ -67,9 +67,8 @@ pub(crate) use crate::vertex::Vertex;
 
 /// This struct represents a Surging Object DiGraph (SODG).
 ///
-/// You add vertices
-/// to it, bind them one to one with edges, put data into some of them,
-/// and read data back:
+/// You add vertices to it, bind them one to one with edges,
+/// put data into some of them, and read data back:
 ///
 /// ```
 /// use sodg::Sodg;
@@ -111,14 +110,14 @@ pub trait Relay {
     fn re(&self, v: u32, a: &str, b: &str) -> Result<String>;
 }
 
-/// This `Relay` doesn't even try to find anything, but returns
-/// an error.
+/// This `Relay` doesn't even try to find anything, but returns an error.
 ///
 /// If you don't know what relay to use, use [`DeadRelay::new()`].
 pub struct DeadRelay {}
 
-/// This `Relay` can be made of a lambda function. The function must
-/// accept three arguments: `v` is the ID of the vertex where an attribute
+/// This `Relay` can be made of a lambda function.
+///
+/// The function must accept three arguments: `v` is the ID of the vertex where an attribute
 /// is not found, `a` is the name of the attribute, `b` is the optional locator
 /// of the attribute. The function must return a new locator where the
 /// search algorithm must continue. It can be just a name of a new attribute,

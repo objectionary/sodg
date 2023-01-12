@@ -23,6 +23,8 @@ use crate::Sodg;
 impl Sodg {
     /// Is it empty?
     ///
+    /// Emptiness means that not a single vertex is there.
+    ///
     /// ```
     /// use sodg::Sodg;
     /// let mut sodg = Sodg::empty();
