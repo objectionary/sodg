@@ -114,11 +114,11 @@ impl Sodg {
             let redirect = relay.re(v, &head, &tail);
             let failure = if let Ok(re) = redirect {
                 if let Ok(to) = self.find(v, re.as_str(), relay) {
-                    trace!("#find: ν{v}.{k} -> ν{to} (redirect to .{re})");
+                    trace!("#find: ν{v}.{k} -> ν{to} (redirect to '{re}')");
                     v = to;
                     continue;
                 }
-                format!("redirect to .{re} didn't help")
+                format!("redirect to '{re}' didn't help")
             } else {
                 redirect.err().unwrap().to_string()
             };
