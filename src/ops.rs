@@ -214,13 +214,36 @@ impl Sodg {
     /// g.bind(0, 42, "π/Φ.test").unwrap();
     /// assert_eq!(Some(42), g.kid(0, "π"));
     /// ```
-    ///
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         if let Some(vtx) = self.vertices.get(&v) {
             vtx.edges
                 .iter()
                 .find(|e| Self::split_a(&e.a).0 == Self::split_a(a).0)
                 .map(|e| e.to)
+        } else {
+            None
+        }
+    }
+
+    /// Find a kid of a vertex, by its edge name, and return the ID of the vertex
+    /// found and the locator of the edge.
+    ///
+    /// ```
+    /// use sodg::Sodg;
+    /// let mut g = Sodg::empty();
+    /// g.add(0).unwrap();
+    /// g.add(42).unwrap();
+    /// g.bind(0, 42, "k/foo").unwrap();
+    /// assert_eq!((42, "foo".to_string()), g.kid_and_loc(0, "k").unwrap());
+    /// ```
+    ///
+    /// If vertex `v1` is absent, `None` will be returned.
+    pub fn kid_and_loc(&self, v: u32, a: &str) -> Option<(u32, String)> {
+        if let Some(vtx) = self.vertices.get(&v) {
+            vtx.edges
+                .iter()
+                .find(|e| Self::split_a(&e.a).0 == Self::split_a(a).0)
+                .map(|e| (e.to, Self::split_a(&e.a).1))
         } else {
             None
         }
@@ -253,7 +276,6 @@ impl Sodg {
     /// g.bind(0, 42, "π").unwrap();
     /// assert_eq!(Some("".to_string()), g.loc(0, "π"));
     /// ```
-    ///
     pub fn loc(&self, v: u32, a: &str) -> Option<String> {
         if let Some(vtx) = self.vertices.get(&v) {
             vtx.edges
@@ -469,6 +491,16 @@ fn finds_kid_by_prefix() -> Result<()> {
     g.add(1)?;
     g.bind(0, 1, "π/Φ.test")?;
     assert_eq!(Some(1), g.kid(0, "π"));
+    Ok(())
+}
+
+#[test]
+fn finds_kid_and_loc_by_prefix() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "π/foo")?;
+    assert_eq!(Some((1, "foo".to_string())), g.kid_and_loc(0, "π"));
     Ok(())
 }
 
