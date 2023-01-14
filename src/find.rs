@@ -32,14 +32,14 @@ impl Relay for DeadRelay {
 }
 
 impl DeadRelay {
-    /// Make a new one, the empty one.
+    /// Make a new [`DeadRelay`], the empty one.
     pub fn new() -> Self {
         DeadRelay {}
     }
 }
 
 impl Default for DeadRelay {
-    /// The default dead relay.
+    /// Make a new default [`DeadRelay`].
     #[allow(dead_code)]
     fn default() -> Self {
         Self::new()
@@ -47,8 +47,17 @@ impl Default for DeadRelay {
 }
 
 impl LambdaRelay {
-    /// Makes a new instance of `LambdaRelay` with the encapsulated
-    /// function.
+    /// Make a new instance of [`LambdaRelay`] with the encapsulated
+    /// lambda function.
+    ///
+    /// The function must accept three arguments:
+    /// 1) the ID of the vertex where the search algorithm found a problem,
+    /// 2) the head of the edge it is trying to find,
+    /// 3) the tail of the edge (may be empty). The function must
+    /// return a new locator, which the algorithm will use. If it is just
+    /// a string, it will be treated as a name of the attribute to
+    /// try instead. If it starts from `"ν"`, it is treated as an absolute
+    /// locator on the entire graph.
     #[allow(dead_code)]
     pub fn new(lambda: fn(u32, &str, &str) -> Result<String>) -> Self {
         LambdaRelay { lambda }
@@ -62,7 +71,11 @@ impl Relay for LambdaRelay {
 }
 
 impl Sodg {
-    /// Find a vertex in the Sodg by its locator using a closure to provide alternative edge names.
+    /// Find a vertex in the Sodg by its locator using a [`Relay`]
+    /// to provide alternative edge names, if the desired ones are not found.
+    ///
+    /// For example, here is how [`LambdaRelay`] may be used with a
+    /// "relaying" function:
     ///
     /// ```
     /// use sodg::Sodg;
@@ -81,7 +94,9 @@ impl Sodg {
     /// assert_eq!(1, v);
     /// ```
     ///
-    /// If target vertex is not found or `v1` is absent,
+    /// If `v1` is absent, an `Err` will be returned.
+    ///
+    /// If searching algorithm fails to find the destination,
     /// an `Err` will be returned.
     pub fn find<T: Relay>(&self, v1: u32, loc: &str, relay: &T) -> Result<u32> {
         let mut v = v1;

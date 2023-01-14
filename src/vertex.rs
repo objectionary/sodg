@@ -21,7 +21,7 @@
 use crate::{Deserialize, Edge, Hex, Serialize};
 use std::collections::HashSet;
 
-/// A vertex in the graph.
+/// A vertex in the [`Sodg`].
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct Vertex {
     pub edges: Vec<Edge>,
@@ -32,6 +32,8 @@ pub(crate) struct Vertex {
 
 impl Vertex {
     /// Make an empty one.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Sodg;

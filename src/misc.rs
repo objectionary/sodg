@@ -23,7 +23,7 @@ use crate::Sodg;
 impl Sodg {
     /// Is it empty?
     ///
-    /// Emptiness means that not a single vertex is there.
+    /// Emptiness means that not a single vertex is in the graph.
     ///
     /// ```
     /// use sodg::Sodg;

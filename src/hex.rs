@@ -80,7 +80,7 @@ impl Hex {
         Self::from_vec(Vec::new())
     }
 
-    /// Bytes contained.
+    /// Take the bytes contained.
     ///
     /// ```
     /// use sodg::Hex;
@@ -94,7 +94,7 @@ impl Hex {
         }
     }
 
-    /// How many bytes in there.
+    /// Count, how many bytes are in there.
     ///
     /// ```
     /// use sodg::Hex;
@@ -108,7 +108,7 @@ impl Hex {
         }
     }
 
-    /// Create from slice, in appropriate mode.
+    /// Create a new [`Hex`] from slice, in appropriate mode.
     ///
     /// ```
     /// use sodg::Hex;
@@ -132,7 +132,7 @@ impl Hex {
         }
     }
 
-    /// From `Vec<u8>`.
+    /// Create a new [`Hex`] from `Vec<u8>`.
     ///
     /// ```
     /// use sodg::Hex;
@@ -147,7 +147,7 @@ impl Hex {
         }
     }
 
-    /// Make `Hex` from `String`.
+    /// Create a new [`Hex`] from `String`.
     ///
     /// ```
     /// use sodg::Hex;
@@ -158,7 +158,7 @@ impl Hex {
         Self::from_slice(d.as_bytes())
     }
 
-    /// Make hex from the bytes composing `&str`.
+    /// Create a new [`Hex`] from the bytes composing `&str`.
     ///
     /// ```
     /// use sodg::Hex;
@@ -169,7 +169,7 @@ impl Hex {
         Self::from_slice(d.as_bytes())
     }
 
-    /// It's empty and no data?
+    /// Is it empty and has no data (not a single byte)?
     ///
     /// ```
     /// use sodg::Hex;
@@ -332,7 +332,7 @@ impl Hex {
 }
 
 impl From<i64> for Hex {
-    /// Make `Hex` from `i64`.
+    /// Make a new `Hex` from `i64`.
     ///
     /// ```
     /// use sodg::Hex;
@@ -345,7 +345,7 @@ impl From<i64> for Hex {
 }
 
 impl From<f64> for Hex {
-    /// Make `Hex` from `f64`.
+    /// Make a new `Hex` from `f64`.
     ///
     /// ```
     /// use std::f64::consts::PI;
@@ -359,7 +359,7 @@ impl From<f64> for Hex {
 }
 
 impl From<bool> for Hex {
-    /// From `bool`.
+    /// Create a new [`Hex`] from `bool`.
     ///
     /// ```
     /// use sodg::Hex;
@@ -374,8 +374,9 @@ impl From<bool> for Hex {
 impl FromStr for Hex {
     type Err = anyhow::Error;
 
-    /// Create a `Hex` from a `&str` containing a hexadecimal representation of some data,
-    /// for example, `DE-AD-BE-EF-20-22`.
+    /// Create a `Hex` from a `&str` containing a hexadecimal representation of data.
+    ///
+    /// For example, this is how you make a new [`Hex`] from `"DE-AD-BE-EF-20-22"` string:
     ///
     /// ```
     /// use sodg::Hex;

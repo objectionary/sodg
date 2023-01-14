@@ -25,7 +25,7 @@ use itertools::Itertools;
 use std::collections::HashSet;
 
 impl Sodg {
-    /// Finds an object by the provided locator and prints its tree
+    /// Find an object by the provided locator and print its tree
     /// of sub-objects and edges.
     ///
     /// The function is mostly used for testing.

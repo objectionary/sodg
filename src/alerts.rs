@@ -22,14 +22,14 @@ use crate::Sodg;
 use anyhow::anyhow;
 use anyhow::Result;
 
-/// An function that is called when a problem is found in [`Sodg`].
+/// A function that is called when a problem is found in [`Sodg`].
 ///
 /// Instances of this type can be used in [`Sodg::alert_on`] method,
 /// in order to ensure runtime consistency of data inside the graph.
 pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
 
 impl Sodg {
-    /// Attach a new alert to this SODG.
+    /// Attach a new alert to this graph.
     ///
     /// For example, you don't want
     /// more than one edge to depart from any vertex:
@@ -51,8 +51,6 @@ impl Sodg {
     /// sodg.bind(0, 1, "first").unwrap();
     /// assert!(sodg.bind(0, 2, "second").is_err());
     /// ```
-    ///
-    /// If vertex `v1` already exists in the graph, an `Err` will be returned.
     pub fn alert_on(&mut self, a: Alert) {
         self.alerts.push(a);
     }

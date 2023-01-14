@@ -3,7 +3,7 @@ use anyhow::{Context, Result};
 use std::collections::VecDeque;
 
 impl Sodg {
-    /// Attempts to collect the vertex.
+    /// Attempt to collect the vertex (delete it from the graph).
     ///
     /// If there are no edges leading to it, then it is deleted and all its children are collected.
     /// Otherwise, nothing happens.

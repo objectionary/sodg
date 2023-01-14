@@ -27,7 +27,9 @@ use log::trace;
 use rstest::rstest;
 
 impl Sodg {
-    /// Add a new vertex `v1` to the Sodg:
+    /// Add a new vertex `v1` to itself.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Sodg;
@@ -48,11 +50,11 @@ impl Sodg {
         Ok(())
     }
 
-    /// Makes an edge `e1` from vertex `v1` to vertex `v2` and puts `a` label on it.
+    /// Make an edge `e1` from vertex `v1` to vertex `v2` and put `a` label on it.
     ///
     /// If the
     /// label is not equal to `"ρ"`, makes two backward edges from `v2` to `v1`
-    /// and label them as `"ρ"` an `"𝜎"`.
+    /// and label them as `"ρ"` an `"𝜎"`. For example:
     ///
     /// ```
     /// use sodg::Sodg;
@@ -90,6 +92,8 @@ impl Sodg {
 
     /// Set vertex data.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// use sodg::Sodg;
@@ -111,6 +115,8 @@ impl Sodg {
     }
 
     /// Read vertex data, and then submit the vertex to garbage collection.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Hex;
@@ -146,6 +152,8 @@ impl Sodg {
     }
 
     /// Find all kids of a vertex.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Sodg;
@@ -189,6 +197,8 @@ impl Sodg {
 
     /// Find a kid of a vertex, by its edge name.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
@@ -227,6 +237,8 @@ impl Sodg {
 
     /// Find a kid of a vertex, by its edge name, and return the ID of the vertex
     /// found and the locator of the edge.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Sodg;
@@ -288,7 +300,7 @@ impl Sodg {
         }
     }
 
-    /// Check whether data is there.
+    /// Check whether data is in the vertex.
     ///
     /// With this method you can check whether the data is in the vertex:
     ///

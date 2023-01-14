@@ -27,10 +27,10 @@ use std::path::Path;
 use std::time::Instant;
 
 impl Sodg {
-    /// Save the entire Sodg into a binary file.
+    /// Save the entire [`Sodg`] into a binary file.
     ///
-    /// The entire Sodg
-    /// can be restored from the file. Returns the size of the file just saved.
+    /// The entire [`Sodg`] can be restored from the file.
+    /// The function returns the size of the file just saved.
     pub fn save(&mut self, path: &Path) -> Result<usize> {
         let start = Instant::now();
         let bytes: Vec<u8> = serialize(self).context("Failed to serialize")?;
@@ -45,7 +45,7 @@ impl Sodg {
         Ok(size)
     }
 
-    /// Load the entire Sodg from a binary file previously
+    /// Load the entire [`Sodg`] from a binary file previously
     /// created by `save()`.
     pub fn load(path: &Path) -> Result<Sodg> {
         let start = Instant::now();

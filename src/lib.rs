@@ -114,7 +114,7 @@ pub trait Relay {
 
 /// A [`Relay`] that doesn't even try to find anything, but returns an error.
 ///
-/// If you don't know what relay to use, use [`DeadRelay::new()`].
+/// If you don't know what [`Relay`] to use, use [`DeadRelay::new()`].
 pub struct DeadRelay {}
 
 /// A [`Relay`] that is made of a lambda function.
@@ -123,7 +123,7 @@ pub struct DeadRelay {}
 /// is not found, `a` is the name of the attribute, `b` is the optional locator
 /// of the attribute. The function must return a new locator where the
 /// search algorithm must continue. It can be just a name of a new attribute,
-/// or an absolute locator with dots inside.
+/// or an absolute locator (starting from `"ν"`) with dots inside.
 pub struct LambdaRelay {
     lambda: fn(u32, &str, &str) -> Result<String>,
 }

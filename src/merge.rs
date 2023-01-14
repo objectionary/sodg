@@ -23,7 +23,7 @@ use log::debug;
 use std::collections::HashMap;
 
 impl Sodg {
-    /// Merge this new graph into itself.
+    /// Merge another graph into itself.
     pub fn merge(&mut self, g: &Sodg) {
         let mut matcher: HashMap<u32, u32> = HashMap::new();
         let mut next = self.next_id();

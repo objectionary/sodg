@@ -27,8 +27,7 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::str::FromStr;
 
-/// A wrapper of a plain text with graph-modifying
-/// instructions.
+/// A wrapper of a plain text with graph-modifying instructions.
 ///
 /// For example, you can pass the following instructions to it:
 ///
@@ -76,12 +75,12 @@ impl Script {
         }
     }
 
-    /// Make a new one, parsing a `String` with instructions.
+    /// Make a new one, parsing a [`String`] with instructions.
     pub fn from_string(s: String) -> Script {
         Script::from_str(s.as_str())
     }
 
-    /// Deploy the entire script to the SODG.
+    /// Deploy the entire script to the [`Sodg`].
     pub fn deploy_to(&mut self, g: &mut Sodg) -> Result<usize> {
         let mut pos = 0;
         for cmd in self.commands().iter() {
@@ -93,7 +92,7 @@ impl Script {
         Ok(pos)
     }
 
-    /// Get all commands
+    /// Get all commands.
     fn commands(&self) -> Vec<String> {
         lazy_static! {
             static ref STRIP_COMMENTS: Regex = Regex::new("#.*\n").unwrap();
@@ -108,7 +107,7 @@ impl Script {
             .collect()
     }
 
-    /// Deploy a single command to the sodg.
+    /// Deploy a single command to the [`Sodg`].
     fn deploy_one(&mut self, cmd: &str, g: &mut Sodg) -> Result<()> {
         lazy_static! {
             static ref LINE: Regex = Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap();
@@ -161,7 +160,7 @@ impl Script {
         }
     }
 
-    /// Parses `$ν5` into `5`, and `ν23` into `23`, and `42` into `42`.
+    /// Parse `$ν5` into `5`, and `ν23` into `23`, and `42` into `42`.
     fn parse(&mut self, s: &str, g: &mut Sodg) -> Result<u32> {
         let head = s.chars().next().context("Empty identifier".to_string())?;
         if head == '$' || head == 'ν' {

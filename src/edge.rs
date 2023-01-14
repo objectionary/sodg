@@ -20,7 +20,7 @@
 
 use crate::{Deserialize, Serialize};
 
-/// Edge between vertices in the graph.
+/// An edge between vertices in the graph.
 #[derive(Clone, Serialize, Deserialize, Eq, PartialOrd, PartialEq, Ord)]
 pub(crate) struct Edge {
     pub to: u32,

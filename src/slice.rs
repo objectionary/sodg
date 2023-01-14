@@ -24,7 +24,7 @@ use anyhow::Result;
 use std::collections::{HashMap, HashSet};
 
 impl Sodg {
-    /// Take a slice of the Sodg, keeping only the vertex specified
+    /// Take a slice of the graph, keeping only the vertex specified
     /// by the locator.
     pub fn slice(&mut self, loc: &str) -> Result<Sodg> {
         let mut todo = HashSet::new();

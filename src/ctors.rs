@@ -23,7 +23,7 @@ use rstest::rstest;
 use std::collections::HashMap;
 
 impl Sodg {
-    /// Makes an empty Sodg, with no vertices and no edges.
+    /// Make an empty [`Sodg`], with no vertices and no edges.
     pub fn empty() -> Self {
         let mut g = Sodg {
             vertices: HashMap::new(),
