@@ -12,11 +12,11 @@
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/objectionary/sodg/blob/master/LICENSE.txt)
 [![docs.rs](https://img.shields.io/docsrs/sodg)](https://docs.rs/sodg/latest/sodg/)
 
-This Rust library helps you build a Surging Object DiGraph (SODG) for
-[reo](https://github.com/objectionary/reo) compiler of
+This Rust library implements a Surging Object DiGraph (SODG) for
+[reo](https://github.com/objectionary/reo) virtual machine for
 [EO](https://www.eolang.org) programs.
 
-Create a graph:
+Here is how you can create a di-graph:
 
 ```rust
 use sodg::Sodg;
@@ -24,27 +24,32 @@ use sodg::Hex;
 let mut g = Sodg::empty();
 g.add(0)?; // add a vertex no.0
 g.add(1)?; // add a vertex no.1
-g.bind(0, 1, "foo")?; // connect v0 to v1 with label "foo"
+g.bind(0, 1, "foo/bar")?; // connect v0 to v1 with label "foo"
 g.put(1, Hex::from_str_bytes("Hello, world!"))?; // attach data to v1
 ```
 
-You can find a vertex by the label of an edge departing from another vertex:
+Then, you can find a vertex by the label of an edge departing from another vertex:
 
 ```rust
-let id = g.kid(0, "foo")?; // returns 1
+let id = g.kid(0, "foo")?;
+assert_eq!(1, id);
 ```
 
-You can find all kids of a vertex:
+Then, you can find all kids of a vertex:
 
 ```rust
 let kids: Vec<(String, String, u32)> = g.kids(0);
+assert_eq!("foo", kids[0].0);
+assert_eq!("bar", kids[0].1);
+assert_eq!(1, kids[0].2);
 ```
 
-You can read the data of a vertex:
+Then, you can read the data of a vertex:
 
 ```rust
 let hex: Hex = g.data(1)?;
 let num: i64 = hex.to_i64()?;
+assert_eq!(42, num);
 ```
 
 Then, you can print the graph:
@@ -54,6 +59,8 @@ println!("{:?}", g);
 ```
 
 Also, you can serialize and deserialize the graph.
+
+Read [the documentation](https://docs.rs/sodg/latest/sodg/).
 
 ## How to Contribute
 
