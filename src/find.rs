@@ -98,6 +98,19 @@ impl Sodg {
     /// If searching algorithm fails to find the destination,
     /// an `Err` will be returned.
     pub fn find<T: Relay>(&self, v1: u32, loc: &str, relay: &T) -> Result<u32> {
+        self.find_with_indent(v1, loc, relay, "")
+    }
+
+    /// Find a vertex, printing the log with an indentation prefix.
+    ///
+    /// This function is used only by [`Sodg::find].
+    fn find_with_indent<T: Relay>(
+        &self,
+        v1: u32,
+        loc: &str,
+        relay: &T,
+        indent: &str,
+    ) -> Result<u32> {
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
         loc.split('.')
@@ -120,8 +133,10 @@ impl Sodg {
             };
             let redirect = relay.re(v, &k);
             let failure = if let Ok(re) = redirect {
-                if let Ok(to) = self.find(v, re.as_str(), relay) {
-                    trace!("#find: ν{v}.{k} redirect to ν{to} (re: {re})");
+                let mut ind = indent.to_owned();
+                ind.push_str("▷ ");
+                if let Ok(to) = self.find_with_indent(v, re.as_str(), relay, ind.as_str()) {
+                    trace!("#find: {indent}ν{v}.{k} redirect to ν{to} (re: {re})");
                     v = to;
                     continue;
                 }
@@ -139,12 +154,11 @@ impl Sodg {
                 .map(|e| e.a.clone())
                 .collect();
             return Err(anyhow!(
-                "Can't find .{k} in ν{v} among [{}]: {} ({failure})",
-                others.len(),
+                "Can't find ν{v}.{k} among [{}]: ({failure})",
                 others.join(", ")
             ));
         }
-        trace!("#find: ν{v1}.{loc} -> ν{v}");
+        trace!("#find: {indent}ν{v1}.{loc} → ν{v}");
         Ok(v)
     }
 }

@@ -84,7 +84,7 @@ impl Sodg {
             .context(format!("Can't arrive at ν{v2}, it's absent"))?;
         vtx2.parents.insert(v1);
         self.validate(vec![v1, v2])?;
-        trace!("#bind: edge added ν{}-{}->ν{}", v1, a, v2);
+        trace!("#bind: edge added ν{}.{} → ν{}", v1, a, v2);
         Ok(())
     }
 
