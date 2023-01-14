@@ -102,8 +102,7 @@ pub struct Sodg {
 /// The finding algorithm asks the relay for the name of the attribute to use instead
 /// of the not found one, which is provided as the `a` argument to the relay. The
 /// `v` argument provided to the relay is the ID of the vertex
-/// where the attribute `a` is not found. The `b` argument
-/// is the locator of the not found attribute.
+/// where the attribute `a` is not found.
 ///
 /// A relay may return a new vertex ID as a string `"ν42"`, for example.
 /// Pretty much anything that the relay returns will be used
@@ -112,16 +111,15 @@ pub trait Relay {
     /// A method to be called when the searching algorithm
     /// fails to find the required attribute.
     ///
-    /// The method must accept three arguments:
+    /// The method must accept two arguments:
     /// 1) the ID of the vertex where the search algorithm found a problem,
-    /// 2) the head of the edge it is trying to find,
-    /// 3) the tail of the edge (may be empty).
+    /// 2) the name of the edge it is trying to find.
     ///
     /// The method must return a new locator, which the algorithm will use.
     /// If it is just a string, it will be treated as a name of the attribute to
     /// try instead. If it starts from `"ν"`, it is treated as an absolute
     /// locator on the entire graph.
-    fn re(&self, v: u32, a: &str, b: &str) -> Result<String>;
+    fn re(&self, v: u32, a: &str) -> Result<String>;
 }
 
 /// A [`Relay`] that doesn't even try to find anything, but returns an error.
@@ -131,13 +129,14 @@ pub struct DeadRelay {}
 
 /// A [`Relay`] that is made of a lambda function.
 ///
-/// The function must accept three arguments: `v` is the ID of the vertex where an attribute
-/// is not found, `a` is the name of the attribute, `b` is the optional locator
-/// of the attribute. The function must return a new locator where the
+/// The function must accept two arguments:
+/// 1) `v` is the ID of the vertex where an attribute is not found,
+/// and 2) `a` is the name of the attribute.
+/// The function must return a new locator where the
 /// search algorithm must continue. It can be just a name of a new attribute,
 /// or an absolute locator (starting from `"ν"`) with dots inside.
 pub struct LambdaRelay {
-    lambda: fn(u32, &str, &str) -> Result<String>,
+    lambda: fn(u32, &str) -> Result<String>,
 }
 
 #[cfg(test)]

@@ -26,8 +26,8 @@ use std::collections::VecDeque;
 use std::str::FromStr;
 
 impl Relay for DeadRelay {
-    fn re(&self, v: u32, a: &str, b: &str) -> Result<String> {
-        Err(anyhow!("Can't find {a}/{b} at ν{v}"))
+    fn re(&self, v: u32, a: &str) -> Result<String> {
+        Err(anyhow!("Can't find ν{v}.{a}"))
     }
 }
 
@@ -52,21 +52,21 @@ impl LambdaRelay {
     ///
     /// The function must accept three arguments:
     /// 1) the ID of the vertex where the search algorithm found a problem,
-    /// 2) the head of the edge it is trying to find,
-    /// 3) the tail of the edge (may be empty). The function must
-    /// return a new locator, which the algorithm will use. If it is just
+    /// 2) the name of the edge it is trying to find.
+    /// The function must return a new locator,
+    /// which the algorithm will use. If it is just
     /// a string, it will be treated as a name of the attribute to
     /// try instead. If it starts from `"ν"`, it is treated as an absolute
     /// locator on the entire graph.
     #[allow(dead_code)]
-    pub fn new(lambda: fn(u32, &str, &str) -> Result<String>) -> Self {
+    pub fn new(lambda: fn(u32, &str) -> Result<String>) -> Self {
         LambdaRelay { lambda }
     }
 }
 
 impl Relay for LambdaRelay {
-    fn re(&self, v: u32, a: &str, b: &str) -> Result<String> {
-        (self.lambda)(v, a, b)
+    fn re(&self, v: u32, a: &str) -> Result<String> {
+        (self.lambda)(v, a)
     }
 }
 
@@ -86,9 +86,8 @@ impl Sodg {
     /// g.add(1).unwrap();
     /// g.bind(0, 1, "foo").unwrap();
     /// assert!(g.find(0, "bar", &DeadRelay::default()).is_err());
-    /// let v = g.find(0, "bar", &LambdaRelay::new(|v, a, b| {
+    /// let v = g.find(0, "bar", &LambdaRelay::new(|v, a| {
     ///   assert_eq!(a, "bar");
-    ///   assert_eq!(b, "");
     ///   Ok("foo".to_string())
     /// })).unwrap();
     /// assert_eq!(1, v);
@@ -119,8 +118,7 @@ impl Sodg {
                 v = to;
                 continue;
             };
-            let (head, tail) = Self::split_a(&k);
-            let redirect = relay.re(v, &head, &tail);
+            let redirect = relay.re(v, &k);
             let failure = if let Ok(re) = redirect {
                 if let Ok(to) = self.find(v, re.as_str(), relay) {
                     trace!("#find: ν{v}.{k} -> ν{to} (re: {re})");
@@ -163,12 +161,12 @@ fn finds_with_closure() -> Result<()> {
         3,
         g.find(
             1,
-            "first.second/abc",
-            &mut LambdaRelay::new(|v, a, b| {
-                if v == 1 && !b.is_empty() {
+            "first.second",
+            &mut LambdaRelay::new(|v, a| {
+                if v == 1 && !a.is_empty() {
                     panic!();
                 }
-                if v == 2 && a == "second" && b == "abc" {
+                if v == 2 && a == "second" {
                     Ok("something_else".to_string())
                 } else {
                     Ok("".to_string())
@@ -199,9 +197,8 @@ fn closure_return_absolute_vertex() -> Result<()> {
         g.find(
             0,
             "bar",
-            &mut LambdaRelay::new(|_v, a, b| {
+            &mut LambdaRelay::new(|_v, a| {
                 assert_eq!(a, "bar");
-                assert_eq!(b, "");
                 Ok("ν1".to_string())
             }),
         )?
@@ -226,7 +223,7 @@ impl FakeRelay {
 
 #[cfg(test)]
 impl Relay for FakeRelay {
-    fn re(&self, _v: u32, _a: &str, _b: &str) -> Result<String> {
+    fn re(&self, _v: u32, _a: &str) -> Result<String> {
         let cp = self as *const Self;
         let mp = cp as *mut Self;
         unsafe {
