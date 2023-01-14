@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{SafeRelay, Sodg};
-use crate::{DeadRelay, LambdaRelay, Relay};
+use crate::{Sodg, DeadRelay, LambdaRelay, Relay};
 use anyhow::{anyhow, Context, Result};
 use log::trace;
 use std::collections::VecDeque;
