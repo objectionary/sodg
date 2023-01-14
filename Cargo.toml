@@ -1,6 +1,6 @@
 [package]
 name = "sodg"
-version = "0.0.0"
+version = "0.0.21"
 edition = "2021"
 repository = "https://github.com/objectionary/sodg"
 description = "Surging Object DiGraph (SODG)"
