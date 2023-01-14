@@ -98,7 +98,7 @@ impl Sodg {
     /// If searching algorithm fails to find the destination,
     /// an `Err` will be returned.
     pub fn find<T: Relay>(&self, v1: u32, loc: &str, relay: &T) -> Result<u32> {
-        self.find_with_indent(v1, loc, relay, "")
+        self.find_with_indent(v1, loc, relay, 0)
     }
 
     /// Find a vertex, printing the log with an indentation prefix.
@@ -109,13 +109,17 @@ impl Sodg {
         v1: u32,
         loc: &str,
         relay: &T,
-        indent: &str,
+        depth: usize,
     ) -> Result<u32> {
+        if depth > 16 {
+            return Err(anyhow!("Nesting depth {depth} is too big"));
+        }
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
         loc.split('.')
             .filter(|k| !k.is_empty())
             .for_each(|k| locator.push_back(k.to_string()));
+        let indent = "▷ ".repeat(depth);
         loop {
             let next = locator.pop_front();
             if next.is_none() {
@@ -134,9 +138,7 @@ impl Sodg {
             trace!("#find(ν{v1}, {loc}): {indent}calling relay(ν{v}, {k})...");
             let redirect = relay.re(v, &k);
             let fault = if let Ok(re) = redirect {
-                let mut ind = indent.to_owned();
-                ind.push_str("▷ ");
-                if let Ok(to) = self.find_with_indent(v, re.as_str(), relay, ind.as_str()) {
+                if let Ok(to) = self.find_with_indent(v, re.as_str(), relay, depth + 1) {
                     trace!("#find(ν{v1}, {loc}): {indent}ν{v}.{k} relayed to ν{to} (re: {re})");
                     v = to;
                     continue;
