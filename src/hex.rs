@@ -70,6 +70,8 @@ impl Display for Hex {
 impl Hex {
     /// Make an empty `Hex`.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::empty();
@@ -81,6 +83,8 @@ impl Hex {
     }
 
     /// Take the bytes contained.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Hex;
@@ -96,6 +100,8 @@ impl Hex {
 
     /// Count, how many bytes are in there.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::empty();
@@ -109,6 +115,8 @@ impl Hex {
     }
 
     /// Create a new [`Hex`] from slice, in appropriate mode.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Hex;
@@ -134,6 +142,8 @@ impl Hex {
 
     /// Create a new [`Hex`] from `Vec<u8>`.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::from_vec(vec![0xCA, 0xFE]);
@@ -149,6 +159,8 @@ impl Hex {
 
     /// Create a new [`Hex`] from `String`.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::from_string_bytes("Ура!".to_string());
@@ -159,6 +171,8 @@ impl Hex {
     }
 
     /// Create a new [`Hex`] from the bytes composing `&str`.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Hex;
@@ -171,6 +185,8 @@ impl Hex {
 
     /// Is it empty and has no data (not a single byte)?
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::from_vec(vec![]);
@@ -182,6 +198,8 @@ impl Hex {
 
     /// Turn it into `bool`.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::from_vec([0x01].to_vec());
@@ -192,6 +210,8 @@ impl Hex {
     }
 
     /// Turn it into `i64`.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Hex;
@@ -208,6 +228,8 @@ impl Hex {
 
     /// Turn it into `f64`.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::from_vec([0x40, 0x09, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18].to_vec());
@@ -223,6 +245,8 @@ impl Hex {
 
     /// Turn it into `String` in UTF-8 encoding.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::from_vec([0x41, 0x42].to_vec());
@@ -236,6 +260,8 @@ impl Hex {
     }
 
     /// Turn it into a hexadecimal string.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Hex;
@@ -277,6 +303,8 @@ impl Hex {
 
     /// Take one byte.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::from_str_bytes("你好");
@@ -290,6 +318,8 @@ impl Hex {
     /// Skip a few bytes at the beginning and return the rest
     /// as a new instance of `Hex`.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::from_str_bytes("Hello, world!");
@@ -300,6 +330,8 @@ impl Hex {
     }
 
     /// Create a new `Hex`, which is a concatenation of `self` and `h`.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Hex;
@@ -334,6 +366,8 @@ impl Hex {
 impl From<i64> for Hex {
     /// Make a new `Hex` from `i64`.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::from(65536);
@@ -346,6 +380,8 @@ impl From<i64> for Hex {
 
 impl From<f64> for Hex {
     /// Make a new `Hex` from `f64`.
+    ///
+    /// For example:
     ///
     /// ```
     /// use std::f64::consts::PI;
@@ -360,6 +396,8 @@ impl From<f64> for Hex {
 
 impl From<bool> for Hex {
     /// Create a new [`Hex`] from `bool`.
+    ///
+    /// For example:
     ///
     /// ```
     /// use sodg::Hex;

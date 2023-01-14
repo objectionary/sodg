@@ -25,6 +25,8 @@ impl Sodg {
     ///
     /// Emptiness means that not a single vertex is in the graph.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Sodg;
     /// let mut sodg = Sodg::empty();

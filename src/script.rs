@@ -57,6 +57,8 @@ impl Script {
     /// 2) a variable started with `$`, 3) an attribute name, or
     /// 4) data in `XX-XX-...` hexadecimal format.
     ///
+    /// For example:
+    ///
     /// ```
     /// use sodg::Script;
     /// use sodg::Sodg;

@@ -5,8 +5,9 @@ use std::collections::VecDeque;
 impl Sodg {
     /// Attempt to collect the vertex (delete it from the graph).
     ///
-    /// If there are no edges leading to it, then it is deleted and all its children are collected.
-    /// Otherwise, nothing happens.
+    /// If there are no edges leading to it, then it is deleted and
+    /// all its children are collected.
+    /// Otherwise, nothing happens. For example:
     ///
     /// ```
     /// use sodg::{Hex, Sodg};

@@ -52,9 +52,7 @@ impl Sodg {
 
     /// Make an edge `e1` from vertex `v1` to vertex `v2` and put `a` label on it.
     ///
-    /// If the
-    /// label is not equal to `"ρ"`, makes two backward edges from `v2` to `v1`
-    /// and label them as `"ρ"` an `"𝜎"`. For example:
+    /// For example:
     ///
     /// ```
     /// use sodg::Sodg;
@@ -71,7 +69,7 @@ impl Sodg {
     ///
     /// If `v1` equals to `v2`, an `Err` will be returned.
     ///
-    /// The label `a` can't be empty. If it's empty, an `Err` will be returned.
+    /// The label `a` can't be empty. If it is empty, an `Err` will be returned.
     pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
         let vtx1 = self
             .vertices

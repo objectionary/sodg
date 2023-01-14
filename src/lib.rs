@@ -70,7 +70,7 @@ pub(crate) use crate::vertex::Vertex;
 /// A struct that represents a Surging Object DiGraph (SODG).
 ///
 /// You add vertices to it, bind them one to one with edges,
-/// put data into some of them, and read data back:
+/// put data into some of them, and read data back, for example:
 ///
 /// ```
 /// use sodg::Sodg;

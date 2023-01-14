@@ -72,8 +72,7 @@ impl Sodg {
 
     /// Check all alerts for the given list of vertices.
     ///
-    /// If any of them
-    /// have any issues, `Err` is returned.
+    /// If any of them have any issues, `Err` is returned.
     pub fn validate(&self, vx: Vec<u32>) -> Result<()> {
         if self.alerts_active {
             for a in self.alerts.iter() {
