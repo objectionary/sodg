@@ -85,8 +85,8 @@ impl Sodg {
     /// g.add(0).unwrap();
     /// g.add(1).unwrap();
     /// g.bind(0, 1, "foo").unwrap();
-    /// assert!(g.find(0, "bar", &mut DeadRelay::default()).is_err());
-    /// let v = g.find(0, "bar", &mut LambdaRelay::new(|v, a, b| {
+    /// assert!(g.find(0, "bar", &DeadRelay::default()).is_err());
+    /// let v = g.find(0, "bar", &LambdaRelay::new(|v, a, b| {
     ///   assert_eq!(a, "bar");
     ///   assert_eq!(b, "");
     ///   Ok("foo".to_string())
