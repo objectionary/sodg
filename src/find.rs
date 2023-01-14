@@ -141,9 +141,8 @@ impl Sodg {
                 .map(|e| e.a.clone())
                 .collect();
             return Err(anyhow!(
-                "Can't find .{k} in ν{v} among other {} attribute{}: {} ({failure})",
+                "Can't find .{k} in ν{v} among [{}]: {} ({failure})",
                 others.len(),
-                if others.len() == 1 { "" } else { "s" },
                 others.join(", ")
             ));
         }
