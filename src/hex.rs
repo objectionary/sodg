@@ -100,12 +100,20 @@ impl Hex {
 
     /// Count, how many bytes are in there.
     ///
-    /// For example:
+    /// For example, an empty [`Hex`] has zero bytes:
     ///
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::empty();
     /// assert_eq!(0, d.len());
+    /// ```
+    ///
+    /// A non-empty [`Hex`] with an `i64` inside has eight bytes:
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from(42);
+    /// assert_eq!(8, d.len());
     /// ```
     pub fn len(&self) -> usize {
         match self {

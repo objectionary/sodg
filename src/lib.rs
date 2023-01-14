@@ -109,6 +109,18 @@ pub struct Sodg {
 /// Pretty much anything that the relay returns will be used
 /// as a new search string, starting from the `v` vertex.
 pub trait Relay {
+    /// A method to be called when the searching algorithm
+    /// fails to find the required attribute.
+    ///
+    /// The method must accept three arguments:
+    /// 1) the ID of the vertex where the search algorithm found a problem,
+    /// 2) the head of the edge it is trying to find,
+    /// 3) the tail of the edge (may be empty).
+    ///
+    /// The method must return a new locator, which the algorithm will use.
+    /// If it is just a string, it will be treated as a name of the attribute to
+    /// try instead. If it starts from `"ν"`, it is treated as an absolute
+    /// locator on the entire graph.
     fn re(&self, v: u32, a: &str, b: &str) -> Result<String>;
 }
 
