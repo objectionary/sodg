@@ -95,14 +95,21 @@ impl Sodg {
                     }
                     if e.a.contains(' ') {
                         errors.push(format!(
-                            "Edge label from ν{} to ν{} has prohibited spaces",
-                            v, e.to
+                            "Edge label from ν{} to ν{} has prohibited spaces: '{}'",
+                            v, e.to, e.a
                         ));
                     }
-                    if e.a.split('/').count() > 2 {
+                    let parts: Vec<&str> = e.a.split('/').collect();
+                    if parts.len() > 2 {
                         errors.push(format!(
-                            "Edge label from ν{} to ν{} has more than one slash",
-                            v, e.to
+                            "Edge label from ν{} to ν{} has more than one slash: '{}'",
+                            v, e.to, e.a
+                        ));
+                    }
+                    if parts[0].contains('.') {
+                        errors.push(format!(
+                            "Edge label from ν{} to ν{} has a dot inside: '{}'",
+                            v, e.to, e.a
                         ));
                     }
                 }
@@ -141,6 +148,17 @@ fn prohibits_empty_labels() -> Result<()> {
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "")?;
+    assert!(g.alerts_on().is_err());
+    Ok(())
+}
+
+#[test]
+fn prohibits_labels_with_dot() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.alerts_off();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "a.b")?;
     assert!(g.alerts_on().is_err());
     Ok(())
 }
