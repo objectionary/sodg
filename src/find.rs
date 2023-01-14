@@ -178,7 +178,7 @@ impl Sodg {
                 }
                 format!("re to '{re}' didn't help")
             } else {
-                redirect.err().unwrap().to_string()
+                format!("Err: {}", redirect.err().unwrap())
             };
             let others: Vec<String> = self
                 .vertices
