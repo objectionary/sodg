@@ -132,11 +132,11 @@ impl Sodg {
                 continue;
             };
             let redirect = relay.re(v, &k);
-            let failure = if let Ok(re) = redirect {
+            let fault = if let Ok(re) = redirect {
                 let mut ind = indent.to_owned();
                 ind.push_str("▷ ");
                 if let Ok(to) = self.find_with_indent(v, re.as_str(), relay, ind.as_str()) {
-                    trace!("#find: {indent}ν{v}.{k} redirect to ν{to} (re: {re})");
+                    trace!("#find: {indent}ν{v}.{k} relay to ν{to} (re: {re})");
                     v = to;
                     continue;
                 }
@@ -154,7 +154,7 @@ impl Sodg {
                 .map(|e| e.a.clone())
                 .collect();
             return Err(anyhow!(
-                "Can't find ν{v}.{k} among [{}]: ({failure})",
+                "Can't find ν{v}.{k} among [{}]: ({fault})",
                 others.join(", ")
             ));
         }
