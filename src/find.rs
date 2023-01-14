@@ -169,18 +169,19 @@ impl Sodg {
                 continue;
             };
             trace!("#find(ν{v1}, {loc}): {indent}calling relay(ν{v}, {k})...");
-            let redirect = relay.re(v, &k);
-            let fault = if let Ok(re) = redirect {
-                if let Ok(to) = self.find_with_indent(v, re.as_str(), relay, depth + 1) {
-                    trace!("#find(ν{v1}, {loc}): {indent}ν{v}.{k} relayed to ν{to} (re: {re})");
-                    v = to;
-                    continue;
+            let fault = match relay.re(v, &k) {
+                Ok(re) => {
+                    if let Ok(to) = self.find_with_indent(v, re.as_str(), relay, depth + 1) {
+                        trace!("#find(ν{v1}, {loc}): {indent}ν{v}.{k} relayed to ν{to} (re: {re})");
+                        v = to;
+                        continue;
+                    }
+                    format!("re to '{re}' didn't help")
                 }
-                format!("re to '{re}' didn't help")
-            } else {
-                let msg = redirect.err().unwrap();
-                trace!("#find(ν{v1}, {loc}): !{}", msg);
-                format!("error: {}", msg)
+                Err(err) => {
+                    trace!("#find(ν{v1}, {loc}): !{}", err);
+                    format!("error: {}", err)
+                }
             };
             let others: Vec<String> = self
                 .vertices
