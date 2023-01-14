@@ -92,7 +92,6 @@ impl Sodg {
         loop {
             let next = locator.pop_front();
             if next.is_none() {
-                trace!("#find: end of locator, we are at ν{v}");
                 break;
             }
             let k = next.unwrap().to_string();
@@ -102,11 +101,9 @@ impl Sodg {
             if k.starts_with('ν') {
                 let num: String = k.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
                 v = u32::from_str(num.as_str())?;
-                trace!("#find: jumping directly to ν{v}");
                 continue;
             }
             if let Some(to) = self.kid(v, k.as_str()) {
-                trace!("#find: ν{v}.{k} -> ν{to}");
                 v = to;
                 continue;
             };
@@ -114,7 +111,7 @@ impl Sodg {
             let redirect = relay.re(v, &head, &tail);
             let failure = if let Ok(re) = redirect {
                 if let Ok(to) = self.find(v, re.as_str(), relay) {
-                    trace!("#find: ν{v}.{k} -> ν{to} (redirect to '{re}')");
+                    trace!("#find: ν{v}.{k} -> ν{to} (redirect to {re})");
                     v = to;
                     continue;
                 }
@@ -132,15 +129,13 @@ impl Sodg {
                 .map(|e| e.a.clone())
                 .collect();
             return Err(anyhow!(
-                "Can't find .{} in ν{} among other {} attribute{}: {} ({failure})",
-                k,
-                v,
+                "Can't find .{k} in ν{v} among other {} attribute{}: {} ({failure})",
                 others.len(),
                 if others.len() == 1 { "" } else { "s" },
                 others.join(", ")
             ));
         }
-        trace!("#find: found ν{v} by '{loc}'");
+        trace!("#find: ν{v1}.{loc} -> ν{v}");
         Ok(v)
     }
 }
