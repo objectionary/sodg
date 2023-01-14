@@ -120,7 +120,12 @@ impl Sodg {
             .filter(|k| !k.is_empty())
             .for_each(|k| locator.push_back(k.to_string()));
         let indent = "▷ ".repeat(depth);
+        let mut jumps = 0;
         loop {
+            jumps += 1;
+            if jumps > 100 {
+                return Err(anyhow!("Too many jumps ({jumps})"));
+            }
             let next = locator.pop_front();
             if next.is_none() {
                 break;
@@ -161,7 +166,7 @@ impl Sodg {
                 others.join(", ")
             ));
         }
-        trace!("#find(ν{v1}, {loc}): {indent}found ν{v}");
+        trace!("#find(ν{v1}, {loc}): {indent}found ν{v} in {jumps} jumps");
         Ok(v)
     }
 }
