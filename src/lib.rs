@@ -23,8 +23,10 @@
 //! modifications comping from a user (through [`Sodg::add`],
 //! [`Sodg::bind`], and [`Sodg::put`]) and then decides itself when
 //! it's time to delete some vertices (something similar to
-//! "garbage collection"). For example, here is how you create a simple
-//! graph with two vertices and an edge between them:
+//! "garbage collection").
+//!
+//! For example, here is how you create a simple
+//! di-graph with two vertices and an edge between them:
 //!
 //! ```
 //! use sodg::Sodg;
@@ -65,7 +67,7 @@ pub use crate::hex::Hex;
 pub use crate::script::Script;
 pub(crate) use crate::vertex::Vertex;
 
-/// This struct represents a Surging Object DiGraph (SODG).
+/// A struct that represents a Surging Object DiGraph (SODG).
 ///
 /// You add vertices to it, bind them one to one with edges,
 /// put data into some of them, and read data back:
@@ -110,12 +112,12 @@ pub trait Relay {
     fn re(&self, v: u32, a: &str, b: &str) -> Result<String>;
 }
 
-/// This `Relay` doesn't even try to find anything, but returns an error.
+/// A [`Relay`] that doesn't even try to find anything, but returns an error.
 ///
 /// If you don't know what relay to use, use [`DeadRelay::new()`].
 pub struct DeadRelay {}
 
-/// This `Relay` can be made of a lambda function.
+/// A [`Relay`] that is made of a lambda function.
 ///
 /// The function must accept three arguments: `v` is the ID of the vertex where an attribute
 /// is not found, `a` is the name of the attribute, `b` is the optional locator

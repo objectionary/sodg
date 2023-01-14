@@ -23,7 +23,7 @@ use anyhow::{Context, Result};
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
 
-/// It is an object-oriented representation of binary data
+/// An object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
 ///
 /// You can create it from Rust primitives:

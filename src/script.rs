@@ -27,8 +27,10 @@ use regex::Regex;
 use std::collections::HashMap;
 use std::str::FromStr;
 
-/// It is a wrapper of a plain text with graph-modifying
-/// instructions, for example:
+/// A wrapper of a plain text with graph-modifying
+/// instructions.
+///
+/// For example, you can pass the following instructions to it:
 ///
 /// ```text
 /// ADD(0);

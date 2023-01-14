@@ -92,7 +92,6 @@ fn collects_complicated_graph() -> Result<()> {
     for i in 1..=5 {
         g.data(i)?;
     }
-    // g.collect(1)?;
     assert!(g.is_empty());
     Ok(())
 }
