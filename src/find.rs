@@ -98,7 +98,7 @@ impl Sodg {
     /// an `Err` will be returned.
     pub fn find<T: Relay>(&self, v1: u32, loc: &str, relay: &T) -> Result<u32> {
         #[cfg(feature = "sober")]
-        let badge = format!("{v1}.{loc}");
+        let badge = format!("ν{v1}.{loc}");
         #[cfg(feature = "sober")]
         {
             if self.finds.contains(&badge) {
@@ -178,7 +178,9 @@ impl Sodg {
                 }
                 format!("re to '{re}' didn't help")
             } else {
-                format!("Err: {}", redirect.err().unwrap())
+                let msg = redirect.err().unwrap();
+                trace!("#find(ν{v1}, {loc}): !{}", msg);
+                format!("error: {}", msg)
             };
             let others: Vec<String> = self
                 .vertices
@@ -322,6 +324,8 @@ fn handles_endless_recursion_gracefully() -> Result<()> {
     let mut g: Sodg = Sodg::empty();
     g.add(0).unwrap();
     let r = &g;
-    assert!(g.find(0, "foo", &RecursiveRelay::new(r)).is_err());
+    let ret = g.find(0, "foo", &RecursiveRelay::new(r));
+    assert!(ret.is_err());
+    assert!(ret.err().unwrap().to_string().contains("recursive call"));
     Ok(())
 }
