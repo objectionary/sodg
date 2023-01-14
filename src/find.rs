@@ -131,12 +131,13 @@ impl Sodg {
                 v = to;
                 continue;
             };
+            trace!("#find(ν{v1}, {loc}): {indent}calling relay(ν{v}, {k})...");
             let redirect = relay.re(v, &k);
             let fault = if let Ok(re) = redirect {
                 let mut ind = indent.to_owned();
                 ind.push_str("▷ ");
                 if let Ok(to) = self.find_with_indent(v, re.as_str(), relay, ind.as_str()) {
-                    trace!("#find: {indent}ν{v}.{k} relay to ν{to} (re: {re})");
+                    trace!("#find(ν{v1}, {loc}): {indent}ν{v}.{k} relayed to ν{to} (re: {re})");
                     v = to;
                     continue;
                 }
@@ -158,7 +159,7 @@ impl Sodg {
                 others.join(", ")
             ));
         }
-        trace!("#find: {indent}ν{v1}.{loc} → ν{v}");
+        trace!("#find(ν{v1}, {loc}): {indent}found ν{v}");
         Ok(v)
     }
 }
