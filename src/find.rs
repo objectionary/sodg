@@ -110,9 +110,6 @@ impl Sodg {
                 break;
             }
             let k = next.unwrap().to_string();
-            if k.is_empty() {
-                return Err(anyhow!("System error, the locator is empty"));
-            }
             if k.starts_with('ν') {
                 let num: String = k.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
                 v = u32::from_str(num.as_str())?;
