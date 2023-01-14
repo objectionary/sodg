@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
+use crate::{SafeRelay, Sodg};
 use crate::{DeadRelay, LambdaRelay, Relay};
 use anyhow::{anyhow, Context, Result};
 use log::trace;
@@ -259,3 +259,31 @@ fn relay_modifies_sodg_back() -> Result<()> {
     assert_eq!(42, relay.find("bar")?);
     Ok(())
 }
+
+#[cfg(test)]
+struct RecursiveRelay<'a> {
+    g: &'a Sodg,
+}
+
+#[cfg(test)]
+impl<'a> RecursiveRelay<'a> {
+    pub fn new(g: &'a Sodg) -> RecursiveRelay {
+        RecursiveRelay { g }
+    }
+}
+
+#[cfg(test)]
+impl<'a> Relay for RecursiveRelay<'a> {
+    fn re(&self, v: u32, a: &str) -> Result<String> {
+        Ok(format!("ν{}", self.g.find(v, a, self).unwrap()))
+    }
+}
+
+#[test]
+fn handles_endless_recursion_gracefully() -> Result<()> {
+    let g : Sodg = Sodg::empty();
+    let r = &g;
+    assert_eq!(42, g.find(0, "foo", &RecursiveRelay::new(r))?);
+    Ok(())
+}
+
