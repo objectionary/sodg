@@ -22,6 +22,9 @@ use crate::Sodg;
 use rstest::rstest;
 use std::collections::HashMap;
 
+#[cfg(feature = "sober")]
+use std::collections::HashSet;
+
 impl Sodg {
     /// Make an empty [`Sodg`], with no vertices and no edges.
     pub fn empty() -> Self {
@@ -30,6 +33,8 @@ impl Sodg {
             next_v: 0,
             alerts: vec![],
             alerts_active: true,
+            #[cfg(feature = "sober")]
+            finds: HashSet::new(),
         };
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();

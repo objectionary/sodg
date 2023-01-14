@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Sodg, DeadRelay, LambdaRelay, Relay};
+use crate::{DeadRelay, LambdaRelay, Relay, Sodg};
 use anyhow::{anyhow, Context, Result};
 use log::trace;
 use std::collections::VecDeque;
@@ -97,7 +97,30 @@ impl Sodg {
     /// If searching algorithm fails to find the destination,
     /// an `Err` will be returned.
     pub fn find<T: Relay>(&self, v1: u32, loc: &str, relay: &T) -> Result<u32> {
-        self.find_with_indent(v1, loc, relay, 0)
+        #[cfg(feature = "sober")]
+        let badge = format!("{v1}.{loc}");
+        #[cfg(feature = "sober")]
+        {
+            if self.finds.contains(&badge) {
+                return Err(anyhow!("Most probably a recursive call to {badge}"));
+            }
+            let cp = self as *const Self;
+            let mp = cp as *mut Self;
+            unsafe {
+                (&mut *mp).finds.insert(badge.clone());
+            }
+        }
+        #[allow(clippy::let_and_return)]
+        let v = self.find_with_indent(v1, loc, relay, 0);
+        #[cfg(feature = "sober")]
+        {
+            let cp = self as *const Self;
+            let mp = cp as *mut Self;
+            unsafe {
+                (&mut *mp).finds.remove(&badge);
+            }
+        }
+        v
     }
 
     /// Find a vertex, printing the log with an indentation prefix.
@@ -110,6 +133,12 @@ impl Sodg {
         relay: &T,
         depth: usize,
     ) -> Result<u32> {
+        #[cfg(feature = "sober")]
+        {
+            if depth > 16 {
+                return Err(anyhow!("The depth {depth} is too big"));
+            }
+        }
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
         loc.split('.')
@@ -119,6 +148,12 @@ impl Sodg {
         let mut jumps = 0;
         loop {
             jumps += 1;
+            #[cfg(sober)]
+            {
+                if jumps > 64 {
+                    return Err(anyhow!("Too many jumps ({jumps})"));
+                }
+            }
             let next = locator.pop_front();
             if next.is_none() {
                 break;
@@ -260,11 +295,13 @@ fn relay_modifies_sodg_back() -> Result<()> {
 }
 
 #[cfg(test)]
+#[cfg(feature = "sober")]
 struct RecursiveRelay<'a> {
     g: &'a Sodg,
 }
 
 #[cfg(test)]
+#[cfg(feature = "sober")]
 impl<'a> RecursiveRelay<'a> {
     pub fn new(g: &'a Sodg) -> RecursiveRelay {
         RecursiveRelay { g }
@@ -272,17 +309,19 @@ impl<'a> RecursiveRelay<'a> {
 }
 
 #[cfg(test)]
+#[cfg(feature = "sober")]
 impl<'a> Relay for RecursiveRelay<'a> {
     fn re(&self, v: u32, a: &str) -> Result<String> {
-        Ok(format!("ν{}", self.g.find(v, a, self).unwrap()))
+        Ok(format!("ν{}", self.g.find(v, a, self)?))
     }
 }
 
 #[test]
+#[cfg(feature = "sober")]
 fn handles_endless_recursion_gracefully() -> Result<()> {
-    let g : Sodg = Sodg::empty();
+    let mut g: Sodg = Sodg::empty();
+    g.add(0).unwrap();
     let r = &g;
-    assert_eq!(42, g.find(0, "foo", &RecursiveRelay::new(r))?);
+    assert!(g.find(0, "foo", &RecursiveRelay::new(r)).is_err());
     Ok(())
 }
-

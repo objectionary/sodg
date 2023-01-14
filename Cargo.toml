@@ -10,6 +10,9 @@ homepage = "https://github.com/objectionary/sodg"
 keywords = ["graph", "oop"]
 categories = ["data-structures", "memory-management"]
 
+[features]
+sober = []
+
 [dependencies]
 anyhow = "1.0.68"
 log = "0.4.17"

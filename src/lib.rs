@@ -67,6 +67,9 @@ pub use crate::hex::Hex;
 pub use crate::script::Script;
 pub(crate) use crate::vertex::Vertex;
 
+#[cfg(feature = "sober")]
+use std::collections::HashSet;
+
 /// A struct that represents a Surging Object DiGraph (SODG).
 ///
 /// You add vertices to it, bind them one to one with edges,
@@ -95,6 +98,8 @@ pub struct Sodg {
     alerts: Vec<Alert>,
     #[serde(skip_serializing, skip_deserializing)]
     alerts_active: bool,
+    #[cfg(feature = "sober")]
+    finds: HashSet<String>,
 }
 
 /// A relay that is used by [`Sodg::find()`] when it can't find an attribute.
