@@ -111,9 +111,6 @@ impl Sodg {
         relay: &T,
         depth: usize,
     ) -> Result<u32> {
-        if depth > 16 {
-            return Err(anyhow!("Nesting depth {depth} is too big"));
-        }
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
         loc.split('.')
@@ -123,9 +120,6 @@ impl Sodg {
         let mut jumps = 0;
         loop {
             jumps += 1;
-            if jumps > 100 {
-                return Err(anyhow!("Too many jumps ({jumps})"));
-            }
             let next = locator.pop_front();
             if next.is_none() {
                 break;
