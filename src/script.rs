@@ -67,7 +67,7 @@ impl Script {
     /// );
     /// let mut g = Sodg::empty();
     /// let total = s.deploy_to(&mut g).unwrap();
-    /// assert_eq!(1, g.kid(0, "foo").unwrap());
+    /// assert_eq!(1, g.kid(0, "foo").unwrap().0);
     /// ```
     #[allow(clippy::should_implement_trait)]
     pub fn from_str(s: &str) -> Script {
@@ -195,6 +195,6 @@ fn simple_command() -> Result<()> {
     let total = s.deploy_to(&mut g)?;
     assert_eq!(4, total);
     assert_eq!("привет", g.data(1)?.to_utf8()?);
-    assert_eq!(1, g.kid(0, "foo").unwrap());
+    assert_eq!(1, g.kid(0, "foo").unwrap().0);
     Ok(())
 }

@@ -193,46 +193,6 @@ impl Sodg {
         Ok(kids)
     }
 
-    /// Find a kid of a vertex, by its edge name.
-    ///
-    /// For example:
-    ///
-    /// ```
-    /// use sodg::Sodg;
-    /// let mut g = Sodg::empty();
-    /// g.add(0).unwrap();
-    /// g.add(42).unwrap();
-    /// g.bind(0, 42, "k").unwrap();
-    /// assert_eq!(42, g.kid(0, "k").unwrap());
-    /// assert!(g.kid(0, "another").is_none());
-    /// ```
-    ///
-    /// If vertex `v1` is absent, `None` will be returned.
-    ///
-    /// The name of the edge may be a composite of two parts, for example
-    /// `π/Φ.test` or `foo/ν13.print.me`. The parts are separated by the
-    /// forward slash. In this case, the search will only take into account
-    /// the first part:
-    ///
-    /// ```
-    /// use sodg::Sodg;
-    /// let mut g = Sodg::empty();
-    /// g.add(0).unwrap();
-    /// g.add(42).unwrap();
-    /// g.bind(0, 42, "π/Φ.test").unwrap();
-    /// assert_eq!(Some(42), g.kid(0, "π"));
-    /// ```
-    pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
-        if let Some(vtx) = self.vertices.get(&v) {
-            vtx.edges
-                .iter()
-                .find(|e| Self::split_a(&e.a).0 == Self::split_a(a).0)
-                .map(|e| e.to)
-        } else {
-            None
-        }
-    }
-
     /// Find a kid of a vertex, by its edge name, and return the ID of the vertex
     /// found and the locator of the edge.
     ///
@@ -244,55 +204,16 @@ impl Sodg {
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// g.bind(0, 42, "k/foo").unwrap();
-    /// assert_eq!((42, "foo".to_string()), g.kid_and_loc(0, "k").unwrap());
+    /// assert_eq!((42, "foo".to_string()), g.kid(0, "k").unwrap());
     /// ```
     ///
     /// If vertex `v1` is absent, `None` will be returned.
-    pub fn kid_and_loc(&self, v: u32, a: &str) -> Option<(u32, String)> {
+    pub fn kid(&self, v: u32, a: &str) -> Option<(u32, String)> {
         if let Some(vtx) = self.vertices.get(&v) {
             vtx.edges
                 .iter()
                 .find(|e| Self::split_a(&e.a).0 == Self::split_a(a).0)
                 .map(|e| (e.to, Self::split_a(&e.a).1))
-        } else {
-            None
-        }
-    }
-
-    /// Get a locator of an edge, if it exists.
-    ///
-    /// The name of the edge may be a composite of two parts, for example
-    /// `π/Φ.foo` or `foo/ν6.boom.x.y`. The parts are separated by the
-    /// forward slash. This function returns the second part if it exists:
-    ///
-    /// ```
-    /// use sodg::Sodg;
-    /// let mut g = Sodg::empty();
-    /// g.add(0).unwrap();
-    /// g.add(42).unwrap();
-    /// g.bind(0, 42, "π/Φ.test").unwrap();
-    /// assert_eq!(Some("Φ.test".to_string()), g.loc(0, "π"));
-    /// assert_eq!(None, g.loc(0, "foo"));
-    /// ```
-    ///
-    /// If there is no second part, but the edge is present, an empty string
-    /// will be returned:
-    ///
-    /// ```
-    /// use sodg::Sodg;
-    /// let mut g = Sodg::empty();
-    /// g.add(0).unwrap();
-    /// g.add(42).unwrap();
-    /// g.bind(0, 42, "π").unwrap();
-    /// assert_eq!(Some("".to_string()), g.loc(0, "π"));
-    /// ```
-    pub fn loc(&self, v: u32, a: &str) -> Option<String> {
-        if let Some(vtx) = self.vertices.get(&v) {
-            vtx.edges
-                .iter()
-                .map(|e| Self::split_a(&e.a))
-                .find(|(l, _)| l == a)
-                .map(|(_, r)| r)
         } else {
             None
         }
@@ -394,8 +315,8 @@ fn overwrites_edges(#[case] before: &str, #[case] after: &str) {
     g.bind(1, 2, before).unwrap();
     g.add(3).unwrap();
     g.bind(1, 3, after).unwrap();
-    assert_eq!(3, g.kid(1, after).unwrap());
-    assert_eq!(3, g.kid(1, before).unwrap());
+    assert_eq!(3, g.kid(1, after).unwrap().0);
+    assert_eq!(3, g.kid(1, before).unwrap().0);
 }
 
 #[test]
@@ -406,8 +327,8 @@ fn overwrites_edge() -> Result<()> {
     g.bind(1, 2, "foo")?;
     g.add(3)?;
     g.bind(1, 3, "foo/ee")?;
-    assert_eq!(3, g.kid(1, "foo").unwrap());
-    assert_eq!(3, g.kid(1, "foo/ee").unwrap());
+    assert_eq!(3, g.kid(1, "foo").unwrap().0);
+    assert_eq!(3, g.kid(1, "foo/ee").unwrap().0);
     Ok(())
 }
 
@@ -500,7 +421,7 @@ fn finds_kid_by_prefix() -> Result<()> {
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "π/Φ.test")?;
-    assert_eq!(Some(1), g.kid(0, "π"));
+    assert_eq!(1, g.kid(0, "π").unwrap().0);
     Ok(())
 }
 
@@ -510,27 +431,7 @@ fn finds_kid_and_loc_by_prefix() -> Result<()> {
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "π/foo")?;
-    assert_eq!(Some((1, "foo".to_string())), g.kid_and_loc(0, "π"));
-    Ok(())
-}
-
-#[test]
-fn finds_locator() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "π/Φ.test")?;
-    assert_eq!(Some("Φ.test".to_string()), g.loc(0, "π"));
-    Ok(())
-}
-
-#[test]
-fn finds_empty_locator() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "π")?;
-    assert_eq!(Some("".to_string()), g.loc(0, "π"));
+    assert_eq!(Some((1, "foo".to_string())), g.kid(0, "π"));
     Ok(())
 }
 

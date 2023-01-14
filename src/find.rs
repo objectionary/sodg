@@ -164,7 +164,7 @@ impl Sodg {
                 v = u32::from_str(num.as_str())?;
                 continue;
             }
-            if let Some(to) = self.kid(v, k.as_str()) {
+            if let Some((to, _loc)) = self.kid(v, k.as_str()) {
                 v = to;
                 continue;
             };
