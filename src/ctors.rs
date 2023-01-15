@@ -108,7 +108,7 @@ impl Sodg {
                     }
                     if parts[0].contains('.') {
                         errors.push(format!(
-                            "Edge label from ν{} to ν{} has a dot inside: '{}'",
+                            "Edge label from ν{} to ν{} has a dot inside the head part: '{}'",
                             v, e.to, e.a
                         ));
                     }
