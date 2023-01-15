@@ -36,8 +36,9 @@ impl Sodg {
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
-    /// sodg.alert_on(|g, vx| {
+    /// let mut g = Sodg::empty();
+    /// g.alerts_on().unwrap();
+    /// g.alert_on(|g, vx| {
     ///   for v in vx {
     ///     if g.kids(v).unwrap().len() > 1 {
     ///       return vec![format!("Too many kids at ν{v}")];
@@ -45,11 +46,11 @@ impl Sodg {
     ///   }
     ///   return vec![];
     /// });
-    /// sodg.add(0).unwrap();
-    /// sodg.add(1).unwrap();
-    /// sodg.add(2).unwrap();
-    /// sodg.bind(0, 1, "first").unwrap();
-    /// assert!(sodg.bind(0, 2, "second").is_err());
+    /// g.add(0).unwrap();
+    /// g.add(1).unwrap();
+    /// g.add(2).unwrap();
+    /// g.bind(0, 1, "first").unwrap();
+    /// assert!(g.bind(0, 2, "second").is_err());
     /// ```
     pub fn alert_on(&mut self, a: Alert) {
         self.alerts.push(a);
@@ -89,6 +90,7 @@ impl Sodg {
 #[test]
 fn panic_on_simple_alert() -> Result<()> {
     let mut g = Sodg::empty();
+    g.alerts_on()?;
     g.alert_on(|_, _| vec![format!("{}", "oops")]);
     assert!(g.add(0).is_err());
     Ok(())
@@ -114,6 +116,7 @@ fn panic_on_complex_alert() -> Result<()> {
             vec![]
         }
     });
+    g.alerts_on()?;
     assert!(g.add(42).is_err());
     Ok(())
 }
