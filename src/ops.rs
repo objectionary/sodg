@@ -310,6 +310,7 @@ fn binds_two_names() -> Result<()> {
 #[case("hello/", "hello")]
 fn overwrites_edges(#[case] before: &str, #[case] after: &str) {
     let mut g = Sodg::empty();
+    g.alerts_off();
     g.add(1).unwrap();
     g.add(2).unwrap();
     g.bind(1, 2, before).unwrap();
@@ -382,6 +383,7 @@ fn finds_all_kids() -> Result<()> {
 #[test]
 fn builds_list_of_kids() -> Result<()> {
     let mut g = Sodg::empty();
+    g.alerts_off();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "one")?;

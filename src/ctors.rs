@@ -112,6 +112,12 @@ impl Sodg {
                             v, e.to, e.a
                         ));
                     }
+                    if parts.len() == 2 && parts[1].is_empty() {
+                        errors.push(format!(
+                            "Edge label from ν{} to ν{} has a an empty tail part: '{}'",
+                            v, e.to, e.a
+                        ));
+                    }
                 }
             }
             errors
@@ -159,6 +165,17 @@ fn prohibits_labels_with_dot() -> Result<()> {
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "a.b")?;
+    assert!(g.alerts_on().is_err());
+    Ok(())
+}
+
+#[test]
+fn prohibits_labels_with_empty_tail() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.alerts_off();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "a/")?;
     assert!(g.alerts_on().is_err());
     Ok(())
 }
