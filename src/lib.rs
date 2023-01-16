@@ -144,6 +144,11 @@ pub struct LambdaRelay {
     lambda: fn(u32, &str) -> Result<String>,
 }
 
+/// A [`Relay`] that always returns the same `String`.
+pub struct ConstRelay {
+    s: String,
+}
+
 #[cfg(test)]
 use simple_logger::SimpleLogger;
 

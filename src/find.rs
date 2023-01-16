@@ -18,11 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{DeadRelay, LambdaRelay, Relay, Sodg};
+use crate::{ConstRelay, DeadRelay, LambdaRelay, Relay, Sodg};
 use anyhow::{anyhow, Context, Result};
 use log::trace;
 use std::collections::VecDeque;
 use std::str::FromStr;
+
+impl Relay for ConstRelay {
+    fn re(&self, _v: u32, _a: &str) -> Result<String> {
+        Ok(self.s.clone())
+    }
+}
+
+impl ConstRelay {
+    /// Make a new [`ConstRelay`], with a string inside.
+    pub fn new(s: &str) -> Self {
+        ConstRelay { s: s.to_string() }
+    }
+}
 
 impl Relay for DeadRelay {
     fn re(&self, v: u32, a: &str) -> Result<String> {
@@ -164,9 +177,11 @@ impl Sodg {
                 v = u32::from_str(num.as_str())?;
                 continue;
             }
-            if let Some((to, _loc)) = self.kid(v, k.as_str()) {
-                v = to;
-                continue;
+            if let Some((to, loc)) = self.kid(v, k.as_str()) {
+                if !loc.starts_with('.') {
+                    v = to;
+                    continue;
+                }
             };
             trace!("#find(ν{v1}, {loc}): {indent}calling relay(ν{v}, {k})...");
             let fault = match relay.re(v, &k) {
@@ -227,6 +242,20 @@ fn finds_with_closure() -> Result<()> {
             })
         )?
     );
+    Ok(())
+}
+
+#[test]
+fn finds_with_locator() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    g.bind(1, 2, "a/.foo")?;
+    g.add(3)?;
+    g.bind(1, 3, "xyz")?;
+    g.add(4)?;
+    g.bind(3, 4, "x")?;
+    assert_eq!(4, g.find(1, "a.x", &mut ConstRelay::new("xyz"))?);
     Ok(())
 }
 
