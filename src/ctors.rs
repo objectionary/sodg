@@ -124,7 +124,7 @@ impl Sodg {
         });
         g.alerts_off();
         #[cfg(feature = "sober")]
-        g.alerts_on();
+        g.alerts_on().unwrap();
         g
     }
 }
