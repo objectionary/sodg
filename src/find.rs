@@ -177,6 +177,9 @@ impl Sodg {
                 if k.contains('/') {
                     return Err(anyhow!("A slash is not allowed in the path ({loc})"));
                 }
+                if k.contains(' ') {
+                    return Err(anyhow!("A space is not allowed in the path ({loc})"));
+                }
             }
             if k.starts_with('ν') {
                 let num: String = k.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
@@ -371,6 +374,15 @@ fn handles_endless_recursion_gracefully() -> Result<()> {
 fn prohibits_slash_in_path() -> Result<()> {
     let g: Sodg = Sodg::empty();
     let r = g.find(0, "bar/xyz.tt", &DeadRelay::new());
+    assert!(r.is_err());
+    Ok(())
+}
+
+#[test]
+#[cfg(feature = "sober")]
+fn prohibits_space_in_path() -> Result<()> {
+    let g: Sodg = Sodg::empty();
+    let r = g.find(0, "bar . xyz", &DeadRelay::new());
     assert!(r.is_err());
     Ok(())
 }
