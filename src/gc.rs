@@ -47,6 +47,7 @@ impl Sodg {
                         .context(format!("Failed to get v{}", edge.to))?
                         .parents
                         .remove(&v);
+                    trace!("#collect: ν{v} removed");
                 }
                 self.vertices.remove(&v);
             }
