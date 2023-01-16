@@ -6,6 +6,9 @@ use anyhow::{Context, Result};
 #[cfg(feature = "gc")]
 use std::collections::VecDeque;
 
+#[cfg(feature = "gc")]
+use log::trace;
+
 impl Sodg {
     /// Attempt to collect the vertex (delete it from the graph).
     ///
