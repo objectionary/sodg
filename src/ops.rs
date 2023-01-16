@@ -124,6 +124,7 @@ impl Sodg {
     /// let data = Hex::from_str_bytes("hello, world!");
     /// g.put(42, data.clone()).unwrap();
     /// assert_eq!(data, g.data(42).unwrap());
+    /// #[cfg(feature = "gc")]
     /// assert!(g.is_empty());
     /// ```
     ///
@@ -145,6 +146,7 @@ impl Sodg {
             .context(format!("Can't find ν{v}"))?;
         let data = vtx.data.clone();
         vtx.taken = true;
+        #[cfg(feature = "gc")]
         self.collect(v)?;
         Ok(data)
     }
@@ -355,6 +357,7 @@ fn sets_simple_data() -> Result<()> {
 }
 
 #[test]
+#[cfg(feature = "gc")]
 fn simple_data_gc() -> Result<()> {
     let mut g = Sodg::empty();
     let data = Hex::from_str_bytes("hello");

@@ -12,6 +12,7 @@ categories = ["data-structures", "memory-management"]
 
 [features]
 sober = []
+gc = []
 
 [dependencies]
 anyhow = "1.0.68"

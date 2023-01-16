@@ -1,5 +1,9 @@
 use crate::Sodg;
+
+#[cfg(feature = "gc")]
 use anyhow::{Context, Result};
+
+#[cfg(feature = "gc")]
 use std::collections::VecDeque;
 
 impl Sodg {
@@ -22,6 +26,7 @@ impl Sodg {
     /// g.data(1).unwrap(); // Successfully collect 1
     /// assert!(g.data(1).is_err());
     /// ```
+    #[cfg(feature = "gc")]
     pub(crate) fn collect(&mut self, start: u32) -> Result<()> {
         let mut queue = VecDeque::new();
         queue.push_back(start);
@@ -51,6 +56,7 @@ impl Sodg {
 }
 
 #[test]
+#[cfg(feature = "gc")]
 fn does_not_collect_owned() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
@@ -62,6 +68,7 @@ fn does_not_collect_owned() -> Result<()> {
 }
 
 #[test]
+#[cfg(feature = "gc")]
 fn collects_simple_graph() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
@@ -80,6 +87,7 @@ fn collects_simple_graph() -> Result<()> {
 }
 
 #[test]
+#[cfg(feature = "gc")]
 fn collects_complicated_graph() -> Result<()> {
     let mut g = Sodg::empty();
     for i in 1..=5 {
