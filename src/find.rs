@@ -161,7 +161,7 @@ impl Sodg {
         let mut jumps = 0;
         loop {
             jumps += 1;
-            #[cfg(sober)]
+            #[cfg(feature = "sober")]
             {
                 if jumps > 64 {
                     return Err(anyhow!("Too many jumps ({jumps})"));
@@ -172,6 +172,12 @@ impl Sodg {
                 break;
             }
             let k = next.unwrap().to_string();
+            #[cfg(feature = "sober")]
+            {
+                if k.contains('/') {
+                    return Err(anyhow!("A slash is not allowed in the path ({loc})"));
+                }
+            }
             if k.starts_with('ν') {
                 let num: String = k.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
                 v = u32::from_str(num.as_str())?;
@@ -357,5 +363,14 @@ fn handles_endless_recursion_gracefully() -> Result<()> {
     let ret = g.find(0, "foo", &RecursiveRelay::new(r));
     assert!(ret.is_err());
     assert!(ret.err().unwrap().to_string().contains("recursive call"));
+    Ok(())
+}
+
+#[test]
+#[cfg(feature = "sober")]
+fn prohibits_slash_in_path() -> Result<()> {
+    let g: Sodg = Sodg::empty();
+    let r = g.find(0, "bar/xyz.tt", &DeadRelay::new());
+    assert!(r.is_err());
     Ok(())
 }
