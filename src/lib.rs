@@ -42,6 +42,7 @@
 mod alerts;
 mod ctors;
 mod debug;
+mod dot;
 mod edge;
 mod find;
 mod gc;
