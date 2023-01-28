@@ -40,9 +40,15 @@ impl Sodg {
     /// println!("{}", dot);
     /// ```
     ///
-    /// The printout will look like this:
+    /// The printout will look approximately like this:
     ///
-    /// ```
+    /// ```text
+    /// digraph {
+    ///   v0[shape=circle,label="ν0"];
+    ///   v0 -> v1 [label="bar"];
+    ///   v0 -> v1 [label="foo"];
+    ///   v1[shape=circle,label="ν1"];
+    /// }
     /// ```
     pub fn to_dot(&self) -> Result<String> {
         let mut lines: Vec<String> = vec![];
