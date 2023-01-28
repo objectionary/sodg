@@ -204,7 +204,7 @@ impl Sodg {
                 }
                 Err(err) => {
                     trace!("#find(ν{v1}, {loc}): !{}", err);
-                    format!("error: {}", err)
+                    format!("error: {err}")
                 }
             };
             let others: Vec<String> = self
