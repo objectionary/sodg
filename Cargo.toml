@@ -15,7 +15,7 @@ sober = []
 gc = []
 
 [dependencies]
-anyhow = "1.0.68"
+anyhow = "1.0.69"
 log = "0.4.17"
 regex = "1.7.1"
 lazy_static = "1.4.0"
