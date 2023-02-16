@@ -106,13 +106,14 @@ impl Sodg {
             .vertices
             .get_mut(&v)
             .context(format!("Can't find ν{v}"))?;
-        if vtx.posted {
-            return Err(anyhow!(
-                "The vertex isn't available, #put() was called earlier"
-            ));
+        if vtx.full {
+            return Err(anyhow!(format!(
+                "The ν{} is full, #put() was called earlier",
+                v
+            )));
         }
         vtx.data = d.clone();
-        vtx.posted = true;
+        vtx.full = true;
         self.validate(vec![v])?;
         trace!("#data: data of ν{v} set to {d}");
         Ok(())
@@ -489,10 +490,7 @@ fn checks_for_put_called_once() -> Result<()> {
     g.add(1)?;
     g.bind(0, 1, "bar/baz")?;
     g.put(0, Hex::from(42))?;
-    let actual = g.put(0, Hex::from(42)).unwrap_err();
-    assert_eq!(
-        format!("{}", actual.root_cause()),
-        "The vertex isn't available, #put() was called earlier"
-    );
+    let actual = format!("{}", g.put(0, Hex::from(42)).unwrap_err().root_cause());
+    assert_eq!(true, actual.contains("#put() was called earlier"));
     Ok(())
 }
