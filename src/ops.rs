@@ -101,6 +101,7 @@ impl Sodg {
     /// ```
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
+    /// If `#put` called twice for one vertex, an `Err` will be returned.
     pub fn put(&mut self, v: u32, d: Hex) -> Result<()> {
         let vtx = self
             .vertices
@@ -108,8 +109,7 @@ impl Sodg {
             .context(format!("Can't find ν{v}"))?;
         if vtx.full {
             return Err(anyhow!(format!(
-                "#put: The ν{} is full, #put was called earlier",
-                v
+                "#put: The ν{v} is full, #put was called earlier"
             )));
         }
         vtx.data = d.clone();
@@ -144,13 +144,19 @@ impl Sodg {
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(42).unwrap();
-    /// assert!(g.data(42).unwrap().is_empty());
+    /// g.put(42, Hex::from(10)).unwrap();
+    /// assert!(!g.data(42).unwrap().is_empty());
     /// ```
     pub fn data(&mut self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
             .get_mut(&v)
             .context(format!("Can't find ν{v}"))?;
+        if !vtx.full {
+            return Err(anyhow!(format!(
+                "#data: call #data before ν{v} isn't full impossible"
+            )));
+        }
         let data = vtx.data.clone();
         vtx.taken = true;
         #[cfg(feature = "gc")]
@@ -408,7 +414,8 @@ fn builds_list_of_kids() -> Result<()> {
 fn gets_data_from_empty_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    assert!(g.data(0)?.is_empty());
+    g.put(0, Hex::from(42))?;
+    assert!(!g.data(0)?.is_empty());
     Ok(())
 }
 
@@ -492,5 +499,14 @@ fn checks_for_put_called_once() -> Result<()> {
     g.put(0, Hex::from(42))?;
     let actual = format!("{}", g.put(0, Hex::from(42)).unwrap_err().root_cause());
     assert_eq!(true, actual.contains("#put was called earlier"));
+    Ok(())
+}
+
+#[test]
+fn check_for_data_receiving_before_put() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    let actual = format!("{}", g.data(1).unwrap_err().root_cause());
+    assert_eq!(true, actual.contains("#data: call #data before"));
     Ok(())
 }
