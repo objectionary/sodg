@@ -491,6 +491,6 @@ fn checks_for_put_called_once() -> Result<()> {
     g.bind(0, 1, "bar/baz")?;
     g.put(0, Hex::from(42))?;
     let actual = format!("{}", g.put(0, Hex::from(42)).unwrap_err().root_cause());
-    assert_eq!(true, actual.contains("#put() was called earlier"));
+    assert_eq!(true, actual.contains("#put was called earlier"));
     Ok(())
 }
