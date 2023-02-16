@@ -22,7 +22,7 @@ use crate::Edge;
 use crate::Hex;
 use crate::Sodg;
 use crate::Vertex;
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use log::trace;
 use rstest::rstest;
 
@@ -107,7 +107,9 @@ impl Sodg {
             .get_mut(&v)
             .context(format!("Can't find ν{v}"))?;
         if vtx.posted {
-            return Err(anyhow!("The vertex isn't available, #put() was called earlier"));
+            return Err(anyhow!(
+                "The vertex isn't available, #put() was called earlier"
+            ));
         }
         vtx.data = d.clone();
         vtx.posted = true;
