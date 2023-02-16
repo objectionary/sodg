@@ -62,7 +62,11 @@ impl Sodg {
                     }
                 }
                 if found.is_none() {
-                    found = Some(self.next_id());
+                    if self.vertices.contains_key(v) && ups.get(v).unwrap().len() == 0 {
+                        found = Some(*v);
+                    } else {
+                        found = Some(self.next_id());
+                    }
                 }
                 rename.insert(*v, found.unwrap());
             }
@@ -123,8 +127,18 @@ fn avoids_simple_duplicates() -> Result<()> {
     extra.add(2)?;
     extra.bind(1, 2, "bar")?;
     g.merge(&extra);
-    debug!("{g:?}");
     assert_eq!(3, g.vertices.len());
     assert_eq!(1, g.kid(0, "foo").unwrap().0);
+    Ok(())
+}
+
+#[test]
+fn merges_singletons() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(13)?;
+    let mut extra = Sodg::empty();
+    extra.add(13)?;
+    g.merge(&extra);
+    assert_eq!(1, g.vertices.len());
     Ok(())
 }
