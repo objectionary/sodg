@@ -193,6 +193,8 @@ fn merges_large_identical_graphs() -> Result<()> {
     g.add(4)?;
     g.bind(4, 1, "x")?;
     g.bind(4, 2, "y")?;
+    g.add(5)?;
+    g.bind(1, 5, "z")?;
     let extra = g.clone();
     g.merge(&extra);
     assert_eq!(extra.vertices.len(), g.vertices.len());
