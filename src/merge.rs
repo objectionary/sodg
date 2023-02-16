@@ -23,7 +23,7 @@ use log::debug;
 use std::collections::HashMap;
 
 impl Sodg {
-    /// Merge another graph into itself.
+    /// Merge another graph into the current one.
     ///
     /// During the merge, vertices that are present in both graphs and have
     /// identical coordinates are considered as duplicates and are not re-created
