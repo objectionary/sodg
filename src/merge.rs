@@ -24,6 +24,13 @@ use std::collections::HashMap;
 
 impl Sodg {
     /// Merge another graph into itself.
+    ///
+    /// During the merge, vertices that are present in both graphs and have
+    /// identical coordinates are considered as duplicates and are not re-created
+    /// in the current graph. For example, the current graph is "1-a->2", while
+    /// the other graph is "1-a->3". The vertex "3" will not be created in the
+    /// current graph - it will be considered a duplicate. The resulting graph
+    /// will look like "1-a->2".
     pub fn merge(&mut self, g: &Sodg) {
         let mut ups: HashMap<u32, Vec<(u32, String)>> = HashMap::new();
         for (v, vtx) in g.vertices.iter() {
