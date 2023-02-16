@@ -20,9 +20,9 @@
 
 use crate::Sodg;
 
-impl Sodg {
+impl Clone for Sodg {
     /// Make a clone of the graph.
-    pub fn clone(&self) -> Self {
+    fn clone(&self) -> Self {
         Sodg {
             vertices: self.vertices.clone(),
             next_v: self.next_v,
