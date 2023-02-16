@@ -137,6 +137,8 @@ impl Sodg {
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
     ///
+    /// If vertex `v1` is not full (i.e. #put was not called to the vertex), `Err` will be returned.
+    ///
     /// If there is no data, an empty `Hex` will be returned, for example:
     ///
     /// ```
