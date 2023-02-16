@@ -36,7 +36,6 @@ impl Sodg {
             }
         }
         let mut rename: HashMap<u32, u32> = HashMap::new();
-        rename.insert(0, 0);
         loop {
             for (v, _vtx) in g.vertices.iter() {
                 if rename.contains_key(v) {
@@ -140,5 +139,25 @@ fn merges_singletons() -> Result<()> {
     extra.add(13)?;
     g.merge(&extra);
     assert_eq!(1, g.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn merges_connected_singletons() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    g.bind(1, 2, "foo")?;
+    g.add(3)?;
+    g.bind(3, 2, "foo")?;
+    let mut extra = Sodg::empty();
+    extra.add(1)?;
+    extra.add(2)?;
+    extra.bind(1, 2, "foo")?;
+    extra.add(3)?;
+    extra.bind(3, 2, "foo")?;
+    g.merge(&extra);
+    debug!("{g:?}");
+    assert_eq!(3, g.vertices.len());
     Ok(())
 }
