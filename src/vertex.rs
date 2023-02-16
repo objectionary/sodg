@@ -28,6 +28,7 @@ pub(crate) struct Vertex {
     pub data: Hex,
     pub parents: HashSet<u32>,
     pub taken: bool,
+    pub posted: bool,
 }
 
 impl Vertex {
@@ -46,6 +47,7 @@ impl Vertex {
             data: Hex::empty(),
             parents: HashSet::new(),
             taken: false,
+            posted: false,
         }
     }
 }
