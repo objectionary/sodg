@@ -101,7 +101,7 @@ fn dont_panic_when_alerts_disabled() -> Result<()> {
     let mut g = Sodg::empty();
     g.alert_on(|_, _| vec!["should never happen".to_string()]);
     g.alerts_off();
-    assert!(!g.add(0).is_err());
+    assert!(g.add(0).is_ok());
     Ok(())
 }
 

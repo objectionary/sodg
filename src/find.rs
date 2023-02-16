@@ -318,7 +318,7 @@ impl Relay for FakeRelay {
         let cp = self as *const Self;
         let mp = cp as *mut Self;
         unsafe {
-            (&mut *mp).g.add(42).unwrap();
+            (*mp).g.add(42).unwrap();
         }
         Ok("ν42".to_string())
     }

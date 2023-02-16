@@ -31,9 +31,7 @@ impl Sodg {
                 ups.insert(*v, vec![]);
             }
             for e in vtx.edges.iter() {
-                if !ups.contains_key(&e.to) {
-                    ups.insert(e.to, vec![]);
-                }
+                ups.entry(e.to).or_insert_with(std::vec::Vec::new);
                 ups.get_mut(&e.to).unwrap().push((*v, e.a.clone()));
             }
         }
@@ -80,7 +78,7 @@ impl Sodg {
             };
             for e in vtx.edges.iter() {
                 let v1 = *rename.get(&e.to).unwrap();
-                before.edges.retain(|e1| &e1.a != e.a.as_str());
+                before.edges.retain(|e1| e1.a != e.a.as_str());
                 before.edges.push(Edge::new(v1, e.a.as_str()));
             }
             self.vertices.insert(*new, before);
