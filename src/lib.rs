@@ -40,6 +40,7 @@
 // #![deny(warnings)]
 
 mod alerts;
+mod clone;
 mod ctors;
 mod debug;
 mod dot;

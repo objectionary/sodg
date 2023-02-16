@@ -36,6 +36,15 @@ impl Sodg {
             }
         }
         let mut rename: HashMap<u32, u32> = HashMap::new();
+        for (_, vtx) in self.vertices.iter() {
+            for e in vtx.edges.iter() {
+                if g.vertices.contains_key(&e.to)
+                    && ups.get(&e.to).unwrap().iter().any(|(_, a)| *a == e.a)
+                {
+                    rename.insert(e.to, e.to);
+                }
+            }
+        }
         loop {
             for (v, _vtx) in g.vertices.iter() {
                 if rename.contains_key(v) {
@@ -157,7 +166,35 @@ fn merges_connected_singletons() -> Result<()> {
     extra.add(3)?;
     extra.bind(3, 2, "foo")?;
     g.merge(&extra);
-    debug!("{g:?}");
     assert_eq!(3, g.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn merges_simple_loop() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    g.bind(1, 2, "foo")?;
+    g.bind(2, 1, "bar")?;
+    let extra = g.clone();
+    g.merge(&extra);
+    assert_eq!(extra.vertices.len(), g.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn merges_large_identical_graphs() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    g.bind(1, 2, "foo")?;
+    g.bind(2, 1, "bar")?;
+    g.add(4)?;
+    g.bind(4, 1, "x")?;
+    g.bind(4, 2, "y")?;
+    let extra = g.clone();
+    g.merge(&extra);
+    assert_eq!(extra.vertices.len(), g.vertices.len());
     Ok(())
 }
