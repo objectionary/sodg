@@ -37,7 +37,6 @@ impl Sodg {
                 ups.get_mut(&e.to).unwrap().push((*v, e.a.clone()));
             }
         }
-        debug!("ups: {ups:?}");
         let mut rename: HashMap<u32, u32> = HashMap::new();
         rename.insert(0, 0);
         loop {
@@ -73,7 +72,6 @@ impl Sodg {
                 break;
             }
         }
-        debug!("rename: {rename:?}");
         for (v, vtx) in g.vertices.iter() {
             let new = rename.get(v).unwrap();
             let mut before = match self.vertices.get(new) {
