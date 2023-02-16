@@ -156,7 +156,7 @@ impl Sodg {
             .context(format!("Can't find ν{v}"))?;
         if !vtx.full {
             return Err(anyhow!(format!(
-                "#data: call #data before ν{v} isn't full impossible"
+                "#data: Calling #data before ν{v} is empty is not possible"
             )));
         }
         let data = vtx.data.clone();
@@ -509,6 +509,6 @@ fn check_for_data_receiving_before_put() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
     let actual = format!("{}", g.data(1).unwrap_err().root_cause());
-    assert_eq!(true, actual.contains("#data: call #data before"));
+    assert_eq!(true, actual.contains("#data: Calling #data before"));
     Ok(())
 }
