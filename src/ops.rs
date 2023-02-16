@@ -488,7 +488,7 @@ fn checks_for_put_called_once() -> Result<()> {
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "bar/baz")?;
-    g.put(0, Hex::from(42)).unwrap();
+    g.put(0, Hex::from(42))?;
     let actual = g.put(0, Hex::from(42)).unwrap_err();
     assert_eq!(
         format!("{}", actual.root_cause()),
