@@ -62,7 +62,7 @@ impl Sodg {
                     }
                 }
                 if found.is_none() {
-                    if self.vertices.contains_key(v) && ups.get(v).unwrap().len() == 0 {
+                    if self.vertices.contains_key(v) && ups.get(v).unwrap().is_empty() {
                         found = Some(*v);
                     } else {
                         found = Some(self.next_id());
