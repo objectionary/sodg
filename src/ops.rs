@@ -108,7 +108,7 @@ impl Sodg {
             .context(format!("Can't find ν{v}"))?;
         if vtx.full {
             return Err(anyhow!(format!(
-                "The ν{} is full, #put() was called earlier",
+                "#put: The ν{} is full, #put was called earlier",
                 v
             )));
         }
