@@ -519,7 +519,7 @@ fn checks_for_put_make_vert_full() -> Result<()> {
     g.add(1)?;
     g.add(2)?;
     g.bind(1, 2, "Hi, i'm the dog my name is Ruby!")?;
-    g.put(2, Hex::from_str_bytes("Ruby-the-dog"))?;
-    assert!(g.full(2)?);
+    g.put(2, Hex::empty())?;
+    assert!(!g.full(2).unwrap());
     Ok(())
 }
