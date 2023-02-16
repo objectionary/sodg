@@ -512,3 +512,14 @@ fn check_for_data_receiving_before_put() -> Result<()> {
     assert_eq!(true, actual.contains("#data: Calling #data before"));
     Ok(())
 }
+
+#[test]
+fn checks_for_put_make_vert_full() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    g.bind(1, 2, "Hi, i'm the dog my name is Ruby!")?;
+    g.put(2, Hex::from_str_bytes("Ruby-the-dog"))?;
+    assert!(g.full(2)?);
+    Ok(())
+}
