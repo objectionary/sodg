@@ -22,8 +22,8 @@ use crate::edge::Edge;
 use crate::vertex::Vertex;
 use crate::Sodg;
 use anyhow::{anyhow, Result};
-use log::debug;
 use std::collections::HashMap;
+use log::debug;
 
 impl Sodg {
     /// Merge another graph into the current one.
@@ -45,9 +45,38 @@ impl Sodg {
                 ups.get_mut(&e.to).unwrap().push((*v, e.a.clone()));
             }
         }
+        let mut toxic: Vec<u32> = Vec::new();
+        loop {
+            let mut again = false;
+            for (v, vtx) in self.vertices.iter() {
+                if let Some(right) = g.vertices.get(v) {
+                    for e1 in vtx.edges.iter() {
+                        for e2 in right.edges.iter() {
+                            if e2.to == e1.to && e2.a != e1.a {
+                                if !toxic.contains(&e2.to) {
+                                    toxic.push(e2.to);
+                                    again = true;
+                                }
+                            }
+                        }
+                    }
+                    if toxic.contains(v) {
+                        for e2 in right.edges.iter() {
+                            toxic.push(e2.to);
+                        }
+                    }
+                }
+            }
+            if !again {
+                break;
+            }
+        }
         let mut rename: HashMap<u32, u32> = HashMap::new();
         for (_, vtx) in self.vertices.iter() {
             for e in vtx.edges.iter() {
+                if toxic.contains(&e.to) {
+                    continue;
+                }
                 if g.vertices.contains_key(&e.to)
                     && ups.get(&e.to).unwrap().iter().any(|(_, a)| *a == e.a)
                 {
@@ -113,10 +142,7 @@ impl Sodg {
             before.data = vtx.data.clone();
             self.vertices.insert(*new, before);
         }
-        debug!(
-            "Merged {} vertices into the existing Sodg",
-            g.vertices.len()
-        );
+        debug!("Merged {} vertices into the existing Sodg", g.vertices.len());
         Ok(())
     }
 }
@@ -198,6 +224,23 @@ fn merges_simple_loop() -> Result<()> {
 }
 
 #[test]
+fn merges_large_loop() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    g.add(3)?;
+    g.add(4)?;
+    g.bind(1, 2, "a")?;
+    g.bind(2, 3, "b")?;
+    g.bind(3, 4, "c")?;
+    g.bind(4, 1, "d")?;
+    let extra = g.clone();
+    g.merge(&extra)?;
+    assert_eq!(extra.vertices.len(), g.vertices.len());
+    Ok(())
+}
+
+#[test]
 fn merges_large_identical_graphs() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
@@ -209,7 +252,16 @@ fn merges_large_identical_graphs() -> Result<()> {
     g.bind(4, 2, "y")?;
     g.add(5)?;
     g.bind(1, 5, "z")?;
-    let extra = g.clone();
+    let mut extra = Sodg::empty();
+    extra.add(1)?;
+    extra.add(2)?;
+    extra.bind(1, 2, "foo")?;
+    extra.bind(2, 1, "bar")?;
+    extra.add(4)?;
+    extra.bind(4, 1, "x")?;
+    extra.bind(4, 2, "y")?;
+    extra.add(5)?;
+    extra.bind(1, 5, "z")?;
     g.merge(&extra)?;
     assert_eq!(extra.vertices.len(), g.vertices.len());
     Ok(())
@@ -229,3 +281,23 @@ fn merges_data() -> Result<()> {
     assert_eq!(42, g.data(1)?.to_i64()?);
     Ok(())
 }
+
+#[test]
+fn understands_same_name_kids() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "a")?;
+    g.add(2)?;
+    g.bind(1, 2, "x")?;
+    let mut extra = Sodg::empty();
+    extra.add(0)?;
+    extra.add(1)?;
+    extra.bind(0, 1, "b")?;
+    extra.add(2)?;
+    extra.bind(1, 2, "x")?;
+    g.merge(&extra)?;
+    assert_eq!(5, g.vertices.len());
+    Ok(())
+}
+
