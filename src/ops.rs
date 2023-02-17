@@ -416,8 +416,8 @@ fn builds_list_of_kids() -> Result<()> {
 fn gets_data_from_empty_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    g.put(0, Hex::from(42))?;
-    assert!(!g.data(0)?.is_empty());
+    g.put(0, Hex::empty())?;
+    assert!(!g.full(0)?);
     Ok(())
 }
 
@@ -514,7 +514,7 @@ fn check_for_data_receiving_before_put() -> Result<()> {
 }
 
 #[test]
-fn checks_for_put_make_vert_full() -> Result<()> {
+fn checks_for_empty_hex_not_full() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
