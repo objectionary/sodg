@@ -18,7 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+use crate::edge::Edge;
+use crate::vertex::Vertex;
 use crate::Sodg;
+use anyhow::{anyhow, Result};
 use log::debug;
 use std::collections::HashMap;
 
@@ -31,7 +34,7 @@ impl Sodg {
     /// the other graph is "1-a->3". The vertex "3" will not be created in the
     /// current graph - it will be considered a duplicate. The resulting graph
     /// will look like "1-a->2".
-    pub fn merge(&mut self, g: &Sodg) {
+    pub fn merge(&mut self, g: &Sodg) -> Result<()> {
         let mut ups: HashMap<u32, Vec<(u32, String)>> = HashMap::new();
         for (v, vtx) in g.vertices.iter() {
             if !ups.contains_key(v) {
@@ -70,7 +73,7 @@ impl Sodg {
                     for h in has.edges {
                         if h.a == up.1 {
                             if found.is_some() && found.unwrap() != h.to {
-                                panic!("Double parents");
+                                return Err(anyhow!("Double parents"));
                             }
                             found = Some(h.to);
                         }
@@ -100,19 +103,19 @@ impl Sodg {
                 before.edges.retain(|e1| e1.a != e.a.as_str());
                 before.edges.push(Edge::new(v1, e.a.as_str()));
             }
+            if !before.data.is_empty() && before.data != vtx.data {
+                return Err(anyhow!("Data conflict"));
+            }
+            before.data = vtx.data.clone();
             self.vertices.insert(*new, before);
         }
         debug!(
             "Merged {} vertices into the existing Sodg",
             g.vertices.len()
         );
+        Ok(())
     }
 }
-
-use crate::edge::Edge;
-use crate::vertex::Vertex;
-#[cfg(test)]
-use anyhow::Result;
 
 #[test]
 fn merges_two_graphs() -> Result<()> {
@@ -124,7 +127,7 @@ fn merges_two_graphs() -> Result<()> {
     extra.add(0)?;
     extra.add(1)?;
     extra.bind(0, 1, "bar")?;
-    g.merge(&extra);
+    g.merge(&extra)?;
     assert_eq!(3, g.vertices.len());
     Ok(())
 }
@@ -141,7 +144,7 @@ fn avoids_simple_duplicates() -> Result<()> {
     extra.bind(0, 1, "foo")?;
     extra.add(2)?;
     extra.bind(1, 2, "bar")?;
-    g.merge(&extra);
+    g.merge(&extra)?;
     assert_eq!(3, g.vertices.len());
     assert_eq!(1, g.kid(0, "foo").unwrap().0);
     Ok(())
@@ -153,7 +156,7 @@ fn merges_singletons() -> Result<()> {
     g.add(13)?;
     let mut extra = Sodg::empty();
     extra.add(13)?;
-    g.merge(&extra);
+    g.merge(&extra)?;
     assert_eq!(1, g.vertices.len());
     Ok(())
 }
@@ -172,7 +175,7 @@ fn merges_connected_singletons() -> Result<()> {
     extra.bind(1, 2, "foo")?;
     extra.add(3)?;
     extra.bind(3, 2, "foo")?;
-    g.merge(&extra);
+    g.merge(&extra)?;
     assert_eq!(3, g.vertices.len());
     Ok(())
 }
@@ -185,7 +188,7 @@ fn merges_simple_loop() -> Result<()> {
     g.bind(1, 2, "foo")?;
     g.bind(2, 1, "bar")?;
     let extra = g.clone();
-    g.merge(&extra);
+    g.merge(&extra)?;
     assert_eq!(extra.vertices.len(), g.vertices.len());
     Ok(())
 }
@@ -203,7 +206,22 @@ fn merges_large_identical_graphs() -> Result<()> {
     g.add(5)?;
     g.bind(1, 5, "z")?;
     let extra = g.clone();
-    g.merge(&extra);
+    g.merge(&extra)?;
     assert_eq!(extra.vertices.len(), g.vertices.len());
+    Ok(())
+}
+
+#[cfg(test)]
+use crate::Hex;
+
+#[test]
+fn merges_data() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    let mut extra = Sodg::empty();
+    extra.add(1)?;
+    extra.put(1, Hex::from(42))?;
+    g.merge(&extra)?;
+    assert_eq!(42, g.data(1)?.to_i64()?);
     Ok(())
 }
