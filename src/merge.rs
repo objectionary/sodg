@@ -107,7 +107,11 @@ impl Sodg {
                     if self.vertices.contains_key(v) && ups.get(v).unwrap().is_empty() {
                         found = Some(*v);
                     } else {
-                        found = Some(self.next_id());
+                        let mut id = *v;
+                        if self.vertices.contains_key(&id) {
+                            id = self.next_id();
+                        }
+                        found = Some(id);
                     }
                 }
                 rename.insert(*v, found.unwrap());
@@ -313,5 +317,22 @@ fn ignores_double_parents() -> Result<()> {
     extra.bind(42, 3, "a")?;
     g.merge(&extra)?;
     assert_eq!(4, g.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn merges_into_empty_graph() -> Result<()> {
+    let mut g = Sodg::empty();
+    let mut extra = Sodg::empty();
+    extra.add(1)?;
+    extra.add(2)?;
+    extra.add(3)?;
+    extra.bind(1, 2, "a")?;
+    extra.bind(2, 3, "b")?;
+    extra.bind(3, 1, "c")?;
+    g.merge(&extra)?;
+    debug!("{g:?}");
+    assert_eq!(3, g.vertices.len());
+    assert_eq!(2, g.kid(1, "a").unwrap().0);
     Ok(())
 }
