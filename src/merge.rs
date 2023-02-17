@@ -23,7 +23,7 @@ use crate::vertex::Vertex;
 use crate::Sodg;
 use anyhow::{anyhow, Result};
 use log::debug;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 impl Sodg {
     /// Merge another graph into the current one.
@@ -45,7 +45,7 @@ impl Sodg {
                 ups.get_mut(&e.to).unwrap().push((*v, e.a.clone()));
             }
         }
-        let mut toxic: Vec<u32> = Vec::new();
+        let mut toxic = HashSet::new();
         loop {
             let mut again = false;
             for (v, vtx) in self.vertices.iter() {
@@ -53,14 +53,14 @@ impl Sodg {
                     for e1 in vtx.edges.iter() {
                         for e2 in right.edges.iter() {
                             if e2.to == e1.to && e2.a != e1.a && !toxic.contains(&e2.to) {
-                                toxic.push(e2.to);
+                                toxic.insert(e2.to);
                                 again = true;
                             }
                         }
                     }
                     if toxic.contains(v) {
                         for e2 in right.edges.iter() {
-                            toxic.push(e2.to);
+                            toxic.insert(e2.to);
                         }
                     }
                 }
@@ -133,7 +133,7 @@ impl Sodg {
             }
             if !before.data.is_empty() && before.data != vtx.data {
                 return Err(anyhow!(
-                    "Data conflict, ν{new} on the left has {}, ν{v} on the right has {}",
+                    "Data conflict, ν{new} on the left has {}, ν{v} on the right has {}; ups={ups:?}; rename={rename:?}, toxic={toxic:?}",
                     before.data,
                     vtx.data
                 ));
