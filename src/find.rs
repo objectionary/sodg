@@ -288,7 +288,7 @@ fn closure_return_absolute_vertex() -> Result<()> {
         g.find(
             0,
             "bar",
-            &mut LambdaRelay::new(|_v, a| {
+            &LambdaRelay::new(|_v, a| {
                 assert_eq!(a, "bar");
                 Ok("ν1".to_string())
             }),
