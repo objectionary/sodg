@@ -65,11 +65,16 @@ digraph {
             .sorted_by_key(|(v, _)| <&u32>::clone(v))
         {
             lines.push(format!(
-                "  v{v}[shape=circle,label=\"ν{v}\"{}];",
+                "  v{v}[shape=circle,label=\"ν{v}\"{}]; {}",
                 if vtx.data.is_empty() {
                     ""
                 } else {
                     ",color=\"#f96900\""
+                },
+                if vtx.data.is_empty() {
+                    "".to_string()
+                } else {
+                    format!("/* {} */", vtx.data)
                 }
             ));
             for e in vtx.edges.iter().sorted_by_key(|e| e.a.clone()) {
