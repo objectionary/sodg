@@ -37,7 +37,7 @@
 //! ```
 
 #![doc(html_root_url = "https://docs.rs/sodg/0.0.0")]
-// #![deny(warnings)]
+#![deny(warnings)]
 
 mod alerts;
 mod clone;
