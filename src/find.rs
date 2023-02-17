@@ -239,7 +239,7 @@ fn finds_with_closure() -> Result<()> {
         g.find(
             1,
             "first.second",
-            &mut LambdaRelay::new(|v, a| {
+            &LambdaRelay::new(|v, a| {
                 if v == 1 && !a.is_empty() {
                     panic!();
                 }
@@ -264,7 +264,7 @@ fn finds_with_locator() -> Result<()> {
     g.bind(1, 3, "xyz")?;
     g.add(4)?;
     g.bind(3, 4, "x")?;
-    assert_eq!(4, g.find(1, "a.x", &mut ConstRelay::new("xyz"))?);
+    assert_eq!(4, g.find(1, "a.x", &ConstRelay::new("xyz"))?);
     Ok(())
 }
 
@@ -272,7 +272,7 @@ fn finds_with_locator() -> Result<()> {
 fn finds_root() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    assert_eq!(0, g.find(0, "", &mut DeadRelay::default())?);
+    assert_eq!(0, g.find(0, "", &DeadRelay::default())?);
     Ok(())
 }
 
@@ -282,13 +282,13 @@ fn closure_return_absolute_vertex() -> Result<()> {
     g.add(0).unwrap();
     g.add(1).unwrap();
     g.bind(0, 1, "foo").unwrap();
-    assert!(g.find(0, "bar", &mut DeadRelay::new()).is_err());
+    assert!(g.find(0, "bar", &DeadRelay::new()).is_err());
     assert_eq!(
         1,
         g.find(
             0,
             "bar",
-            &mut LambdaRelay::new(|_v, a| {
+            &LambdaRelay::new(|_v, a| {
                 assert_eq!(a, "bar");
                 Ok("ν1".to_string())
             }),
@@ -318,7 +318,7 @@ impl Relay for FakeRelay {
         let cp = self as *const Self;
         let mp = cp as *mut Self;
         unsafe {
-            (&mut *mp).g.add(42).unwrap();
+            (*mp).g.add(42).unwrap();
         }
         Ok("ν42".to_string())
     }
