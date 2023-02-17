@@ -52,11 +52,9 @@ impl Sodg {
                 if let Some(right) = g.vertices.get(v) {
                     for e1 in vtx.edges.iter() {
                         for e2 in right.edges.iter() {
-                            if e2.to == e1.to && e2.a != e1.a {
-                                if !toxic.contains(&e2.to) {
-                                    toxic.push(e2.to);
-                                    again = true;
-                                }
+                            if e2.to == e1.to && e2.a != e1.a && !toxic.contains(&e2.to) {
+                                toxic.push(e2.to);
+                                again = true;
                             }
                         }
                     }
