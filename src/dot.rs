@@ -77,7 +77,7 @@ digraph {
                     "  v{v} -> v{} [label=\"{}\"{}{}];",
                     e.to,
                     e.a,
-                    if e.a.starts_with('ρ') {
+                    if e.a.starts_with('ρ') || e.a.starts_with('σ') {
                         ",color=gray,fontcolor=gray"
                     } else {
                         ""
