@@ -104,7 +104,11 @@ impl Sodg {
                 before.edges.push(Edge::new(v1, e.a.as_str()));
             }
             if !before.data.is_empty() && before.data != vtx.data {
-                return Err(anyhow!("Data conflict"));
+                return Err(anyhow!(
+                    "Data conflict, ν{new} on the left has {}, ν{v} on the right has {}",
+                    before.data,
+                    vtx.data
+                ));
             }
             before.data = vtx.data.clone();
             self.vertices.insert(*new, before);
