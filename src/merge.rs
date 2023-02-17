@@ -70,6 +70,9 @@ impl Sodg {
             }
         }
         let mut rename: HashMap<u32, u32> = HashMap::new();
+        if g.vertices.contains_key(&0) && self.vertices.contains_key(&0) {
+            rename.insert(0, 0);
+        }
         for (_, vtx) in self.vertices.iter() {
             for e in vtx.edges.iter() {
                 if toxic.contains(&e.to) {
@@ -306,6 +309,8 @@ fn understands_same_name_kids() -> Result<()> {
     extra.bind(1, 2, "x")?;
     g.merge(&extra)?;
     assert_eq!(5, g.vertices.len());
+    assert_eq!(1, g.kid(0, "a").unwrap().0);
+    assert_eq!(2, g.kid(1, "x").unwrap().0);
     Ok(())
 }
 
@@ -369,5 +374,43 @@ fn mixed_injection() -> Result<()> {
     extra.bind(5, 4, "b")?;
     g.merge(&extra)?;
     assert_eq!(3, g.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn zero_to_zero() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "a")?;
+    g.bind(1, 0, "back")?;
+    g.add(2)?;
+    g.bind(0, 2, "b")?;
+    let mut extra = Sodg::empty();
+    extra.add(0)?;
+    extra.add(1)?;
+    extra.bind(0, 1, "c")?;
+    extra.bind(1, 0, "back")?;
+    g.merge(&extra)?;
+    assert_eq!(4, g.vertices.len());
+    Ok(())
+}
+
+#[cfg(test)]
+use crate::Script;
+
+#[test]
+fn two_big_graphs() -> Result<()> {
+    let mut g = Sodg::empty();
+    Script::from_str(
+        "ADD(0); ADD(1); BIND(0, 1, foo);
+        ADD(2); BIND(0, 1, alpha);
+        BIND(1, 0, back);",
+    )
+    .deploy_to(&mut g)?;
+    let mut extra = Sodg::empty();
+    Script::from_str("ADD(0); ADD(1); BIND(0, 1, bar); BIND(1, 0, back);").deploy_to(&mut extra)?;
+    g.merge(&extra)?;
+    assert_eq!(4, g.vertices.len());
     Ok(())
 }
