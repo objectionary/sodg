@@ -22,8 +22,8 @@ use crate::edge::Edge;
 use crate::vertex::Vertex;
 use crate::Sodg;
 use anyhow::{anyhow, Result};
-use std::collections::HashMap;
 use log::debug;
+use std::collections::HashMap;
 
 impl Sodg {
     /// Merge another graph into the current one.
@@ -98,10 +98,7 @@ impl Sodg {
                         Some(vt) => vt.clone(),
                     };
                     for h in has.edges {
-                        if h.a == up.1 {
-                            if found.is_some() && found.unwrap() != h.to {
-                                return Err(anyhow!("Double parents"));
-                            }
+                        if h.a == up.1 && found.is_none() {
                             found = Some(h.to);
                         }
                     }
@@ -140,7 +137,10 @@ impl Sodg {
             before.data = vtx.data.clone();
             self.vertices.insert(*new, before);
         }
-        debug!("Merged {} vertices into the existing Sodg", g.vertices.len());
+        debug!(
+            "Merged {} vertices into the existing Sodg",
+            g.vertices.len()
+        );
         Ok(())
     }
 }
@@ -299,3 +299,19 @@ fn understands_same_name_kids() -> Result<()> {
     Ok(())
 }
 
+#[test]
+fn ignores_double_parents() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    g.add(3)?;
+    g.bind(1, 3, "a")?;
+    g.bind(2, 3, "a")?;
+    let mut extra = Sodg::empty();
+    extra.add(42)?;
+    extra.add(3)?;
+    extra.bind(42, 3, "a")?;
+    g.merge(&extra)?;
+    assert_eq!(4, g.vertices.len());
+    Ok(())
+}
