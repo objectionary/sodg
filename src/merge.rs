@@ -82,6 +82,11 @@ impl Sodg {
                 }
             }
         }
+        for (v, _vtx) in g.vertices.iter() {
+            if self.next_v <= *v {
+                self.next_v = *v + 1;
+            }
+        }
         loop {
             for (v, _vtx) in g.vertices.iter() {
                 if rename.contains_key(v) {
@@ -133,9 +138,10 @@ impl Sodg {
             }
             if !before.data.is_empty() && before.data != vtx.data {
                 return Err(anyhow!(
-                    "Data conflict, ν{new} on the left has {}, ν{v} on the right has {}; ups={ups:?}; rename={rename:?}, toxic={toxic:?}",
+                    "Data conflict, ν{new} on the left has {}, ν{v} on the right has {}; ups=[{}]; toxic={toxic:?}",
                     before.data,
-                    vtx.data
+                    vtx.data,
+                    ups.get(v).unwrap().iter().map(|(k, v)| format!("{k}->{v}")).collect::<Vec<String>>().join(", ")
                 ));
             }
             before.data = vtx.data.clone();
@@ -331,8 +337,37 @@ fn merges_into_empty_graph() -> Result<()> {
     extra.bind(2, 3, "b")?;
     extra.bind(3, 1, "c")?;
     g.merge(&extra)?;
-    debug!("{g:?}");
     assert_eq!(3, g.vertices.len());
     assert_eq!(2, g.kid(1, "a").unwrap().0);
+    Ok(())
+}
+
+#[test]
+fn two_roots() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    g.bind(1, 2, "a")?;
+    let mut extra = Sodg::empty();
+    extra.add(42)?;
+    extra.add(43)?;
+    extra.bind(42, 43, "a")?;
+    g.merge(&extra)?;
+    assert_eq!(4, g.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn mixed_injection() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(4)?;
+    let mut extra = Sodg::empty();
+    extra.add(4)?;
+    extra.put(4, Hex::from(4))?;
+    extra.add(5)?;
+    extra.put(5, Hex::from(5))?;
+    extra.bind(5, 4, "b")?;
+    g.merge(&extra)?;
+    assert_eq!(3, g.vertices.len());
     Ok(())
 }
