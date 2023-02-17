@@ -106,8 +106,12 @@ impl Sodg {
                         Some(vt) => vt.clone(),
                     };
                     for h in has.edges {
-                        if h.a == up.1 && found.is_none() {
-                            found = Some(h.to);
+                        if h.a == up.1 {
+                            if found.is_none() {
+                                found = Some(h.to);
+                            } else {
+                                found = None;
+                            }
                         }
                     }
                 }
@@ -393,6 +397,23 @@ fn zero_to_zero() -> Result<()> {
     extra.bind(1, 0, "back")?;
     g.merge(&extra)?;
     assert_eq!(4, g.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn finds_siblings() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "a")?;
+    g.add(2)?;
+    g.bind(0, 2, "b")?;
+    let mut extra = Sodg::empty();
+    extra.add(0)?;
+    extra.add(1)?;
+    extra.bind(0, 1, "b")?;
+    g.merge(&extra)?;
+    assert_eq!(3, g.vertices.len());
     Ok(())
 }
 
