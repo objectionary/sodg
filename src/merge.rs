@@ -18,10 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::edge::Edge;
 use crate::vertex::Vertex;
 use crate::Sodg;
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use log::debug;
 use std::collections::{HashMap, HashSet};
 
@@ -132,27 +131,36 @@ impl Sodg {
                 break;
             }
         }
-        for (v, vtx) in g.vertices.iter() {
-            let new = rename.get(v).unwrap();
-            let mut before = match self.vertices.get(new) {
-                None => Vertex::empty(),
-                Some(b) => b.clone(),
-            };
-            for e in vtx.edges.iter() {
-                let v1 = *rename.get(&e.to).unwrap();
-                before.edges.retain(|e1| e1.a != e.a.as_str());
-                before.edges.push(Edge::new(v1, e.a.as_str()));
+        let mut merged = HashSet::new();
+        loop {
+            let mut again = false;
+            for (v, vtx) in g.vertices.iter() {
+                let new = rename.get(v).unwrap();
+                if !merged.contains(v) {
+                    self.add(*new)?;
+                    self.put(*new, vtx.data.clone()).context(anyhow!(
+                        "Data conflict, ups=[{}], toxic={toxic:?}",
+                        ups.get(v)
+                            .unwrap()
+                            .iter()
+                            .map(|(k, v)| format!("{k}->{v}"))
+                            .collect::<Vec<String>>()
+                            .join(", ")
+                    ))?;
+                    merged.insert(v);
+                }
+                for e in vtx.edges.iter() {
+                    let v1 = *rename.get(&e.to).unwrap();
+                    if !self.vertices.contains_key(&v1) {
+                        again = true;
+                        continue;
+                    }
+                    self.bind(*new, v1, e.a.as_str())?;
+                }
             }
-            if !before.data.is_empty() && before.data != vtx.data {
-                return Err(anyhow!(
-                    "Data conflict, ν{new} on the left has {}, ν{v} on the right has {}; ups=[{}]; toxic={toxic:?}",
-                    before.data,
-                    vtx.data,
-                    ups.get(v).unwrap().iter().map(|(k, v)| format!("{k}->{v}")).collect::<Vec<String>>().join(", ")
-                ));
+            if !again {
+                break;
             }
-            before.data = vtx.data.clone();
-            self.vertices.insert(*new, before);
         }
         debug!(
             "Merged {} vertices into the existing Sodg",
