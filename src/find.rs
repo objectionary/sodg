@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 use crate::{ConstRelay, DeadRelay, LambdaRelay, Relay, Sodg};
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Result};
 use log::trace;
 use std::collections::VecDeque;
 use std::str::FromStr;
@@ -204,33 +204,17 @@ impl Sodg {
                 }
                 Err(err) => {
                     trace!(
-                        "#find(ν{v1}, {loc}): '{}' at relay({v}, {k}) having [{}]",
+                        "#find(ν{v1}, {loc}): '{}' from relay of .{k} in {}",
                         err,
-                        self.attrs(v)
+                        self.v_print(v)
                     );
                     format!("error: {err}")
                 }
             };
-            return Err(anyhow!(
-                "Can't find ν{v}.{k} among [{}]: ({fault})",
-                self.attrs(v)
-            ));
+            return Err(anyhow!("Can't find .{k} in {}: ({fault})", self.v_print(v)));
         }
         trace!("#find(ν{v1}, {loc}): {indent}found ν{v} in {jumps} jumps");
         Ok(v)
-    }
-
-    fn attrs(&self, v: u32) -> String {
-        let list: Vec<String> = self
-            .vertices
-            .get(&v)
-            .context(format!("Can't find ν{v}"))
-            .unwrap()
-            .edges
-            .iter()
-            .map(|e| e.a.clone())
-            .collect();
-        list.join(", ")
     }
 }
 

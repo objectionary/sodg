@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 use crate::Sodg;
+use anyhow::Context;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 
@@ -43,6 +44,23 @@ impl Debug for Sodg {
             lines.push(format!("ν{} -> ⟦{}⟧", i, attrs.join(", ")));
         }
         f.write_str(lines.join("\n").as_str())
+    }
+}
+
+impl Sodg {
+    /// Print a single vertex to a string, which can be used for
+    /// logging and debugging.
+    pub fn v_print(&self, v: u32) -> String {
+        let list: Vec<String> = self
+            .vertices
+            .get(&v)
+            .context(format!("Can't find ν{v}"))
+            .unwrap()
+            .edges
+            .iter()
+            .map(|e| e.a.clone())
+            .collect();
+        format!("ν{v}[{}]", list.join(", "))
     }
 }
 
