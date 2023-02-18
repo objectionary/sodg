@@ -93,6 +93,8 @@ fn merges_two_graphs() -> Result<()> {
     extra.bind(0, 1, "bar")?;
     g.merge(&extra, 0, 0)?;
     assert_eq!(3, g.vertices.len());
+    assert_eq!(1, g.kid(0, "foo").unwrap().0);
+    assert_eq!(2, g.kid(0, "bar").unwrap().0);
     Ok(())
 }
 

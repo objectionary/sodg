@@ -203,26 +203,34 @@ impl Sodg {
                     format!("re to '{re}' didn't help")
                 }
                 Err(err) => {
-                    trace!("#find(ν{v1}, {loc}): !{}", err);
+                    trace!(
+                        "#find(ν{v1}, {loc}): '{}' at relay({v}, {k}) having [{}]",
+                        err,
+                        self.attrs(v)
+                    );
                     format!("error: {err}")
                 }
             };
-            let others: Vec<String> = self
-                .vertices
-                .get(&v)
-                .context(format!("Can't find ν{v}"))
-                .unwrap()
-                .edges
-                .iter()
-                .map(|e| e.a.clone())
-                .collect();
             return Err(anyhow!(
                 "Can't find ν{v}.{k} among [{}]: ({fault})",
-                others.join(", ")
+                self.attrs(v)
             ));
         }
         trace!("#find(ν{v1}, {loc}): {indent}found ν{v} in {jumps} jumps");
         Ok(v)
+    }
+
+    fn attrs(&self, v: u32) -> String {
+        let list: Vec<String> = self
+            .vertices
+            .get(&v)
+            .context(format!("Can't find ν{v}"))
+            .unwrap()
+            .edges
+            .iter()
+            .map(|e| e.a.clone())
+            .collect();
+        list.join(", ")
     }
 }
 
