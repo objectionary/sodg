@@ -25,8 +25,16 @@ use std::collections::{HashMap, HashSet};
 
 impl Sodg {
     /// Take a slice of the graph, keeping only the vertex specified
-    /// by the locator.
+    /// by the locator and its kids, recursively found in the entire graph.
     pub fn slice(&mut self, loc: &str) -> Result<Sodg> {
+        self.slice_some(loc, |_v, _to, _a| true)
+    }
+
+    /// Take a slice of the graph, keeping only the vertex specified
+    /// by the locator and its kids, recursively found in the entire graph,
+    /// but only if the provided predicate agrees with the selection of
+    /// the kids.
+    pub fn slice_some(&mut self, loc: &str, p: fn(u32, u32, String) -> bool) -> Result<Sodg> {
         let mut todo = HashSet::new();
         let mut done = HashSet::new();
         todo.insert(self.find(0, loc, &DeadRelay::default())?);
@@ -38,12 +46,15 @@ impl Sodg {
             for v in before {
                 done.insert(v);
                 let vtx = self.vertices.get(&v).unwrap();
-                for to in vtx.edges.iter().map(|e| e.to) {
-                    if done.contains(&to) {
+                for e in vtx.edges.iter() {
+                    if done.contains(&e.to) {
                         continue;
                     }
-                    done.insert(to);
-                    todo.insert(to);
+                    if !p(v, e.to, e.a.clone()) {
+                        continue;
+                    }
+                    done.insert(e.to);
+                    todo.insert(e.to);
                 }
             }
         }
@@ -70,7 +81,20 @@ fn makes_a_slice() -> Result<()> {
     g.bind(0, 1, "foo")?;
     g.add(2)?;
     g.bind(0, 2, "bar")?;
-    let slice = g.slice("bar")?;
+    assert_eq!(1, g.slice("foo")?.vertices.len());
+    assert_eq!(1, g.slice("bar")?.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn makes_a_partial_slice() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "foo")?;
+    g.add(2)?;
+    g.bind(1, 2, "bar")?;
+    let slice = g.slice_some("foo", |_v, _to, _a| false)?;
     assert_eq!(1, slice.vertices.len());
     Ok(())
 }
