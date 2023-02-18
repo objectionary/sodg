@@ -22,7 +22,7 @@ use crate::{Deserialize, Edge, Hex, Serialize};
 use std::collections::HashSet;
 
 /// A vertex in the [`Sodg`].
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Eq, PartialEq, Clone, Serialize, Deserialize)]
 pub(crate) struct Vertex {
     /// This is a list of edges departing from this vertex.
     pub edges: Vec<Edge>,
