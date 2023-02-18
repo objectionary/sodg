@@ -20,9 +20,16 @@
 
 use crate::Sodg;
 use std::fmt;
+use std::fmt::{Debug, Display, Formatter};
 
-impl fmt::Debug for Sodg {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+impl Display for Sodg {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
+        <&Sodg as Debug>::fmt(&self, f)
+    }
+}
+
+impl Debug for Sodg {
+    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
         for (i, v) in self.vertices.iter() {
             let mut attrs = v
@@ -48,5 +55,14 @@ fn prints_itself() -> Result<()> {
     g.add(0)?;
     g.add(1)?;
     assert_ne!("", format!("{:?}", g));
+    Ok(())
+}
+
+#[test]
+fn displays_itself() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    assert_ne!("", format!("{g}"));
     Ok(())
 }
