@@ -251,7 +251,7 @@ impl Sodg {
     /// If the vertex is absent, the method will return `Err`.
     pub fn full(&self, v: u32) -> Result<bool> {
         let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
-        Ok(!vtx.data.is_empty())
+        Ok(vtx.full)
     }
 
     /// Split label into two parts.
