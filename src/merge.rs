@@ -65,7 +65,8 @@ impl Sodg {
         }
         for (a, k, to) in g.kids(right)? {
             let target = if let Some(t) = mapped.get(&to) {
-                self.bind(left, *t, format!("{a}/{k}").as_str())?;
+                let tag = if k.is_empty() { a } else { format!("{a}/{k}") };
+                self.bind(left, *t, tag.as_str())?;
                 *t
             } else if let Some((t, _)) = self.kid(left, &a) {
                 t

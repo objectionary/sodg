@@ -114,7 +114,7 @@ impl Sodg {
                     }
                     if parts.len() == 2 && parts[1].is_empty() {
                         errors.push(format!(
-                            "Edge label from ν{} to ν{} has a an empty tail part: '{}'",
+                            "Edge label from ν{} to ν{} has an empty tail part: '{}'",
                             v, e.to, e.a
                         ));
                     }
