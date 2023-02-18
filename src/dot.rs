@@ -19,7 +19,6 @@
 // SOFTWARE.
 
 use crate::Sodg;
-use anyhow::Result;
 use itertools::Itertools;
 
 impl Sodg {
@@ -36,7 +35,7 @@ impl Sodg {
     /// g.add(1).unwrap();
     /// g.bind(0, 1, "foo").unwrap();
     /// g.bind(0, 1, "bar").unwrap();
-    /// let dot = g.to_dot().unwrap();
+    /// let dot = g.to_dot();
     /// println!("{}", dot);
     /// ```
     ///
@@ -50,7 +49,7 @@ impl Sodg {
     ///   v1[shape=circle,label="ν1"];
     /// }
     /// ```
-    pub fn to_dot(&self) -> Result<String> {
+    pub fn to_dot(&self) -> String {
         let mut lines: Vec<String> = vec![];
         lines.push(
             "/* Render it at https://dreampuf.github.io/GraphvizOnline/ */
@@ -96,12 +95,15 @@ digraph {
             }
         }
         lines.push("}\n".to_string());
-        Ok(lines.join("\n"))
+        lines.join("\n")
     }
 }
 
 #[cfg(test)]
 use crate::Hex;
+
+#[cfg(test)]
+use anyhow::Result;
 
 #[test]
 fn simple_graph_to_dot() -> Result<()> {
@@ -110,7 +112,7 @@ fn simple_graph_to_dot() -> Result<()> {
     g.put(0, Hex::from_str_bytes("hello"))?;
     g.add(1)?;
     g.bind(0, 1, "foo")?;
-    let dot = g.to_dot()?;
+    let dot = g.to_dot();
     assert!(dot.contains("shape=circle,label=\"ν0\""));
     Ok(())
 }
