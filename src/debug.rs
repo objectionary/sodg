@@ -51,16 +51,17 @@ impl Sodg {
     /// Print a single vertex to a string, which can be used for
     /// logging and debugging.
     pub fn v_print(&self, v: u32) -> String {
-        let list: Vec<String> = self
+        let vtx = self
             .vertices
             .get(&v)
             .context(format!("Can't find ν{v}"))
-            .unwrap()
-            .edges
-            .iter()
-            .map(|e| e.a.clone())
-            .collect();
-        format!("ν{v}[{}]", list.join(", "))
+            .unwrap();
+        let list: Vec<String> = vtx.edges.iter().map(|e| e.a.clone()).collect();
+        format!(
+            "ν{v}⟦{}{}⟧",
+            if vtx.occupied { "Δ, " } else { "" },
+            list.join(", ")
+        )
     }
 }
 
