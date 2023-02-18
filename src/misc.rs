@@ -21,6 +21,11 @@
 use crate::Sodg;
 
 impl Sodg {
+    /// Get total number of vertices in the graph.
+    pub fn len(&self) -> usize {
+        self.vertices.len()
+    }
+
     /// Is it empty?
     ///
     /// Emptiness means that not a single vertex is in the graph.
@@ -46,5 +51,12 @@ use anyhow::Result;
 fn checks_for_emptiness() -> Result<()> {
     let g = Sodg::empty();
     assert!(g.is_empty());
+    Ok(())
+}
+
+#[test]
+fn counts_vertices() -> Result<()> {
+    let g = Sodg::empty();
+    assert_eq!(0, g.len());
     Ok(())
 }

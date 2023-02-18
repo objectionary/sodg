@@ -22,7 +22,7 @@ use crate::Edge;
 use crate::Hex;
 use crate::Sodg;
 use crate::Vertex;
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use log::trace;
 use rstest::rstest;
 
@@ -130,20 +130,22 @@ impl Sodg {
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
     ///
-    /// If there is no data, an empty `Hex` will be returned, for example:
+    /// If there is no data, an `Err` will be returned, for example:
     ///
     /// ```
-    /// use sodg::Hex;
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(42).unwrap();
-    /// assert!(g.data(42).unwrap().is_empty());
+    /// assert!(g.data(42).is_err());
     /// ```
     pub fn data(&mut self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
             .get_mut(&v)
             .context(format!("Can't find ν{v}"))?;
+        if vtx.data.is_empty() {
+            return Err(anyhow!("There is no data in ν{v}"));
+        }
         let data = vtx.data.clone();
         vtx.taken = true;
         #[cfg(feature = "gc")]
@@ -230,11 +232,11 @@ impl Sodg {
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
     /// g.put(0, Hex::from(42)).unwrap();
-    /// assert!(g.full(0).unwrap());
+    /// assert!(g.is_full(0).unwrap());
     /// ```
     ///
     /// If the vertex is absent, the method will return `Err`.
-    pub fn full(&self, v: u32) -> Result<bool> {
+    pub fn is_full(&self, v: u32) -> Result<bool> {
         let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
         Ok(!vtx.data.is_empty())
     }
@@ -401,7 +403,7 @@ fn builds_list_of_kids() -> Result<()> {
 fn gets_data_from_empty_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    assert!(g.data(0)?.is_empty());
+    assert!(g.data(0).is_err());
     Ok(())
 }
 
@@ -464,7 +466,7 @@ fn checks_for_data_presence() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.put(0, Hex::from(42)).unwrap();
-    assert!(g.full(0).unwrap());
+    assert!(g.is_full(0).unwrap());
     Ok(())
 }
 
@@ -472,6 +474,6 @@ fn checks_for_data_presence() -> Result<()> {
 fn checks_for_data_absence() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    assert!(!g.full(0).unwrap());
+    assert!(!g.is_full(0).unwrap());
     Ok(())
 }

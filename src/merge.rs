@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 use crate::Sodg;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Result};
 use log::debug;
 use std::collections::HashMap;
 
@@ -60,25 +60,22 @@ impl Sodg {
             return Ok(());
         }
         mapped.insert(right, left);
-        let vtx = g
-            .vertices
-            .get(&right)
-            .context(format!("Can't find ν{right} in the right tree"))
-            .unwrap();
-        self.put(left, vtx.data.clone())?;
-        for e in vtx.edges.iter() {
-            let target = if let Some(t) = mapped.get(&e.to) {
-                self.bind(left, *t, &e.a)?;
+        if g.is_full(right)? {
+            self.put(left, g.vertices.get(&right).unwrap().data.clone())?;
+        }
+        for (a, k, to) in g.kids(right)? {
+            let target = if let Some(t) = mapped.get(&to) {
+                self.bind(left, *t, format!("{a}/{k}").as_str())?;
                 *t
-            } else if let Some((to, _)) = self.kid(left, &e.a) {
-                to
+            } else if let Some((t, _)) = self.kid(left, &a) {
+                t
             } else {
                 let id = self.next_id();
                 self.add(id)?;
-                self.bind(left, id, &e.a)?;
+                self.bind(left, id, &a)?;
                 id
             };
-            self.merge_rec(g, target, e.to, mapped)?
+            self.merge_rec(g, target, to, mapped)?
         }
         Ok(())
     }
