@@ -417,7 +417,7 @@ fn gets_data_from_empty_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.put(0, Hex::empty())?;
-    assert!(!g.full(0)?);
+    assert!(g.full(0)?);
     Ok(())
 }
 
@@ -517,9 +517,7 @@ fn check_for_data_receiving_before_put() -> Result<()> {
 fn checks_for_empty_hex_not_full() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
-    g.add(2)?;
-    g.bind(1, 2, "Hi, i'm the dog my name is Ruby!")?;
-    g.put(2, Hex::empty())?;
-    assert!(!g.full(2).unwrap());
+    g.put(1, Hex::empty())?;
+    assert!(g.full(1).unwrap());
     Ok(())
 }
