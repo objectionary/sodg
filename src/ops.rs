@@ -514,7 +514,7 @@ fn check_for_data_receiving_before_put() -> Result<()> {
 }
 
 #[test]
-fn checks_for_empty_hex_not_full() -> Result<()> {
+fn checks_for_empty_hex_full() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
     g.put(1, Hex::empty())?;
