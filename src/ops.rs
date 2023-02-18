@@ -107,6 +107,7 @@ impl Sodg {
             .get_mut(&v)
             .context(format!("Can't find ν{v}"))?;
         vtx.data = d.clone();
+        vtx.occupied = true;
         self.validate(vec![v])?;
         trace!("#data: data of ν{v} set to {d}");
         Ok(())
@@ -143,7 +144,7 @@ impl Sodg {
             .vertices
             .get_mut(&v)
             .context(format!("Can't find ν{v}"))?;
-        if vtx.data.is_empty() {
+        if !vtx.occupied {
             return Err(anyhow!("There is no data in ν{v}"));
         }
         let data = vtx.data.clone();
@@ -238,7 +239,7 @@ impl Sodg {
     /// If the vertex is absent, the method will return `Err`.
     pub fn is_full(&self, v: u32) -> Result<bool> {
         let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
-        Ok(!vtx.data.is_empty())
+        Ok(vtx.occupied)
     }
 
     /// Split label into two parts.

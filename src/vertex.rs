@@ -24,10 +24,16 @@ use std::collections::HashSet;
 /// A vertex in the [`Sodg`].
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct Vertex {
+    /// This is a list of edges departing from this vertex.
     pub edges: Vec<Edge>,
+    /// This is the data in the vertex (possibly empty).
     pub data: Hex,
+    /// This is a supplementary list of parent nodes, staying here for caching.
     pub parents: HashSet<u32>,
+    /// This is `TRUE` if the data has been already taken by the use of [`Sodg::data`].
     pub taken: bool,
+    /// This is `TRUE` if there is data in this vertex (possibly empty, but still data).
+    pub occupied: bool,
 }
 
 impl Vertex {
@@ -46,6 +52,7 @@ impl Vertex {
             data: Hex::empty(),
             parents: HashSet::new(),
             taken: false,
+            occupied: false,
         }
     }
 }
