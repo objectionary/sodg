@@ -93,11 +93,16 @@ use std::collections::HashSet;
 /// project, as a memory model for objects and dependencies between them.
 #[derive(Serialize, Deserialize)]
 pub struct Sodg {
+    /// This is a map of vertices with their unique numbers/IDs.
     vertices: HashMap<u32, Vertex>,
+    /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.
     #[serde(skip_serializing, skip_deserializing)]
     next_v: u32,
+    /// This is the list of alerts, which is managed by the [`Sodg::alert_on`] function.
     #[serde(skip_serializing, skip_deserializing)]
     alerts: Vec<Alert>,
+    /// This is the flag that either enables or disables alerts, through [`Sodg::alerts_on`]
+    /// and [`Sodg::alerts_off`].
     #[serde(skip_serializing, skip_deserializing)]
     alerts_active: bool,
     #[cfg(feature = "sober")]
