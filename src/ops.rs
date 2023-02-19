@@ -22,7 +22,7 @@ use crate::Edge;
 use crate::Hex;
 use crate::Sodg;
 use crate::Vertex;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use log::trace;
 use rstest::rstest;
 
@@ -107,7 +107,6 @@ impl Sodg {
             .get_mut(&v)
             .context(format!("Can't find ν{v}"))?;
         vtx.data = d.clone();
-        vtx.occupied = true;
         self.validate(vec![v])?;
         trace!("#data: data of ν{v} set to {d}");
         Ok(())
@@ -131,22 +130,19 @@ impl Sodg {
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
     ///
-    /// If there is no data, an `Err` will be returned, for example:
+    /// If there is no data, an empty `Hex` will be returned, for example:
     ///
     /// ```
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(42).unwrap();
-    /// assert!(g.data(42).is_err());
+    /// assert!(g.data(42).unwrap().is_empty());
     /// ```
     pub fn data(&mut self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
             .get_mut(&v)
             .context(format!("Can't find ν{v}"))?;
-        if !vtx.occupied {
-            return Err(anyhow!("There is no data in ν{v}"));
-        }
         let data = vtx.data.clone();
         vtx.taken = true;
         #[cfg(feature = "gc")]
@@ -222,24 +218,6 @@ impl Sodg {
         } else {
             None
         }
-    }
-
-    /// Check whether data is in the vertex.
-    ///
-    /// With this method you can check whether the data is in the vertex:
-    ///
-    /// ```
-    /// use sodg::{Hex, Sodg};
-    /// let mut g = Sodg::empty();
-    /// g.add(0).unwrap();
-    /// g.put(0, Hex::from(42)).unwrap();
-    /// assert!(g.is_full(0).unwrap());
-    /// ```
-    ///
-    /// If the vertex is absent, the method will return `Err`.
-    pub fn is_full(&self, v: u32) -> Result<bool> {
-        let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
-        Ok(vtx.occupied)
     }
 
     /// Split label into two parts.
@@ -404,7 +382,8 @@ fn builds_list_of_kids() -> Result<()> {
 fn gets_data_from_empty_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    assert!(g.data(0).is_err());
+    assert!(g.data(0).is_ok());
+    assert!(g.data(0).unwrap().is_empty());
     Ok(())
 }
 
@@ -459,22 +438,5 @@ fn replaces_ignoring_locator() -> Result<()> {
     g.bind(0, 1, "π/Φ.one")?;
     g.bind(0, 1, "π/Φ.two")?;
     assert_eq!(1, g.kids(0)?.len());
-    Ok(())
-}
-
-#[test]
-fn checks_for_data_presence() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.put(0, Hex::from(42)).unwrap();
-    assert!(g.is_full(0).unwrap());
-    Ok(())
-}
-
-#[test]
-fn checks_for_data_absence() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    assert!(!g.is_full(0).unwrap());
     Ok(())
 }

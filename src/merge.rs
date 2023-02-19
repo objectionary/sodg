@@ -60,9 +60,7 @@ impl Sodg {
             return Ok(());
         }
         mapped.insert(right, left);
-        if g.is_full(right)? {
-            self.put(left, g.vertices.get(&right).unwrap().data.clone())?;
-        }
+        self.put(left, g.vertices.get(&right).unwrap().data.clone())?;
         for (a, k, to) in g.kids(right)? {
             let target = if let Some(t) = mapped.get(&to) {
                 let tag = if k.is_empty() { a } else { format!("{a}/{k}") };

@@ -32,8 +32,6 @@ pub(crate) struct Vertex {
     pub parents: HashSet<u32>,
     /// This is `TRUE` if the data has been already taken by the use of [`Sodg::data`].
     pub taken: bool,
-    /// This is `TRUE` if there is data in this vertex (possibly empty, but still data).
-    pub occupied: bool,
 }
 
 impl Vertex {
@@ -52,7 +50,6 @@ impl Vertex {
             data: Hex::empty(),
             parents: HashSet::new(),
             taken: false,
-            occupied: false,
         }
     }
 }

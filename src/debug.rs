@@ -59,7 +59,7 @@ impl Sodg {
         let list: Vec<String> = vtx.edges.iter().map(|e| e.a.clone()).collect();
         format!(
             "ν{v}⟦{}{}⟧",
-            if vtx.occupied { "Δ, " } else { "" },
+            if vtx.data.is_empty() { "" } else { "Δ, " },
             list.join(", ")
         )
     }
