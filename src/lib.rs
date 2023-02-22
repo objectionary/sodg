@@ -65,6 +65,7 @@ use std::collections::HashMap;
 
 pub use crate::alerts::Alert;
 pub(crate) use crate::edge::Edge;
+pub use crate::hex::CloneableHex;
 pub use crate::hex::Hex;
 pub use crate::script::Script;
 pub(crate) use crate::vertex::Vertex;

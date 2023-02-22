@@ -47,6 +47,49 @@ pub enum Hex {
     Bytes([u8; 24], usize),
 }
 
+/// `CloneableHex` is a type that holds a reference to a `Hex` and can be copied.
+///
+/// For example:
+/// ```
+/// use sodg::Hex;
+/// use sodg::CloneableHex;
+/// let origin = Hex::from(3412312);
+/// let copied = CloneableHex::from(&origin);
+/// assert_eq!(origin.bytes(), copied.hex_ref.bytes())
+/// ```
+///
+/// Properties:
+///
+/// * `hex_ref`: A reference to the hex that this object is a clone of.
+#[derive(Copy, Clone)]
+pub struct CloneableHex<'a> {
+    pub hex_ref: &'a Hex,
+}
+
+impl CloneableHex<'_> {
+    /// This function takes a reference to a Hex and returns a CloneableHex that contains a reference to
+    /// the Hex.
+    ///
+    /// For example:
+    /// ```
+    /// use sodg::Hex;
+    /// use sodg::CloneableHex;
+    /// let h = Hex::from(123);
+    /// let c = CloneableHex::from(&h);
+    /// assert!(!c.hex_ref.is_empty())
+    /// ```
+    /// Arguments:
+    ///
+    /// * `hex`: &Hex
+    ///
+    /// Returns:
+    ///
+    /// A CloneableHex struct.
+    pub fn from(hex: &Hex) -> CloneableHex<'_> {
+        CloneableHex { hex_ref: hex }
+    }
+}
+
 impl Debug for Hex {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(self.print().as_str())
@@ -607,5 +650,13 @@ fn concat_test() -> Result<()> {
     let a = Hex::from_str("DE-AD")?;
     let b = Hex::from_str("BE-EF")?;
     assert_eq!(a.concat(b), Hex::from_str("DE-AD-BE-EF")?);
+    Ok(())
+}
+
+#[test]
+fn creates_copy() -> Result<()> {
+    let origin = Hex::from_str("DA-EF-CA")?;
+    let copy = CloneableHex { hex_ref: &origin };
+    assert!(origin.eq(copy.hex_ref));
     Ok(())
 }
