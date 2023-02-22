@@ -14,7 +14,11 @@
 
 This Rust library implements a Surging Object DiGraph (SODG) for
 [reo](https://github.com/objectionary/reo) virtual machine for
-[EO](https://www.eolang.org) programs.
+[EO](https://www.eolang.org) programs. The graph is "surging" because
+it automatically behind the scene deletes vertices and edges from itself,
+which is also known as "garbage collection" mechanism. A vertex gets deleted
+right after the data it contains is read _and_ no other vertices transitively point
+to it.
 
 Here is how you can create a di-graph:
 
