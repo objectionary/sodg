@@ -58,7 +58,16 @@ Then, you can print the graph:
 println!("{:?}", g);
 ```
 
-Also, you can serialize and deserialize the graph.
+Using `merge()`, you can merge two graphs together, provided they are trees.
+
+Using `save()` and `load()`, you can serialize and deserialize the graph.
+
+Using `to_xml()` and `to_dot()`, you can print it to 
+[XML](https://en.wikipedia.org/wiki/XML) and 
+[DOT](https://graphviz.org/doc/info/lang.html).
+
+Using `slice()` and `slice_some()`, you can take a part/slice 
+of the graph (mostly for debugging purposes). 
 
 Read [the documentation](https://docs.rs/sodg/latest/sodg/).
 
