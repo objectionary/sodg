@@ -621,5 +621,24 @@ fn creates_from_big_slice() -> Result<()> {
     }
     let h = Hex::from_slice(accum.as_slice());
     assert_eq!(27, h.len());
+    assert_eq!(h.to_vec(), accum);
+    Ok(())
+}
+
+#[test]
+fn concatenates_from_hex_vec() -> Result<()> {
+    let a = Hex::from_vec(vec![0x12, 0xAB]);
+    let b = Hex::from_slice("as_bytesss".as_bytes());
+    let res = a.concat(b);
+    assert!(!res.is_empty());
+    Ok(())
+}
+
+#[test]
+fn concatenates_from_hex_str() -> Result<()> {
+    let a = Hex::from_str_bytes("Привет!");
+    let b = Hex::from_vec(vec![0x01, 0x02]);
+    let res = a.concat(b);
+    assert!(!res.is_empty());
     Ok(())
 }
