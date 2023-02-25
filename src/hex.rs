@@ -609,3 +609,17 @@ fn concat_test() -> Result<()> {
     assert_eq!(a.concat(b), Hex::from_str("DE-AD-BE-EF")?);
     Ok(())
 }
+
+#[test]
+fn creates_from_big_slice() -> Result<()> {
+    let s: [u8; 9] = [0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+    let mut accum = vec![];
+    for el in s {
+        accum.push(el);
+        accum.push(el);
+        accum.push(el);
+    }
+    let h = Hex::from_slice(accum.as_slice());
+    assert_eq!(27, h.len());
+    Ok(())
+}
