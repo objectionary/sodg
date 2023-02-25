@@ -629,7 +629,8 @@ fn creates_from_big_slice() -> Result<()> {
 fn concatenates_from_hex_vec() -> Result<()> {
     let a = Hex::from_vec(vec![0x12, 0xAB]);
     let b = Hex::from_slice("as_bytesss".as_bytes());
-    let res = a.concat(b);
+    let c = Hex::from_vec(vec![0x12, 0xAD]);
+    let res = a.concat(b).concat(c);
     assert!(!res.is_empty());
     Ok(())
 }
@@ -638,7 +639,8 @@ fn concatenates_from_hex_vec() -> Result<()> {
 fn concatenates_from_hex_str() -> Result<()> {
     let a = Hex::from_str_bytes("Привет!");
     let b = Hex::from_vec(vec![0x01, 0x02]);
-    let res = a.concat(b);
+    let c = Hex::from_str_bytes("Пока!");
+    let res = a.concat(b).concat(c);
     assert!(!res.is_empty());
     Ok(())
 }
