@@ -609,3 +609,38 @@ fn concat_test() -> Result<()> {
     assert_eq!(a.concat(b), Hex::from_str("DE-AD-BE-EF")?);
     Ok(())
 }
+
+#[test]
+fn creates_from_big_slice() -> Result<()> {
+    let s: [u8; 9] = [0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+    let mut accum = vec![];
+    for el in s {
+        accum.push(el);
+        accum.push(el);
+        accum.push(el);
+    }
+    let h = Hex::from_slice(accum.as_slice());
+    assert_eq!(27, h.len());
+    assert_eq!(h.to_vec(), accum);
+    Ok(())
+}
+
+#[test]
+fn concatenates_from_hex_vec() -> Result<()> {
+    let a = Hex::from_vec(vec![0x12, 0xAB]);
+    let b = Hex::from_slice("as_bytesss".as_bytes());
+    let c = Hex::from_vec(vec![0x12, 0xAD]);
+    let res = a.concat(b).concat(c);
+    assert_eq!(14, res.len());
+    Ok(())
+}
+
+#[test]
+fn concatenates_from_hex_str() -> Result<()> {
+    let a = Hex::from_str_bytes("Привет!");
+    let b = Hex::from_vec(vec![0x01, 0x02]);
+    let c = Hex::from_str_bytes("Пока!");
+    let res = a.concat(b).concat(c);
+    assert_eq!(24, res.len());
+    Ok(())
+}
