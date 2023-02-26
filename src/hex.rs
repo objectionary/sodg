@@ -631,7 +631,7 @@ fn concatenates_from_hex_vec() -> Result<()> {
     let b = Hex::from_slice("as_bytesss".as_bytes());
     let c = Hex::from_vec(vec![0x12, 0xAD]);
     let res = a.concat(b).concat(c);
-    assert!(!res.is_empty());
+    assert_eq!(14, res.len());
     Ok(())
 }
 
@@ -641,6 +641,6 @@ fn concatenates_from_hex_str() -> Result<()> {
     let b = Hex::from_vec(vec![0x01, 0x02]);
     let c = Hex::from_str_bytes("Пока!");
     let res = a.concat(b).concat(c);
-    assert!(!res.is_empty());
+    assert_eq!(24, res.len());
     Ok(())
 }
