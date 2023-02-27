@@ -18,11 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{ConstRelay, DeadRelay, LambdaRelay, Relay, Sodg};
-use anyhow::{anyhow, Result};
-use log::trace;
 use std::collections::VecDeque;
 use std::str::FromStr;
+
+use anyhow::{anyhow, Result};
+use log::trace;
+
+use crate::{ConstRelay, DeadRelay, LambdaRelay, Relay, Sodg};
 
 impl Relay for ConstRelay {
     fn re(&self, _v: u32, _a: &str) -> Result<String> {
@@ -195,12 +197,9 @@ impl Sodg {
             trace!("#find(ν{v1}, {loc}): {indent}calling relay(ν{v}, {k})...");
             let fault = match relay.re(v, &k) {
                 Ok(re) => {
-                    if let Ok(to) = self.find_with_indent(v, re.as_str(), relay, depth + 1) {
-                        trace!("#find(ν{v1}, {loc}): {indent}ν{v}.{k} relayed to ν{to} (re: {re})");
-                        v = to;
-                        continue;
-                    }
-                    format!("re to '{re}' didn't help")
+                    trace!("#find(ν{v1}, {loc}): {indent}ν{v}.{k} relayed to {re}");
+                    locator.push_front(re);
+                    continue;
                 }
                 Err(err) => {
                     trace!(
