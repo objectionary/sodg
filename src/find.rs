@@ -126,36 +126,9 @@ impl Sodg {
             }
         }
         #[allow(clippy::let_and_return)]
-        let v = self.find_with_indent(v1, loc, relay, 0);
-        #[cfg(feature = "sober")]
-        {
-            let cp = self as *const Self;
-            let mp = cp as *mut Self;
-            unsafe {
-                (&mut *mp).finds.remove(&badge);
-            }
-        }
-        v
-    }
-
-    /// Find a vertex, printing the log with an indentation prefix.
-    ///
-    /// This function is used only by [`Sodg::find].
-    fn find_with_indent<T: Relay>(
-        &self,
-        v1: u32,
-        loc: &str,
-        relay: &T,
-        depth: usize,
-    ) -> Result<u32> {
-        #[cfg(feature = "sober")]
-        {
-            if depth > 16 {
-                return Err(anyhow!("The depth {depth} is too big"));
-            }
-        }
         let mut v = v1;
         let mut locator: VecDeque<String> = VecDeque::new();
+        let depth = 0;
         loc.split('.')
             .filter(|k| !k.is_empty())
             .for_each(|k| locator.push_back(k.to_string()));
@@ -213,7 +186,16 @@ impl Sodg {
             return Err(anyhow!("Can't find .{k} in {}: ({fault})", self.v_print(v)));
         }
         trace!("#find(ν{v1}, {loc}): {indent}found ν{v} in {jumps} jumps");
-        Ok(v)
+        let found = Ok(v);
+        #[cfg(feature = "sober")]
+        {
+            let cp = self as *const Self;
+            let mp = cp as *mut Self;
+            unsafe {
+                (&mut *mp).finds.remove(&badge);
+            }
+        }
+        found
     }
 }
 
