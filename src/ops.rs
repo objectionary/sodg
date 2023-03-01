@@ -282,6 +282,7 @@ fn binds_two_names() -> Result<()> {
     g.bind(1, 2, "first")?;
     g.bind(1, 2, "second")?;
     assert_eq!(2, g.find(1, "first", &DeadRelay::default())?);
+    assert_eq!(2, g.find(1, "second", &DeadRelay::default())?);
     Ok(())
 }
 
