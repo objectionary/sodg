@@ -65,7 +65,7 @@ impl Sodg {
             let target = if let Some(t) = mapped.get(&to) {
                 self.bind(left, *t, a.as_str())?;
                 *t
-            } else if let Some((t, _)) = self.kid(left, &a) {
+            } else if let Some(t) = self.kid(left, &a) {
                 t
             } else {
                 let id = self.next_id();
@@ -91,8 +91,8 @@ fn merges_two_graphs() -> Result<()> {
     extra.bind(0, 1, "bar")?;
     g.merge(&extra, 0, 0)?;
     assert_eq!(3, g.vertices.len());
-    assert_eq!(1, g.kid(0, "foo").unwrap().0);
-    assert_eq!(2, g.kid(0, "bar").unwrap().0);
+    assert_eq!(1, g.kid(0, "foo").unwrap());
+    assert_eq!(2, g.kid(0, "bar").unwrap());
     Ok(())
 }
 
@@ -110,7 +110,7 @@ fn avoids_simple_duplicates() -> Result<()> {
     extra.bind(1, 2, "bar")?;
     g.merge(&extra, 0, 0)?;
     assert_eq!(3, g.vertices.len());
-    assert_eq!(1, g.kid(0, "foo").unwrap().0);
+    assert_eq!(1, g.kid(0, "foo").unwrap());
     Ok(())
 }
 
@@ -186,8 +186,8 @@ fn understands_same_name_kids() -> Result<()> {
     extra.bind(1, 2, "x")?;
     g.merge(&extra, 0, 0)?;
     assert_eq!(5, g.vertices.len());
-    assert_eq!(1, g.kid(0, "a").unwrap().0);
-    assert_eq!(2, g.kid(1, "x").unwrap().0);
+    assert_eq!(1, g.kid(0, "a").unwrap());
+    assert_eq!(2, g.kid(1, "x").unwrap());
     Ok(())
 }
 
@@ -204,7 +204,7 @@ fn merges_into_empty_graph() -> Result<()> {
     extra.bind(3, 1, "c")?;
     g.merge(&extra, 1, 1)?;
     assert_eq!(3, g.vertices.len());
-    assert_eq!(2, g.kid(1, "a").unwrap().0);
+    assert_eq!(2, g.kid(1, "a").unwrap());
     Ok(())
 }
 

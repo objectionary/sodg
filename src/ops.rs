@@ -184,8 +184,7 @@ impl Sodg {
         Ok(kids)
     }
 
-    /// Find a kid of a vertex, by its edge name, and return the ID of the vertex
-    /// found and the locator of the edge.
+    /// Find a kid of a vertex, by its edge name, and return the ID of the vertex found.
     ///
     /// For example:
     ///
@@ -195,16 +194,13 @@ impl Sodg {
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// g.bind(0, 42, "k").unwrap();
-    /// assert_eq!((42, "k".to_string()), g.kid(0, "k").unwrap());
+    /// assert_eq!(42, g.kid(0, "k").unwrap());
     /// ```
     ///
     /// If vertex `v1` is absent, `None` will be returned.
-    pub fn kid(&self, v: u32, a: &str) -> Option<(u32, String)> {
+    pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         if let Some(vtx) = self.vertices.get(&v) {
-            vtx.edges
-                .iter()
-                .find(|e| e.a == a)
-                .map(|e| (e.to, e.a.clone()))
+            vtx.edges.iter().find(|e| e.a == a).map(|e| e.to)
         } else {
             None
         }
@@ -264,7 +260,7 @@ fn overwrites_edge() -> Result<()> {
     g.bind(1, 2, "foo")?;
     g.add(3)?;
     g.bind(1, 3, "foo")?;
-    assert_eq!(3, g.kid(1, "foo").unwrap().0);
+    assert_eq!(3, g.kid(1, "foo").unwrap());
     Ok(())
 }
 
