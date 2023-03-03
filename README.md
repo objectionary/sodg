@@ -28,7 +28,7 @@ use sodg::Hex;
 let mut g = Sodg::empty();
 g.add(0)?; // add a vertex no.0
 g.add(1)?; // add a vertex no.1
-g.bind(0, 1, "foo/bar")?; // connect v0 to v1 with label "foo"
+g.bind(0, 1, "foo")?; // connect v0 to v1 with label "foo"
 g.put(1, Hex::from_str_bytes("Hello, world!"))?; // attach data to v1
 ```
 

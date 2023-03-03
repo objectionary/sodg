@@ -24,7 +24,6 @@ use crate::Sodg;
 use crate::Vertex;
 use anyhow::{Context, Result};
 use log::trace;
-use rstest::rstest;
 
 impl Sodg {
     /// Add a new vertex `v1` to itself.
@@ -75,8 +74,7 @@ impl Sodg {
             .vertices
             .get_mut(&v1)
             .context(format!("Can't depart from ν{v1}, it's absent"))?;
-        vtx1.edges
-            .retain(|e| Self::split_a(&e.a).0 != Self::split_a(a).0);
+        vtx1.edges.retain(|e| e.a != a);
         vtx1.edges.push(Edge::new(v2, a));
         let vtx2 = self
             .vertices
@@ -160,9 +158,8 @@ impl Sodg {
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// g.bind(0, 42, "k").unwrap();
-    /// let (a, tail, to) = g.kids(0).unwrap().first().unwrap().clone();
+    /// let (a, to) = g.kids(0).unwrap().first().unwrap().clone();
     /// assert_eq!("k", a);
-    /// assert_eq!("", tail);
     /// assert_eq!(42, to);
     /// ```
     ///
@@ -177,20 +174,13 @@ impl Sodg {
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// g.bind(0, 42, "a").unwrap();
-    /// g.bind(0, 42, "b/d.f.e").unwrap();
-    /// g.bind(0, 42, "c/hello-world").unwrap();
-    /// assert_eq!("a,b,c", g.kids(0).unwrap().into_iter().map(|(a, _, _)| a).collect::<Vec<String>>().join(","));
+    /// g.bind(0, 42, "b").unwrap();
+    /// g.bind(0, 42, "c").unwrap();
+    /// assert_eq!("a,b,c", g.kids(0).unwrap().into_iter().map(|(a, _)| a).collect::<Vec<String>>().join(","));
     /// ```
-    pub fn kids(&self, v: u32) -> Result<Vec<(String, String, u32)>> {
+    pub fn kids(&self, v: u32) -> Result<Vec<(String, u32)>> {
         let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
-        let kids = vtx
-            .edges
-            .iter()
-            .map(|x| {
-                let p = Self::split_a(&x.a);
-                (p.0, p.1, x.to)
-            })
-            .collect();
+        let kids = vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect();
         Ok(kids)
     }
 
@@ -204,8 +194,8 @@ impl Sodg {
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
-    /// g.bind(0, 42, "k/foo").unwrap();
-    /// assert_eq!((42, "foo".to_string()), g.kid(0, "k").unwrap());
+    /// g.bind(0, 42, "k").unwrap();
+    /// assert_eq!((42, "k".to_string()), g.kid(0, "k").unwrap());
     /// ```
     ///
     /// If vertex `v1` is absent, `None` will be returned.
@@ -213,36 +203,16 @@ impl Sodg {
         if let Some(vtx) = self.vertices.get(&v) {
             vtx.edges
                 .iter()
-                .find(|e| Self::split_a(&e.a).0 == Self::split_a(a).0)
-                .map(|e| (e.to, Self::split_a(&e.a).1))
+                .find(|e| e.a == a)
+                .map(|e| (e.to, e.a.clone()))
         } else {
             None
         }
-    }
-
-    /// Split label into two parts.
-    pub(crate) fn split_a(a: &str) -> (String, String) {
-        let s = a.splitn(2, '/').collect::<Vec<&str>>();
-        (
-            s.first().unwrap().to_string(),
-            s.get(1).unwrap_or(&"").to_string(),
-        )
     }
 }
 
 #[cfg(test)]
 use crate::DeadRelay;
-
-#[rstest]
-#[case("hello", "hello", "")]
-#[case("hello/", "hello", "")]
-#[case("hello/a-1", "hello", "a-1")]
-#[case("π/Φ.x.Δ", "π", "Φ.x.Δ")]
-fn splits_label_correctly(#[case] a: &str, #[case] head: &str, #[case] tail: &str) {
-    let s = Sodg::split_a(a);
-    assert_eq!(head, s.0);
-    assert_eq!(tail, s.1);
-}
 
 #[test]
 fn adds_simple_vertex() -> Result<()> {
@@ -286,24 +256,6 @@ fn binds_two_names() -> Result<()> {
     Ok(())
 }
 
-#[rstest]
-#[case("hello", "hello")]
-#[case("hello/a.b.c", "hello")]
-#[case("hello", "hello/f.f")]
-#[case("hello", "hello/")]
-#[case("hello/", "hello")]
-fn overwrites_edges(#[case] before: &str, #[case] after: &str) {
-    let mut g = Sodg::empty();
-    g.alerts_off();
-    g.add(1).unwrap();
-    g.add(2).unwrap();
-    g.bind(1, 2, before).unwrap();
-    g.add(3).unwrap();
-    g.bind(1, 3, after).unwrap();
-    assert_eq!(3, g.kid(1, after).unwrap().0);
-    assert_eq!(3, g.kid(1, before).unwrap().0);
-}
-
 #[test]
 fn overwrites_edge() -> Result<()> {
     let mut g = Sodg::empty();
@@ -311,9 +263,8 @@ fn overwrites_edge() -> Result<()> {
     g.add(2)?;
     g.bind(1, 2, "foo")?;
     g.add(3)?;
-    g.bind(1, 3, "foo/ee")?;
+    g.bind(1, 3, "foo")?;
     assert_eq!(3, g.kid(1, "foo").unwrap().0);
-    assert_eq!(3, g.kid(1, "foo/ee").unwrap().0);
     Ok(())
 }
 
@@ -355,12 +306,11 @@ fn finds_all_kids() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
-    g.bind(0, 1, "one/f.d")?;
+    g.bind(0, 1, "one")?;
     g.bind(0, 1, "two")?;
     assert_eq!(2, g.kids(0)?.len());
-    let (a, tail, to) = g.kids(0)?.first().unwrap().clone();
+    let (a, to) = g.kids(0)?.first().unwrap().clone();
     assert_eq!("one", a);
-    assert_eq!("f.d", tail);
     assert_eq!(1, to);
     Ok(())
 }
@@ -372,9 +322,9 @@ fn builds_list_of_kids() -> Result<()> {
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, "one")?;
-    g.bind(0, 1, "two/d.f.hello-world")?;
-    g.bind(0, 1, "three/")?;
-    let names: Vec<String> = g.kids(0)?.into_iter().map(|(a, _, _)| a).collect();
+    g.bind(0, 1, "two")?;
+    g.bind(0, 1, "three")?;
+    let names: Vec<String> = g.kids(0)?.into_iter().map(|(a, _)| a).collect();
     assert_eq!("one,two,three", names.join(","));
     Ok(())
 }
@@ -404,40 +354,9 @@ fn gets_kid_from_absent_vertex() -> Result<()> {
 }
 
 #[test]
-fn finds_kid_by_prefix() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "π/Φ.test")?;
-    assert_eq!(1, g.kid(0, "π").unwrap().0);
-    Ok(())
-}
-
-#[test]
-fn finds_kid_and_loc_by_prefix() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "π/foo")?;
-    assert_eq!(Some((1, "foo".to_string())), g.kid(0, "π"));
-    Ok(())
-}
-
-#[test]
 fn adds_twice() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     assert!(g.add(0).is_ok());
-    Ok(())
-}
-
-#[test]
-fn replaces_ignoring_locator() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "π/Φ.one")?;
-    g.bind(0, 1, "π/Φ.two")?;
-    assert_eq!(1, g.kids(0)?.len());
     Ok(())
 }
