@@ -45,7 +45,7 @@ impl Sodg {
         }
         self.vertices.insert(v1, Vertex::empty());
         self.validate(vec![v1])?;
-        trace!("#add(ν{}): new vertex added", v1);
+        trace!("#add: vertex ν{v1} added");
         Ok(())
     }
 
@@ -145,6 +145,7 @@ impl Sodg {
         vtx.taken = true;
         #[cfg(feature = "gc")]
         self.collect(v)?;
+        trace!("#data: data of ν{v} retrieved");
         Ok(data)
     }
 
