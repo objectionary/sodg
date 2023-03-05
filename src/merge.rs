@@ -26,7 +26,9 @@ use std::collections::HashMap;
 impl Sodg {
     /// Merge another graph into the current one.
     ///
-    /// It is expected that both graphs are trees. The `left` vertex is expected
+    /// It is expected that both graphs are trees! If they are not, the result is unpredictable.
+    ///
+    /// The `left` vertex is expected
     /// to be the root of the current graph, while the `right` vertex is the root
     /// of the graph being merged into the current one.
     pub fn merge(&mut self, g: &Sodg, left: u32, right: u32) -> Result<()> {
@@ -60,7 +62,10 @@ impl Sodg {
             return Ok(());
         }
         mapped.insert(right, left);
-        self.put(left, g.vertices.get(&right).unwrap().data.clone())?;
+        let d = g.vertices.get(&right).unwrap().data.clone();
+        if !d.is_empty() {
+            self.put(left, d)?;
+        }
         for (a, to) in g.kids(right)? {
             let target = if let Some(t) = mapped.get(&to) {
                 self.bind(left, *t, a.as_str())?;
@@ -100,8 +105,8 @@ fn merges_two_graphs() -> Result<()> {
 fn avoids_simple_duplicates() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "foo")?;
+    g.add(5)?;
+    g.bind(0, 5, "foo")?;
     let mut extra = Sodg::empty();
     extra.add(0)?;
     extra.add(1)?;
@@ -110,7 +115,30 @@ fn avoids_simple_duplicates() -> Result<()> {
     extra.bind(1, 2, "bar")?;
     g.merge(&extra, 0, 0)?;
     assert_eq!(3, g.vertices.len());
+    assert_eq!(5, g.kid(0, "foo").unwrap());
+    assert_eq!(6, g.kid(5, "bar").unwrap());
+    Ok(())
+}
+
+#[test]
+fn keeps_existing_vertices_intact() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "foo")?;
+    g.add(2)?;
+    g.bind(1, 2, "bar")?;
+    g.add(3)?;
+    g.bind(2, 3, "zzz")?;
+    let mut extra = Sodg::empty();
+    extra.add(0)?;
+    extra.add(5)?;
+    extra.bind(0, 5, "foo")?;
+    g.merge(&extra, 0, 0)?;
+    assert_eq!(4, g.vertices.len());
     assert_eq!(1, g.kid(0, "foo").unwrap());
+    assert_eq!(2, g.kid(1, "bar").unwrap());
+    assert_eq!(3, g.kid(2, "zzz").unwrap());
     Ok(())
 }
 
