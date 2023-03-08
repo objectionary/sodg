@@ -21,7 +21,7 @@
 use crate::Sodg;
 use anyhow::{anyhow, Result};
 use log::debug;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 impl Sodg {
     /// Merge another graph into the current one.
@@ -38,8 +38,14 @@ impl Sodg {
         let merged = mapped.len();
         let scope = g.vertices.len();
         if merged != scope {
+            let must: Vec<u32> = g.vertices.keys().cloned().collect();
+            let seen: Vec<u32> = mapped.keys().cloned().collect();
+            let missed: HashSet<u32> = &HashSet::from_iter(must) - &HashSet::from_iter(seen);
+            let mut ordered: Vec<u32> = missed.into_iter().collect();
+            ordered.sort();
             return Err(anyhow!(
-                "Just {merged} vertices merged, out of {scope}; maybe the graph is not a tree?"
+                "Just {merged} vertices merged, out of {scope}; maybe the right graph was not a tree? Missed vertices: {}",
+                ordered.iter().map(|v| format!("ν{v}")).collect::<Vec<String>>().join(", ")
             ));
         }
         debug!(
@@ -51,6 +57,9 @@ impl Sodg {
     }
 
     /// Merge two trees recursively, ignoring the nodes already `mapped`.
+    ///
+    /// The `mapped` is a key-value map, where the key is a vertex from the right
+    /// graph, which is mapped to a vertex from the left graph.
     fn merge_rec(
         &mut self,
         g: &Sodg,
@@ -98,6 +107,21 @@ fn merges_two_graphs() -> Result<()> {
     assert_eq!(3, g.vertices.len());
     assert_eq!(1, g.kid(0, "foo").unwrap());
     assert_eq!(2, g.kid(0, "bar").unwrap());
+    Ok(())
+}
+
+#[test]
+fn merges_two_non_trees() -> Result<()> {
+    let mut g = Sodg::empty();
+    let mut extra = Sodg::empty();
+    extra.add(0)?;
+    extra.add(42)?;
+    extra.add(2)?;
+    extra.add(13)?;
+    let r = g.merge(&extra, 0, 0);
+    assert!(r.is_err());
+    let msg = r.err().unwrap().to_string();
+    assert!(msg.contains("ν2, ν13, ν42"), "{}", msg);
     Ok(())
 }
 
