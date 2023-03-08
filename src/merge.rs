@@ -44,8 +44,8 @@ impl Sodg {
             let mut ordered: Vec<u32> = missed.into_iter().collect();
             ordered.sort();
             return Err(anyhow!(
-                "Just {merged} vertices merged, out of {scope}; maybe the right graph was not a tree? Missed vertices: {}",
-                ordered.iter().map(|v| format!("ν{v}")).collect::<Vec<String>>().join(", ")
+                "Just {merged} vertices merged, out of {scope}; maybe the right graph was not a tree? {} missed: {}",
+                ordered.len(), ordered.iter().map(|v| format!("ν{v}")).collect::<Vec<String>>().join(", ")
             ));
         }
         debug!(
