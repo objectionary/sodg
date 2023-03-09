@@ -26,6 +26,11 @@ impl Sodg {
         self.vertices.len()
     }
 
+    /// Get all IDs of vertices, in a vector.
+    pub fn ids(&self) -> Vec<u32> {
+        self.vertices.keys().copied().collect()
+    }
+
     /// Is it empty?
     ///
     /// Emptiness means that not a single vertex is in the graph.
@@ -58,5 +63,14 @@ fn checks_for_emptiness() -> Result<()> {
 fn counts_vertices() -> Result<()> {
     let g = Sodg::empty();
     assert_eq!(0, g.len());
+    Ok(())
+}
+
+#[test]
+fn collect_vertices() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    g.add(2)?;
+    assert!(g.ids().contains(&1));
     Ok(())
 }
