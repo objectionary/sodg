@@ -192,6 +192,9 @@ impl Sodg {
                     continue;
                 }
             };
+            if !self.vertices.contains_key(&v) {
+                return Err(anyhow!("There is no vertex ν{v} in the graph"));
+            };
             trace!("#find(ν{v1}, {loc}): {indent}calling relay(ν{v}, {k})...");
             let fault = match relay.re(v, &k) {
                 Ok(re) => {
