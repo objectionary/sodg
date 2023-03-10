@@ -31,7 +31,7 @@ impl Sodg {
     ///
     /// The entire [`Sodg`] can be restored from the file.
     /// The function returns the size of the file just saved.
-    pub fn save(&mut self, path: &Path) -> Result<usize> {
+    pub fn save(&self, path: &Path) -> Result<usize> {
         let start = Instant::now();
         let bytes: Vec<u8> = serialize(self).context("Failed to serialize")?;
         let size = bytes.len();
