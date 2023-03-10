@@ -28,6 +28,9 @@ impl Sodg {
     ///
     /// It is expected that both graphs are trees! If they are not, the result is unpredictable.
     ///
+    /// The `right` vertex is mapped to the `left` vertex. The decisions about
+    /// their kids are made recursively.
+    ///
     /// The `left` vertex is expected
     /// to be the root of the current graph, while the `right` vertex is the root
     /// of the graph being merged into the current one.
@@ -58,6 +61,9 @@ impl Sodg {
 
     /// Merge two trees recursively, ignoring the nodes already `mapped`.
     ///
+    /// The `right` vertex is mapped to the `left` vertex. The decisions about
+    /// their kids are made recursively.
+    ///
     /// The `mapped` is a key-value map, where the key is a vertex from the right
     /// graph, which is mapped to a vertex from the left graph.
     fn merge_rec(
@@ -76,19 +82,43 @@ impl Sodg {
             self.put(left, d)?;
         }
         for (a, to) in g.kids(right)? {
-            let target = if let Some(t) = mapped.get(&to) {
-                self.bind(left, *t, a.as_str())?;
-                *t
-            } else if let Some(t) = self.kid(left, &a) {
+            let lft = if let Some(t) = self.kid(left, &a) {
                 t
+            } else if let Some(t) = mapped.get(&to) {
+                self.bind(left, *t, &a)?;
+                *t
             } else {
                 let id = self.next_id();
                 self.add(id)?;
                 self.bind(left, id, &a)?;
                 id
             };
-            self.merge_rec(g, target, to, mapped)?
+            self.merge_rec(g, lft, to, mapped)?
         }
+        for (a, to) in g.kids(right)? {
+            if let Some(first) = self.kid(left, &a) {
+                if let Some(second) = mapped.get(&to) {
+                    if first != *second {
+                        self.join(first, *second)?
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn join(&mut self, left: u32, right: u32) -> Result<()> {
+        for vtx in self.vertices.iter_mut() {
+            for e in vtx.1.edges.iter_mut() {
+                if e.to == right {
+                    e.to = left;
+                }
+            }
+        }
+        for e in self.kids(right).unwrap() {
+            self.bind(left, e.1, e.0.as_str())?;
+        }
+        self.vertices.remove(&right);
         Ok(())
     }
 }
@@ -122,6 +152,33 @@ fn merges_two_non_trees() -> Result<()> {
     assert!(r.is_err());
     let msg = r.err().unwrap().to_string();
     assert!(msg.contains("ν2, ν13, ν42"), "{}", msg);
+    Ok(())
+}
+
+#[test]
+fn merges_a_loop() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "a")?;
+    g.add(2)?;
+    g.bind(1, 2, "b")?;
+    let mut extra = Sodg::empty();
+    extra.add(0)?;
+    extra.add(4)?;
+    extra.bind(0, 4, "c")?;
+    extra.add(3)?;
+    extra.bind(0, 3, "a")?;
+    extra.bind(4, 3, "d")?;
+    extra.add(5)?;
+    extra.bind(3, 5, "e")?;
+    g.merge(&extra, 0, 0)?;
+    assert_eq!(5, g.vertices.len());
+    assert_eq!(1, g.kid(0, "a").unwrap());
+    assert_eq!(2, g.kid(1, "b").unwrap());
+    assert_eq!(3, g.kid(0, "c").unwrap());
+    assert_eq!(1, g.kid(3, "d").unwrap());
+    assert_eq!(5, g.kid(1, "e").unwrap());
     Ok(())
 }
 
