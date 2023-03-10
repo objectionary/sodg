@@ -116,7 +116,13 @@ impl Sodg {
             }
         }
         for e in self.kids(right).unwrap() {
-            self.bind(left, e.1, e.0.as_str())?;
+            if self.kid(left, &e.0).is_some() {
+                return Err(anyhow!(
+                    "Can't merge ν{right} into ν{left}, due to conflict in '{}'",
+                    e.0
+                ));
+            }
+            self.bind(left, e.1, &e.0)?;
         }
         self.vertices.remove(&right);
         Ok(())
