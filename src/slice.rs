@@ -26,7 +26,7 @@ use std::collections::{HashMap, HashSet};
 impl Sodg {
     /// Take a slice of the graph, keeping only the vertex specified
     /// by the locator and its kids, recursively found in the entire graph.
-    pub fn slice(&mut self, loc: &str) -> Result<Sodg> {
+    pub fn slice(&self, loc: &str) -> Result<Sodg> {
         self.slice_some(loc, |_v, _to, _a| true)
     }
 
@@ -34,7 +34,7 @@ impl Sodg {
     /// by the locator and its kids, recursively found in the entire graph,
     /// but only if the provided predicate agrees with the selection of
     /// the kids.
-    pub fn slice_some(&mut self, loc: &str, p: fn(u32, u32, String) -> bool) -> Result<Sodg> {
+    pub fn slice_some(&self, loc: &str, p: impl Fn(u32, u32, String) -> bool) -> Result<Sodg> {
         let mut todo = HashSet::new();
         let mut done = HashSet::new();
         todo.insert(self.find(0, loc, &DeadRelay::default())?);
