@@ -37,7 +37,8 @@ impl Sodg {
         let size = bytes.len();
         fs::write(path, bytes).context(format!("Can't write to {}", path.display()))?;
         trace!(
-            "Serialized {} bytes to {} in {:?}",
+            "Serialized {} vertices ({} bytes) to {} in {:?}",
+            self.vertices.len(),
             size,
             path.display(),
             start.elapsed()
@@ -51,10 +52,11 @@ impl Sodg {
         let start = Instant::now();
         let bytes = fs::read(path).context(format!("Can't read from {}", path.display()))?;
         let size = bytes.len();
-        let sodg =
+        let sodg: Sodg =
             deserialize(&bytes).context(format!("Can't deserialize from {}", path.display()))?;
         trace!(
-            "Deserialized {} bytes from {} in {:?}",
+            "Deserialized {} vertices ({} bytes) from {} in {:?}",
+            sodg.vertices.len(),
             size,
             path.display(),
             start.elapsed()
