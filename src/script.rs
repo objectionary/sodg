@@ -123,22 +123,20 @@ impl Script {
             .collect();
         match &cap[1] {
             "ADD" => {
-                let v = self.parse(&args[0], g)?;
-                g.add(v).context(format!("Failed to ADD({})", &args[0]))
+                let v = self.parse(args.get(0).context("V is expected")?, g)?;
+                g.add(v).context(format!("Failed to ADD({})", v))
             }
             "BIND" => {
-                let v1 = self.parse(&args[0], g)?;
-                let v2 = self.parse(&args[1], g)?;
-                let a = &args[2];
-                g.bind(v1, v2, a).context(format!(
-                    "Failed to BIND({}, {}, {})",
-                    &args[0], &args[1], &args[2]
-                ))
+                let v1 = self.parse(args.get(0).context("V1 is expected")?, g)?;
+                let v2 = self.parse(args.get(1).context("V2 is expected")?, g)?;
+                let a = args.get(2).context("Label is expected")?;
+                g.bind(v1, v2, a)
+                    .context(format!("Failed to BIND({}, {}, {})", v1, v2, a))
             }
             "PUT" => {
-                let v = self.parse(&args[0], g)?;
-                g.put(v, Self::parse_data(&args[1])?)
-                    .context(format!("Failed to PUT({})", &args[0]))
+                let v = self.parse(args.get(0).context("V is expected")?, g)?;
+                let d = Self::parse_data(args.get(1).context("Data is expected")?)?;
+                g.put(v, d).context(format!("Failed to PUT({})", v))
             }
             _cmd => Err(anyhow!("Unknown command: {_cmd}")),
         }
