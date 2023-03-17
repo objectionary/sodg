@@ -30,7 +30,8 @@ impl Sodg {
     /// Save the entire [`Sodg`] into a binary file.
     ///
     /// The entire [`Sodg`] can be restored from the file.
-    /// The function returns the size of the file just saved.
+    /// The function returns the size of the file just saved. In order
+    /// to restore from the file, use [`Sodg::load`].
     pub fn save(&self, path: &Path) -> Result<usize> {
         let start = Instant::now();
         let bytes: Vec<u8> = serialize(self).context("Failed to serialize")?;
@@ -47,7 +48,7 @@ impl Sodg {
     }
 
     /// Load the entire [`Sodg`] from a binary file previously
-    /// created by `save()`.
+    /// created by [`Sodg::save`].
     pub fn load(path: &Path) -> Result<Sodg> {
         let start = Instant::now();
         let bytes = fs::read(path).context(format!("Can't read from {}", path.display()))?;
