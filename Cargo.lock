@@ -560,7 +560,7 @@ dependencies = [
 
 [[package]]
 name = "sodg"
-version = "0.0.0"
+version = "0.0.30"
 dependencies = [
  "anyhow",
  "bincode",
