@@ -77,7 +77,12 @@ impl Sodg {
             return Ok(());
         }
         mapped.insert(right, left);
-        let d = g.vertices.get(&right).unwrap().data.clone();
+        let d = g
+            .vertices
+            .get(&right)
+            .ok_or(anyhow!("Can't find ν{right} in the right graph"))?
+            .data
+            .clone();
         if !d.is_empty() {
             self.put(left, d)?;
         }
@@ -115,7 +120,7 @@ impl Sodg {
                 }
             }
         }
-        for e in self.kids(right).unwrap() {
+        for e in self.kids(right)? {
             if self.kid(left, &e.0).is_some() {
                 return Err(anyhow!(
                     "Can't merge ν{right} into ν{left}, due to conflict in '{}'",
