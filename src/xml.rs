@@ -33,7 +33,7 @@ impl Sodg {
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
-    /// g.put(0, Hex::from_str_bytes("hello")).unwrap();
+    /// g.put(0, &Hex::from_str_bytes("hello")).unwrap();
     /// g.add(1).unwrap();
     /// g.bind(0, 1, "foo").unwrap();
     /// g.bind(0, 1, "bar").unwrap();
@@ -76,20 +76,25 @@ impl Sodg {
                 let mut e_node = XMLElement::new("e");
                 e_node.add_attribute("a", e.a.as_str());
                 e_node.add_attribute("to", e.to.to_string().as_str());
-                v_node.add_child(e_node).map_err(|_| anyhow::Error::msg(""))?;
+                v_node
+                    .add_child(e_node)
+                    .map_err(|_| anyhow::Error::msg(""))?;
             }
             if !vtx.data.is_empty() {
                 let mut data_node = XMLElement::new("data");
                 data_node
                     .add_text(vtx.data.print().replace('-', " "))
                     .map_err(|_| anyhow::Error::msg(""))?;
-                v_node.add_child(data_node).map_err(|_| anyhow::Error::msg(""))?;
+                v_node
+                    .add_child(data_node)
+                    .map_err(|_| anyhow::Error::msg(""))?;
             }
             root.add_child(v_node).map_err(|_| anyhow::Error::msg(""))?;
         }
         xml.set_root_element(root);
         let mut writer: Vec<u8> = Vec::new();
-        xml.generate(&mut writer).map_err(|_| anyhow::Error::msg(""))?;
+        xml.generate(&mut writer)
+            .map_err(|_| anyhow::Error::msg(""))?;
         Ok(std::str::from_utf8(&writer)?.to_string())
     }
 }

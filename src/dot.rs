@@ -31,7 +31,7 @@ impl Sodg {
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
-    /// g.put(0, Hex::from_str_bytes("hello")).unwrap();
+    /// g.put(0, &Hex::from_str_bytes("hello")).unwrap();
     /// g.add(1).unwrap();
     /// g.bind(0, 1, "foo").unwrap();
     /// g.bind(0, 1, "bar").unwrap();

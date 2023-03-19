@@ -38,12 +38,7 @@
 
 #![doc(html_root_url = "https://docs.rs/sodg/0.0.0")]
 #![deny(warnings)]
-#![warn(
-    clippy::all,
-    clippy::pedantic,
-    clippy::nursery,
-    clippy::cargo,
-)]
+#![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::cargo)]
 #![allow(clippy::multiple_inherent_impl)]
 #![allow(clippy::multiple_crate_versions)]
 

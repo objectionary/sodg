@@ -142,8 +142,7 @@ impl Script {
             "PUT" => {
                 let v = self.parse(args.get(0).context("V is expected")?, g)?;
                 let d = Self::parse_data(args.get(1).context("Data is expected")?)?;
-                g.put(v, &d)
-                    .context(format!("Failed to PUT({v}, {d})"))
+                g.put(v, &d).context(format!("Failed to PUT({v}, {d})"))
             }
             cmd => Err(anyhow!("Unknown command: {cmd}")),
         }

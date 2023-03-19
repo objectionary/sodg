@@ -222,7 +222,10 @@ impl Sodg {
                     format!("error: {err}")
                 }
             };
-            return Err(anyhow!("Can't find .{k} in {}: ({fault})", self.v_print(v)?));
+            return Err(anyhow!(
+                "Can't find .{k} in {}: ({fault})",
+                self.v_print(v)?
+            ));
         }
         trace!("#find(ν{v1}, {loc}): {indent}found ν{v} in {jumps} jumps");
         Ok(v)

@@ -61,7 +61,10 @@ impl Sodg {
             let before: Vec<u32> = todo.drain().collect();
             for v in before {
                 done.insert(v);
-                let vtx = self.vertices.get(&v).ok_or_else(|| anyhow!("Can't find ν{v}"))?;
+                let vtx = self
+                    .vertices
+                    .get(&v)
+                    .ok_or_else(|| anyhow!("Can't find ν{v}"))?;
                 for e in &vtx.edges {
                     if done.contains(&e.to) {
                         continue;

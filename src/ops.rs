@@ -133,7 +133,7 @@ impl Sodg {
     /// let mut g = Sodg::empty();
     /// g.add(42).unwrap();
     /// let data = Hex::from_str_bytes("hello, world!");
-    /// g.put(42, data.clone()).unwrap();
+    /// g.put(42, &data).unwrap();
     /// assert_eq!(data, g.data(42).unwrap());
     /// #[cfg(feature = "gc")]
     /// assert!(g.is_empty());
@@ -218,7 +218,9 @@ impl Sodg {
     /// If vertex `v1` is absent, `None` will be returned.
     #[must_use]
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
-        self.vertices.get(&v).and_then(|vtx| vtx.edges.iter().find(|e| e.a == a).map(|e| e.to))
+        self.vertices
+            .get(&v)
+            .and_then(|vtx| vtx.edges.iter().find(|e| e.a == a).map(|e| e.to))
     }
 }
 

@@ -181,7 +181,7 @@ impl Hex {
     /// ```
     /// use sodg::Hex;
     /// let d = Hex::from_vec([0x01].to_vec());
-    /// assert_eq!(true, d.to_bool().unwrap());
+    /// assert_eq!(true, d.to_bool());
     /// ```
     #[must_use]
     pub fn to_bool(&self) -> bool {
