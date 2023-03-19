@@ -21,13 +21,21 @@
 use crate::DeadRelay;
 use crate::Sodg;
 use anyhow::Result;
+use log::trace;
 use std::collections::{HashMap, HashSet};
 
 impl Sodg {
     /// Take a slice of the graph, keeping only the vertex specified
     /// by the locator and its kids, recursively found in the entire graph.
     pub fn slice(&self, loc: &str) -> Result<Sodg> {
-        self.slice_some(loc, |_v, _to, _a| true)
+        let g = self.slice_some(loc, |_v, _to, _a| true)?;
+        trace!(
+            "#slice: taken {} vertices out of {} by '{}' locator",
+            self.vertices.len(),
+            g.vertices.len(),
+            loc
+        );
+        Ok(g)
     }
 
     /// Take a slice of the graph, keeping only the vertex specified
@@ -62,14 +70,21 @@ impl Sodg {
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             new_vertices.insert(*v, vtx.clone());
         }
-        Ok(Sodg {
+        let g = Sodg {
             vertices: new_vertices,
             next_v: self.next_v,
             alerts: self.alerts.clone(),
             alerts_active: self.alerts_active,
             #[cfg(feature = "sober")]
             finds: HashSet::new(),
-        })
+        };
+        trace!(
+            "#slice_some: taken {} vertices out of {} by '{}' locator",
+            self.vertices.len(),
+            g.vertices.len(),
+            loc
+        );
+        Ok(g)
     }
 }
 
@@ -96,5 +111,18 @@ fn makes_a_partial_slice() -> Result<()> {
     g.bind(1, 2, "bar")?;
     let slice = g.slice_some("foo", |_v, _to, _a| false)?;
     assert_eq!(1, slice.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn skips_some_vertices() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    g.bind(0, 1, "foo")?;
+    g.add(2)?;
+    g.bind(0, 2, "+bar")?;
+    let slice = g.slice_some("ν0", |_, _, a| !a.starts_with('+'))?;
+    assert_eq!(2, slice.vertices.len());
     Ok(())
 }
