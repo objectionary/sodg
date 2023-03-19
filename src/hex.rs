@@ -18,34 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Deserialize, Serialize};
+use crate::Hex;
 use anyhow::{Context, Result};
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
-
-/// An object-oriented representation of binary data
-/// in hexadecimal format, which can be put into vertices of the graph.
-///
-/// You can create it from Rust primitives:
-///
-/// ```
-/// use sodg::Hex;
-/// let d = Hex::from(65534);
-/// assert_eq!("00-00-00-00-00-00-FF-FE", d.print());
-/// ```
-///
-/// Then, you can turn it back to Rust primitives:
-///
-/// ```
-/// use sodg::Hex;
-/// let d = Hex::from(65534);
-/// assert_eq!(65534, d.to_i64().unwrap());
-/// ```
-#[derive(Serialize, Deserialize, Clone)]
-pub enum Hex {
-    Vector(Vec<u8>),
-    Bytes([u8; 24], usize),
-}
 
 impl Debug for Hex {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -213,8 +189,8 @@ impl Hex {
     /// let d = Hex::from_vec([0x01].to_vec());
     /// assert_eq!(true, d.to_bool().unwrap());
     /// ```
-    pub fn to_bool(&self) -> Result<bool> {
-        Ok(self.bytes()[0] == 0x01)
+    pub fn to_bool(&self) -> bool {
+        self.bytes()[0] == 0x01
     }
 
     /// Turn it into `i64`.
@@ -226,6 +202,10 @@ impl Hex {
     /// let d = Hex::from_vec([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x2A].to_vec());
     /// assert_eq!(42, d.to_i64().unwrap());
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// If it's impossible to convert to an integer, an error will be returned.
     pub fn to_i64(&self) -> Result<i64> {
         let a: &[u8; 8] = &self.bytes().try_into().context(format!(
             "There is not enough bytes, can't make INT (just {} while we need eight)",
@@ -243,6 +223,10 @@ impl Hex {
     /// let d = Hex::from_vec([0x40, 0x09, 0x21, 0xfb, 0x54, 0x44, 0x2d, 0x18].to_vec());
     /// assert_eq!(std::f64::consts::PI, d.to_f64().unwrap());
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// If it's impossible to convert to a float, an error will be returned.
     pub fn to_f64(&self) -> Result<f64> {
         let a: &[u8; 8] = &self.bytes().try_into().context(format!(
             "There is not enough bytes, can't make FLOAT (just {} while we need eight)",
@@ -260,6 +244,10 @@ impl Hex {
     /// let d = Hex::from_vec([0x41, 0x42].to_vec());
     /// assert_eq!("AB", d.to_utf8().unwrap());
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// If it's impossible to convert to a UTF-8 string, an error will be returned.
     pub fn to_utf8(&self) -> Result<String> {
         String::from_utf8(self.bytes().to_vec()).context(format!(
             "The string inside Hex is not UTF-8 ({} bytes)",
@@ -445,6 +433,10 @@ impl FromStr for Hex {
     /// assert_eq!(Hex::empty(), d1);
     /// assert_eq!(Hex::empty(), d2);
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// If it's impossible to convert from a String, an error will be returned.
     fn from_str(hex: &str) -> std::result::Result<Self, Self::Err> {
         let s = hex.replace('-', "");
         Ok(Self::from_vec(hex::decode(s)?))
@@ -464,7 +456,7 @@ fn simple_int() -> Result<()> {
 fn simple_bool() -> Result<()> {
     let b = true;
     let d = Hex::from(b);
-    assert_eq!(b, d.to_bool()?);
+    assert_eq!(b, d.to_bool());
     assert_eq!("01", d.print());
     Ok(())
 }

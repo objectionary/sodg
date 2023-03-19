@@ -38,6 +38,13 @@
 
 #![doc(html_root_url = "https://docs.rs/sodg/0.0.0")]
 #![deny(warnings)]
+#![warn(
+    clippy::all,
+    clippy::pedantic,
+    clippy::nursery,
+    clippy::cargo,
+)]
+#![allow(clippy::multiple_inherent_impl)]
 
 mod alerts;
 mod clone;
@@ -64,15 +71,56 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 pub use crate::alerts::Alert;
-pub(crate) use crate::edge::Edge;
-pub use crate::hex::Hex;
 pub use crate::script::Script;
-pub(crate) use crate::vertex::Vertex;
-
-#[cfg(feature = "sober")]
 use std::collections::HashSet;
 
-/// A struct that represents a Surging Object DiGraph (SODG).
+/// An object-oriented representation of binary data
+/// in hexadecimal format, which can be put into vertices of the graph.
+///
+/// You can create it from Rust primitives:
+///
+/// ```
+/// use sodg::Hex;
+/// let d = Hex::from(65534);
+/// assert_eq!("00-00-00-00-00-00-FF-FE", d.print());
+/// ```
+///
+/// Then, you can turn it back to Rust primitives:
+///
+/// ```
+/// use sodg::Hex;
+/// let d = Hex::from(65534);
+/// assert_eq!(65534, d.to_i64().unwrap());
+/// ```
+#[derive(Serialize, Deserialize, Clone)]
+pub enum Hex {
+    Vector(Vec<u8>),
+    Bytes([u8; 24], usize),
+}
+
+/// A vertex in the [`Sodg`].
+#[derive(Eq, PartialEq, Clone, Serialize, Deserialize)]
+pub(crate) struct Vertex {
+    /// This is a list of edges departing from this vertex.
+    pub edges: Vec<Edge>,
+    /// This is the data in the vertex (possibly empty).
+    pub data: Hex,
+    /// This is a supplementary list of parent nodes, staying here for caching.
+    pub parents: HashSet<u32>,
+    /// This is `TRUE` if the data has been already taken by the use of [`Sodg::data`].
+    pub taken: bool,
+}
+
+/// An edge between vertices in the graph.
+#[derive(Clone, Serialize, Deserialize, Eq, PartialOrd, PartialEq, Ord)]
+pub(crate) struct Edge {
+    /// The vertex that it points to.
+    pub to: u32,
+    /// The label of the edge.
+    pub a: String,
+}
+
+/// A struct that represents a Surging Object Di-Graph (SODG).
 ///
 /// You add vertices to it, bind them one to one with edges,
 /// put data into some of them, and read data back, for example:
@@ -131,13 +179,17 @@ pub trait Relay {
     /// If it is just a string, it will be treated as a name of the attribute to
     /// try instead. If it starts from `"ν"`, it is treated as an absolute
     /// locator on the entire graph.
+    ///
+    /// # Errors
+    ///
+    /// If nothing can be found, an [`Err`] may be returned.
     fn re(&self, v: u32, a: &str) -> Result<String>;
 }
 
 /// A [`Relay`] that doesn't even try to find anything, but returns an error.
 ///
 /// If you don't know what [`Relay`] to use, use [`DeadRelay::new()`].
-pub struct DeadRelay {}
+pub struct DeadRelay;
 
 /// A [`Relay`] that is made of a lambda function.
 ///
@@ -148,11 +200,13 @@ pub struct DeadRelay {}
 /// search algorithm must continue. It can be just a name of a new attribute,
 /// or an absolute locator (starting from `"ν"`) with dots inside.
 pub struct LambdaRelay {
+    /// The function to call
     lambda: fn(u32, &str) -> Result<String>,
 }
 
 /// A [`Relay`] that always returns the same `String`.
 pub struct ConstRelay {
+    /// The constant to return
     s: String,
 }
 

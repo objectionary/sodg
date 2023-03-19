@@ -66,12 +66,18 @@ impl Sodg {
     /// This function also runs all vertices through
     /// all checks and returns the list of errors found. If everything
     /// was fine, an empty vector is returned.
+    ///
+    /// # Errors
+    ///
+    /// An error may be returned if validation fails, after the alerts are turned ON.
     pub fn alerts_on(&mut self) -> Result<()> {
         self.alerts_active = true;
         self.validate(self.vertices.keys().cloned().collect())
     }
 
     /// Check all alerts for the given list of vertices.
+    ///
+    /// # Errors
     ///
     /// If any of them have any issues, `Err` is returned.
     pub fn validate(&self, vx: Vec<u32>) -> Result<()> {

@@ -29,6 +29,9 @@ impl Sodg {
     /// g.data(1).unwrap(); // Successfully collect 1
     /// assert!(g.data(1).is_err());
     /// ```
+    /// # Errors
+    ///
+    /// If something goes wrong, an error may be returned.
     #[cfg(feature = "gc")]
     pub(crate) fn collect(&mut self, start: u32) -> Result<()> {
         let mut queue = VecDeque::new();

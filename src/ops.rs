@@ -39,6 +39,10 @@ impl Sodg {
     /// ```
     ///
     /// If vertex `v1` already exists in the graph, `Ok` will be returned.
+    ///
+    /// # Errors
+    ///
+    /// If it's impossible to add, an error will be returned.
     pub fn add(&mut self, v1: u32) -> Result<()> {
         if self.vertices.contains_key(&v1) {
             return Ok(());
@@ -63,6 +67,8 @@ impl Sodg {
     /// ```
     ///
     /// If an edge with this label already exists, it will be replaced with a new edge.
+    ///
+    /// # Errors
     ///
     /// If either vertex `v1` or `v2` is absent, an `Err` will be returned.
     ///
@@ -103,6 +109,8 @@ impl Sodg {
     /// g.put(42, Hex::from_str_bytes("hello, world!")).unwrap();
     /// ```
     ///
+    /// # Errors
+    ///
     /// If vertex `v1` is absent, an `Err` will be returned.
     pub fn put(&mut self, v: u32, d: Hex) -> Result<()> {
         let vtx = self
@@ -131,8 +139,6 @@ impl Sodg {
     /// assert!(g.is_empty());
     /// ```
     ///
-    /// If vertex `v1` is absent, an `Err` will be returned.
-    ///
     /// If there is no data, an empty `Hex` will be returned, for example:
     ///
     /// ```
@@ -141,6 +147,10 @@ impl Sodg {
     /// g.add(42).unwrap();
     /// assert!(g.data(42).unwrap().is_empty());
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// If vertex `v1` is absent, an `Err` will be returned.
     pub fn data(&mut self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
@@ -169,8 +179,6 @@ impl Sodg {
     /// assert_eq!(42, to);
     /// ```
     ///
-    /// If vertex `v1` is absent, `None` will be returned.
-    ///
     /// Just in case, if you need to put all names into a single line:
     ///
     /// ```
@@ -184,6 +192,10 @@ impl Sodg {
     /// g.bind(0, 42, "c").unwrap();
     /// assert_eq!("a,b,c", g.kids(0).unwrap().into_iter().map(|(a, _)| a).collect::<Vec<String>>().join(","));
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// If vertex `v1` is absent, `Err` will be returned.
     pub fn kids(&self, v: u32) -> Result<Vec<(String, u32)>> {
         let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
         let kids = vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect();

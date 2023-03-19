@@ -105,6 +105,8 @@ impl Sodg {
     /// assert_eq!(1, v);
     /// ```
     ///
+    /// # Errors
+    ///
     /// If `v1` is absent, an `Err` will be returned.
     ///
     /// If searching algorithm fails to find the destination,
@@ -139,6 +141,10 @@ impl Sodg {
     /// Find a vertex, printing the log with an indentation prefix.
     ///
     /// This function is used only by [`Sodg::find].
+    ///
+    /// # Errors
+    ///
+    /// If something goes wrong, an error may be returned.
     fn find_with_indent<T: Relay>(
         &self,
         v1: u32,

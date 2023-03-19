@@ -20,14 +20,18 @@
 
 use crate::DeadRelay;
 use crate::Sodg;
-use anyhow::Result;
+use anyhow::{anyhow, Result};
 use log::trace;
 use std::collections::{HashMap, HashSet};
 
 impl Sodg {
     /// Take a slice of the graph, keeping only the vertex specified
     /// by the locator and its kids, recursively found in the entire graph.
-    pub fn slice(&self, loc: &str) -> Result<Sodg> {
+    ///
+    /// # Errors
+    ///
+    /// If impossible to slice, an error will be returned.
+    pub fn slice(&self, loc: &str) -> Result<Self> {
         let g = self.slice_some(loc, |_, _, _| true)?;
         trace!(
             "#slice: taken {} vertices out of {} by '{}' locator",
@@ -42,7 +46,11 @@ impl Sodg {
     /// by the locator and its kids, recursively found in the entire graph,
     /// but only if the provided predicate agrees with the selection of
     /// the kids.
-    pub fn slice_some(&self, loc: &str, p: impl Fn(u32, u32, String) -> bool) -> Result<Sodg> {
+    ///
+    /// # Errors
+    ///
+    /// If impossible to slice, an error will be returned.
+    pub fn slice_some(&self, loc: &str, p: impl Fn(u32, u32, String) -> bool) -> Result<Self> {
         let mut todo = HashSet::new();
         let mut done = HashSet::new();
         todo.insert(self.find(0, loc, &DeadRelay::default())?);
@@ -53,8 +61,8 @@ impl Sodg {
             let before: Vec<u32> = todo.drain().collect();
             for v in before {
                 done.insert(v);
-                let vtx = self.vertices.get(&v).unwrap();
-                for e in vtx.edges.iter() {
+                let vtx = self.vertices.get(&v).ok_or_else(|| anyhow!("Can't find ν{v}"))?;
+                for e in &vtx.edges {
                     if done.contains(&e.to) {
                         continue;
                     }
@@ -72,7 +80,7 @@ impl Sodg {
             nv.edges.retain(|e| done.contains(&e.to));
             new_vertices.insert(*v, nv);
         }
-        let g = Sodg {
+        let g = Self {
             vertices: new_vertices,
             next_v: self.next_v,
             alerts: self.alerts.clone(),

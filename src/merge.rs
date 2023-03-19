@@ -34,6 +34,10 @@ impl Sodg {
     /// The `left` vertex is expected
     /// to be the root of the current graph, while the `right` vertex is the root
     /// of the graph being merged into the current one.
+    ///
+    /// # Errors
+    ///
+    /// If it's impossible to merge, an error will be returned.
     pub fn merge(&mut self, g: &Sodg, left: u32, right: u32) -> Result<()> {
         let mut mapped = HashMap::new();
         let before = self.vertices.len();
@@ -66,6 +70,10 @@ impl Sodg {
     ///
     /// The `mapped` is a key-value map, where the key is a vertex from the right
     /// graph, which is mapped to a vertex from the left graph.
+    ///
+    /// # Errors
+    ///
+    /// If it's impossible to merge, an error will be returned.
     fn merge_rec(
         &mut self,
         g: &Sodg,

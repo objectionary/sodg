@@ -54,6 +54,11 @@ impl Sodg {
     ///     <v id="1" />
     /// </sodg>
     /// ```
+    ///
+    /// # Errors
+    ///
+    /// If it's impossible to print it to XML, an [`Err`] may be returned. Problems may also
+    /// be caused by XML errors from the XML builder library.
     pub fn to_xml(&self) -> Result<String> {
         let mut xml = XMLBuilder::new()
             .version(XMLVersion::XML1_1)
@@ -71,20 +76,20 @@ impl Sodg {
                 let mut e_node = XMLElement::new("e");
                 e_node.add_attribute("a", e.a.as_str());
                 e_node.add_attribute("to", e.to.to_string().as_str());
-                v_node.add_child(e_node).unwrap();
+                v_node.add_child(e_node).map_err(|_| anyhow::Error::msg(""))?;
             }
             if !vtx.data.is_empty() {
                 let mut data_node = XMLElement::new("data");
                 data_node
                     .add_text(vtx.data.print().replace('-', " "))
-                    .unwrap();
-                v_node.add_child(data_node).unwrap();
+                    .map_err(|_| anyhow::Error::msg(""))?;
+                v_node.add_child(data_node).map_err(|_| anyhow::Error::msg(""))?;
             }
-            root.add_child(v_node).unwrap();
+            root.add_child(v_node).map_err(|_| anyhow::Error::msg(""))?;
         }
         xml.set_root_element(root);
         let mut writer: Vec<u8> = Vec::new();
-        xml.generate(&mut writer).unwrap();
+        xml.generate(&mut writer).map_err(|_| anyhow::Error::msg(""))?;
         Ok(std::str::from_utf8(&writer)?.to_string())
     }
 }

@@ -18,21 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Deserialize, Edge, Hex, Serialize};
+use crate::{Hex, Vertex};
 use std::collections::HashSet;
-
-/// A vertex in the [`Sodg`].
-#[derive(Eq, PartialEq, Clone, Serialize, Deserialize)]
-pub(crate) struct Vertex {
-    /// This is a list of edges departing from this vertex.
-    pub edges: Vec<Edge>,
-    /// This is the data in the vertex (possibly empty).
-    pub data: Hex,
-    /// This is a supplementary list of parent nodes, staying here for caching.
-    pub parents: HashSet<u32>,
-    /// This is `TRUE` if the data has been already taken by the use of [`Sodg::data`].
-    pub taken: bool,
-}
 
 impl Vertex {
     /// Make an empty one.
@@ -45,7 +32,7 @@ impl Vertex {
     /// sodg.add(0).unwrap();
     /// ```
     pub fn empty() -> Self {
-        Vertex {
+        Self {
             edges: vec![],
             data: Hex::empty(),
             parents: HashSet::new(),

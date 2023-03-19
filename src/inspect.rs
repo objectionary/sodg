@@ -29,6 +29,10 @@ impl Sodg {
     /// of sub-objects and edges.
     ///
     /// The function is mostly used for testing.
+    ///
+    /// # Errors
+    ///
+    /// If it's impossible to inspect, an error will be returned.
     pub fn inspect(&self, loc: &str) -> Result<String> {
         let v = self
             .find(0, loc, &DeadRelay::default())
