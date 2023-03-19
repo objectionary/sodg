@@ -64,10 +64,13 @@ mod xml;
 
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
-pub use crate::alerts::Alert;
-use std::collections::HashSet;
+/// A function that is called when a problem is found in [`Sodg`].
+///
+/// Instances of this type can be used in [`Sodg::alert_on`] method,
+/// in order to ensure runtime consistency of data inside the graph.
+pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
 
 /// An object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
