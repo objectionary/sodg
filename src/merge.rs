@@ -95,7 +95,7 @@ impl Sodg {
             self.put(left, &d)?;
         }
         for (a, to) in g.kids(right)? {
-            let lft = if let Some(t) = self.kid(left, &a) {
+            let matched = if let Some(t) = self.kid(left, &a) {
                 t
             } else if let Some(t) = mapped.get(&to) {
                 self.bind(left, *t, &a)?;
@@ -106,7 +106,7 @@ impl Sodg {
                 self.bind(left, id, &a)?;
                 id
             };
-            self.merge_rec(g, lft, to, mapped)?;
+            self.merge_rec(g, matched, to, mapped)?;
         }
         for (a, to) in g.kids(right)? {
             if let Some(first) = self.kid(left, &a) {

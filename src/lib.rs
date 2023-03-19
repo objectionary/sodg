@@ -45,6 +45,7 @@
     clippy::cargo,
 )]
 #![allow(clippy::multiple_inherent_impl)]
+#![allow(clippy::multiple_crate_versions)]
 
 mod alerts;
 mod clone;
