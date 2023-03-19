@@ -68,9 +68,6 @@ impl Sodg {
     }
 }
 
-#[cfg(test)]
-use anyhow::Result;
-
 #[test]
 fn prints_itself() -> Result<()> {
     let mut g = Sodg::empty();
