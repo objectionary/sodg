@@ -27,8 +27,13 @@ use std::collections::HashSet;
 
 impl Sodg {
     /// Make an empty [`Sodg`], with no vertices and no edges.
+    ///
+    /// # Panics
+    ///
+    /// May panic if vertices provided to alerts are absent (should never happen, though).
+    #[must_use]
     pub fn empty() -> Self {
-        let mut g = Sodg {
+        let mut g = Self {
             vertices: HashMap::new(),
             next_v: 0,
             alerts: vec![],
@@ -38,8 +43,8 @@ impl Sodg {
         };
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
-            for v in vx.iter() {
-                for e in g.vertices.get(v).unwrap().edges.iter() {
+            for v in &vx {
+                for e in &g.vertices.get(v).unwrap().edges {
                     if !g.vertices.contains_key(&e.to) {
                         errors.push(format!("Edge ν{}.{} arrives to lost ν{}", v, e.a, e.to));
                     }
@@ -49,8 +54,8 @@ impl Sodg {
         });
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
-            for v in vx.iter() {
-                for e in g.vertices.get(v).unwrap().edges.iter() {
+            for v in &vx {
+                for e in &g.vertices.get(v).unwrap().edges {
                     if e.to == *v {
                         errors.push(format!("Edge ν{}.{} arrives to ν{} (loop)", v, e.a, e.to));
                     }
@@ -60,8 +65,8 @@ impl Sodg {
         });
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
-            for v in vx.iter() {
-                for e in g.vertices.get(v).unwrap().edges.iter() {
+            for v in &vx {
+                for e in &g.vertices.get(v).unwrap().edges {
                     if e.a.is_empty() {
                         errors.push(format!("Edge from ν{} to ν{} has empty label", v, e.to));
                     }
@@ -71,8 +76,8 @@ impl Sodg {
         });
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
-            for v in vx.iter() {
-                for e in g.vertices.get(v).unwrap().edges.iter() {
+            for v in &vx {
+                for e in &g.vertices.get(v).unwrap().edges {
                     if !g.vertices.contains_key(&e.to) {
                         errors.push(format!(
                             "Edge ν{}.{} points to ν{}, which doesn't exist",
@@ -85,8 +90,8 @@ impl Sodg {
         });
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
-            for v in vx.iter() {
-                for e in g.vertices.get(v).unwrap().edges.iter() {
+            for v in &vx {
+                for e in &g.vertices.get(v).unwrap().edges {
                     if e.a.is_empty() {
                         errors.push(format!(
                             "Edge label from ν{} to ν{} is an empty string",

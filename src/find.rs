@@ -32,8 +32,9 @@ impl Relay for ConstRelay {
 
 impl ConstRelay {
     /// Make a new [`ConstRelay`], with a string inside.
+    #[must_use]
     pub fn new(s: &str) -> Self {
-        ConstRelay { s: s.to_string() }
+        Self { s: s.to_string() }
     }
 }
 
@@ -45,8 +46,9 @@ impl Relay for DeadRelay {
 
 impl DeadRelay {
     /// Make a new [`DeadRelay`], the empty one.
-    pub fn new() -> Self {
-        DeadRelay {}
+    #[must_use]
+    pub const fn new() -> Self {
+        Self {}
     }
 }
 
@@ -72,7 +74,7 @@ impl LambdaRelay {
     /// locator on the entire graph.
     #[allow(dead_code)]
     pub fn new(lambda: fn(u32, &str) -> Result<String>) -> Self {
-        LambdaRelay { lambda }
+        Self { lambda }
     }
 }
 
@@ -140,7 +142,7 @@ impl Sodg {
 
     /// Find a vertex, printing the log with an indentation prefix.
     ///
-    /// This function is used only by [`Sodg::find].
+    /// This function is used only by [`Sodg::find`].
     ///
     /// # Errors
     ///
@@ -215,12 +217,12 @@ impl Sodg {
                     trace!(
                         "#find(ν{v1}, {loc}): '{}' from relay of .{k} in {}",
                         err,
-                        self.v_print(v)
+                        self.v_print(v)?
                     );
                     format!("error: {err}")
                 }
             };
-            return Err(anyhow!("Can't find .{k} in {}: ({fault})", self.v_print(v)));
+            return Err(anyhow!("Can't find .{k} in {}: ({fault})", self.v_print(v)?));
         }
         trace!("#find(ν{v1}, {loc}): {indent}found ν{v} in {jumps} jumps");
         Ok(v)

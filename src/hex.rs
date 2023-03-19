@@ -598,7 +598,7 @@ fn correct_equality() -> Result<()> {
 fn concat_test() -> Result<()> {
     let a = Hex::from_str("DE-AD")?;
     let b = Hex::from_str("BE-EF")?;
-    assert_eq!(a.concat(b), Hex::from_str("DE-AD-BE-EF")?);
+    assert_eq!(a.concat(&b), Hex::from_str("DE-AD-BE-EF")?);
     Ok(())
 }
 
@@ -622,7 +622,7 @@ fn concatenates_from_hex_vec() -> Result<()> {
     let a = Hex::from_vec(vec![0x12, 0xAB]);
     let b = Hex::from_slice("as_bytesss".as_bytes());
     let c = Hex::from_vec(vec![0x12, 0xAD]);
-    let res = a.concat(b).concat(c);
+    let res = a.concat(&b).concat(&c);
     assert_eq!(14, res.len());
     Ok(())
 }
@@ -632,7 +632,7 @@ fn concatenates_from_hex_str() -> Result<()> {
     let a = Hex::from_str_bytes("Привет!");
     let b = Hex::from_vec(vec![0x01, 0x02]);
     let c = Hex::from_str_bytes("Пока!");
-    let res = a.concat(b).concat(c);
+    let res = a.concat(&b).concat(&c);
     assert_eq!(24, res.len());
     Ok(())
 }

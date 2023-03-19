@@ -49,6 +49,7 @@ impl Sodg {
     ///   v1[shape=circle,label="ν1"];
     /// }
     /// ```
+    #[must_use]
     pub fn to_dot(&self) -> String {
         let mut lines: Vec<String> = vec![];
         lines.push(
@@ -71,7 +72,7 @@ digraph {
                     ",color=\"#f96900\""
                 },
                 if vtx.data.is_empty() {
-                    "".to_string()
+                    String::new()
                 } else {
                     format!("/* {} */", vtx.data)
                 }

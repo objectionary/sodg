@@ -23,7 +23,7 @@ use crate::Sodg;
 impl Clone for Sodg {
     /// Make a clone of the graph.
     fn clone(&self) -> Self {
-        Sodg {
+        Self {
             vertices: self.vertices.clone(),
             next_v: self.next_v,
             alerts: vec![],

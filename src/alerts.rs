@@ -82,7 +82,7 @@ impl Sodg {
     /// If any of them have any issues, `Err` is returned.
     pub fn validate(&self, vx: Vec<u32>) -> Result<()> {
         if self.alerts_active {
-            for a in self.alerts.iter() {
+            for a in &self.alerts {
                 let msgs = a(self, vx.clone());
                 if !msgs.is_empty() {
                     return Err(anyhow!("{}", msgs.join("; ")));

@@ -19,20 +19,20 @@
 // SOFTWARE.
 
 use crate::Sodg;
-use anyhow::Context;
+use anyhow::{Context, Result};
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 
 impl Display for Sodg {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        <&Sodg as Debug>::fmt(&self, f)
+        <&Self as Debug>::fmt(&self, f)
     }
 }
 
 impl Debug for Sodg {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
-        for (i, v) in self.vertices.iter() {
+        for (i, v) in &self.vertices {
             let mut attrs = v
                 .edges
                 .iter()
@@ -50,18 +50,21 @@ impl Debug for Sodg {
 impl Sodg {
     /// Print a single vertex to a string, which can be used for
     /// logging and debugging.
-    pub fn v_print(&self, v: u32) -> String {
+    ///
+    /// # Errors
+    ///
+    /// If the vertex is absent, an error may be returned.
+    pub fn v_print(&self, v: u32) -> Result<String> {
         let vtx = self
             .vertices
             .get(&v)
-            .context(format!("Can't find ν{v}"))
-            .unwrap();
+            .context(format!("Can't find ν{v}"))?;
         let list: Vec<String> = vtx.edges.iter().map(|e| e.a.clone()).collect();
-        format!(
+        Ok(format!(
             "ν{v}⟦{}{}⟧",
             if vtx.data.is_empty() { "" } else { "Δ, " },
             list.join(", ")
-        )
+        ))
     }
 }
 
