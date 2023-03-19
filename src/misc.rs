@@ -22,11 +22,13 @@ use crate::Sodg;
 
 impl Sodg {
     /// Get total number of vertices in the graph.
+    #[must_use]
     pub fn len(&self) -> usize {
         self.vertices.len()
     }
 
     /// Get all IDs of vertices, in a vector.
+    #[must_use]
     pub fn ids(&self) -> Vec<u32> {
         self.vertices.keys().copied().collect()
     }
@@ -44,6 +46,7 @@ impl Sodg {
     /// sodg.add(42).unwrap();
     /// sodg.bind(0, 42, "hello").unwrap();
     /// ```
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.vertices.is_empty()
     }

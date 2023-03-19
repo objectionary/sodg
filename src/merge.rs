@@ -38,18 +38,18 @@ impl Sodg {
     /// # Errors
     ///
     /// If it's impossible to merge, an error will be returned.
-    pub fn merge(&mut self, g: &Sodg, left: u32, right: u32) -> Result<()> {
+    pub fn merge(&mut self, g: &Self, left: u32, right: u32) -> Result<()> {
         let mut mapped = HashMap::new();
         let before = self.vertices.len();
         self.merge_rec(g, left, right, &mut mapped)?;
         let merged = mapped.len();
         let scope = g.vertices.len();
         if merged != scope {
-            let must: Vec<u32> = g.vertices.keys().cloned().collect();
-            let seen: Vec<u32> = mapped.keys().cloned().collect();
+            let must: Vec<u32> = g.vertices.keys().copied().collect();
+            let seen: Vec<u32> = mapped.keys().copied().collect();
             let missed: HashSet<u32> = &HashSet::from_iter(must) - &HashSet::from_iter(seen);
             let mut ordered: Vec<u32> = missed.into_iter().collect();
-            ordered.sort();
+            ordered.sort_unstable();
             return Err(anyhow!(
                 "Just {merged} vertices merged, out of {scope}; maybe the right graph was not a tree? {} missed: {}",
                 ordered.len(), ordered.iter().map(|v| format!("ν{v}")).collect::<Vec<String>>().join(", ")
@@ -76,7 +76,7 @@ impl Sodg {
     /// If it's impossible to merge, an error will be returned.
     fn merge_rec(
         &mut self,
-        g: &Sodg,
+        g: &Self,
         left: u32,
         right: u32,
         mapped: &mut HashMap<u32, u32>,
@@ -88,11 +88,11 @@ impl Sodg {
         let d = g
             .vertices
             .get(&right)
-            .ok_or(anyhow!("Can't find ν{right} in the right graph"))?
+            .ok_or_else(|| anyhow!("Can't find ν{right} in the right graph"))?
             .data
             .clone();
         if !d.is_empty() {
-            self.put(left, d)?;
+            self.put(left, &d)?;
         }
         for (a, to) in g.kids(right)? {
             let lft = if let Some(t) = self.kid(left, &a) {
@@ -106,13 +106,13 @@ impl Sodg {
                 self.bind(left, id, &a)?;
                 id
             };
-            self.merge_rec(g, lft, to, mapped)?
+            self.merge_rec(g, lft, to, mapped)?;
         }
         for (a, to) in g.kids(right)? {
             if let Some(first) = self.kid(left, &a) {
                 if let Some(second) = mapped.get(&to) {
                     if first != *second {
-                        self.join(first, *second)?
+                        self.join(first, *second)?;
                     }
                 }
             }
@@ -121,8 +121,8 @@ impl Sodg {
     }
 
     fn join(&mut self, left: u32, right: u32) -> Result<()> {
-        for vtx in self.vertices.iter_mut() {
-            for e in vtx.1.edges.iter_mut() {
+        for vtx in &mut self.vertices {
+            for e in &mut vtx.1.edges {
                 if e.to == right {
                     e.to = left;
                 }
@@ -292,7 +292,7 @@ fn merges_data() -> Result<()> {
     g.add(1)?;
     let mut extra = Sodg::empty();
     extra.add(1)?;
-    extra.put(1, Hex::from(42))?;
+    extra.put(1, &Hex::from(42))?;
     g.merge(&extra, 1, 1)?;
     assert_eq!(42, g.data(1)?.to_i64()?);
     Ok(())
@@ -342,9 +342,9 @@ fn mixed_injection() -> Result<()> {
     g.add(4)?;
     let mut extra = Sodg::empty();
     extra.add(4)?;
-    extra.put(4, Hex::from(4))?;
+    extra.put(4, &Hex::from(4))?;
     extra.add(5)?;
-    extra.put(5, Hex::from(5))?;
+    extra.put(5, &Hex::from(5))?;
     extra.bind(4, 5, "b")?;
     g.merge(&extra, 4, 4)?;
     assert_eq!(2, g.vertices.len());

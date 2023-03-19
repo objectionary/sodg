@@ -106,13 +106,13 @@ impl Sodg {
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(42).unwrap();
-    /// g.put(42, Hex::from_str_bytes("hello, world!")).unwrap();
+    /// g.put(42, &Hex::from_str_bytes("hello, world!")).unwrap();
     /// ```
     ///
     /// # Errors
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
-    pub fn put(&mut self, v: u32, d: Hex) -> Result<()> {
+    pub fn put(&mut self, v: u32, d: &Hex) -> Result<()> {
         let vtx = self
             .vertices
             .get_mut(&v)
@@ -216,12 +216,9 @@ impl Sodg {
     /// ```
     ///
     /// If vertex `v1` is absent, `None` will be returned.
+    #[must_use]
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
-        if let Some(vtx) = self.vertices.get(&v) {
-            vtx.edges.iter().find(|e| e.a == a).map(|e| e.to)
-        } else {
-            None
-        }
+        self.vertices.get(&v).and_then(|vtx| vtx.edges.iter().find(|e| e.a == a).map(|e| e.to))
     }
 }
 
@@ -298,7 +295,7 @@ fn sets_simple_data() -> Result<()> {
     let mut g = Sodg::empty();
     let data = Hex::from_str_bytes("hello");
     g.add(0)?;
-    g.put(0, data.clone())?;
+    g.put(0, &data)?;
     assert_eq!(data, g.data(0)?);
     Ok(())
 }

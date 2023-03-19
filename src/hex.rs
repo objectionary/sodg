@@ -54,6 +54,7 @@ impl Hex {
     /// assert!(d.is_empty());
     /// assert_eq!("--", d.print());
     /// ```
+    #[must_use]
     pub fn empty() -> Self {
         Self::from_vec(Vec::new())
     }
@@ -67,10 +68,11 @@ impl Hex {
     /// let d = Hex::from(2);
     /// assert_eq!(8, d.len())
     /// ```
+    #[must_use]
     pub fn bytes(&self) -> &[u8] {
         match self {
-            Hex::Vector(v) => v,
-            Hex::Bytes(array, size) => &array[..*size],
+            Self::Vector(v) => v,
+            Self::Bytes(array, size) => &array[..*size],
         }
     }
 
@@ -91,10 +93,11 @@ impl Hex {
     /// let d = Hex::from(42);
     /// assert_eq!(8, d.len());
     /// ```
+    #[must_use]
     pub fn len(&self) -> usize {
         match self {
-            Hex::Vector(x) => x.len(),
-            Hex::Bytes(_, size) => *size,
+            Self::Vector(x) => x.len(),
+            Self::Bytes(_, size) => *size,
         }
     }
 
@@ -109,6 +112,7 @@ impl Hex {
     /// let v = Hex::from_slice(&vec![0xBE, 0xEF]);
     /// assert_eq!("BE-EF", v.print());
     /// ```
+    #[must_use]
     pub fn from_slice(slice: &[u8]) -> Self {
         if slice.len() <= 24 {
             Self::Bytes(
@@ -133,25 +137,13 @@ impl Hex {
     /// let d = Hex::from_vec(vec![0xCA, 0xFE]);
     /// assert_eq!("CA-FE", d.print());
     /// ```
+    #[must_use]
     pub fn from_vec(bytes: Vec<u8>) -> Self {
         if bytes.len() <= 24 {
             Self::from_slice(&bytes)
         } else {
             Self::Vector(bytes)
         }
-    }
-
-    /// Create a new [`Hex`] from `String`.
-    ///
-    /// For example:
-    ///
-    /// ```
-    /// use sodg::Hex;
-    /// let d = Hex::from_string_bytes("Ура!".to_string());
-    /// assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
-    /// ```
-    pub fn from_string_bytes(d: String) -> Self {
-        Self::from_slice(d.as_bytes())
     }
 
     /// Create a new [`Hex`] from the bytes composing `&str`.
@@ -163,6 +155,7 @@ impl Hex {
     /// let d = Hex::from_str_bytes("Ура!");
     /// assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
     /// ```
+    #[must_use]
     pub fn from_str_bytes(d: &str) -> Self {
         Self::from_slice(d.as_bytes())
     }
@@ -176,6 +169,7 @@ impl Hex {
     /// let d = Hex::from_vec(vec![]);
     /// assert_eq!(true, d.is_empty());
     /// ```
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -189,6 +183,7 @@ impl Hex {
     /// let d = Hex::from_vec([0x01].to_vec());
     /// assert_eq!(true, d.to_bool().unwrap());
     /// ```
+    #[must_use]
     pub fn to_bool(&self) -> bool {
         self.bytes()[0] == 0x01
     }
@@ -280,6 +275,7 @@ impl Hex {
     /// let d = Hex::empty();
     /// assert_eq!("--", d.print());
     /// ```
+    #[must_use]
     pub fn print(&self) -> String {
         if self.bytes().is_empty() {
             "--".to_string()
@@ -293,6 +289,7 @@ impl Hex {
     }
 
     /// Turn it into a vector of bytes (making a clone).
+    #[must_use]
     pub fn to_vec(&self) -> Vec<u8> {
         self.bytes().to_vec()
     }
@@ -307,6 +304,7 @@ impl Hex {
     /// assert_eq!("E4-BD-A0-E5-A5-BD", d.print());
     /// assert_eq!(0xA0, d.byte_at(2));
     /// ```
+    #[must_use]
     pub fn byte_at(&self, pos: usize) -> u8 {
         self.bytes()[pos]
     }
@@ -321,6 +319,7 @@ impl Hex {
     /// let d = Hex::from_str_bytes("Hello, world!");
     /// assert_eq!("world!", d.tail(7).to_utf8().unwrap());
     /// ```
+    #[must_use]
     pub fn tail(&self, skip: usize) -> Self {
         Self::from_vec(self.bytes()[skip..].to_vec())
     }
@@ -333,26 +332,27 @@ impl Hex {
     /// use sodg::Hex;
     /// let a = Hex::from_slice("dead".as_bytes());
     /// let b = Hex::from_slice("beef".as_bytes());
-    /// let c = a.concat(b);
+    /// let c = a.concat(&b);
     /// assert_eq!(c, Hex::from_slice("deadbeef".as_bytes()));
     /// ```
-    pub fn concat(&self, h: Self) -> Self {
+    #[must_use]
+    pub fn concat(&self, h: &Self) -> Self {
         match &self {
-            Hex::Vector(v) => {
+            Self::Vector(v) => {
                 let mut vx = v.clone();
                 vx.extend_from_slice(h.bytes());
-                Hex::Vector(vx)
+                Self::Vector(vx)
             }
-            Hex::Bytes(b, l) => {
+            Self::Bytes(b, l) => {
                 if l + h.len() <= 24 {
                     let mut bytes = *b;
                     bytes[*l..*l + h.len()].copy_from_slice(h.bytes());
-                    Hex::Bytes(bytes, l + h.len())
+                    Self::Bytes(bytes, l + h.len())
                 } else {
                     let mut v = Vec::new();
                     v.extend_from_slice(b);
                     v.extend_from_slice(h.bytes());
-                    Hex::Vector(v)
+                    Self::Vector(v)
                 }
             }
         }

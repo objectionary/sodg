@@ -72,16 +72,12 @@ impl Script {
     /// assert_eq!(1, g.kid(0, "foo").unwrap());
     /// ```
     #[allow(clippy::should_implement_trait)]
+    #[must_use]
     pub fn from_str(s: &str) -> Self {
-        Script {
+        Self {
             txt: s.to_string(),
             vars: HashMap::new(),
         }
-    }
-
-    /// Make a new one, parsing a [`String`] with instructions.
-    pub fn from_string(s: String) -> Self {
-        Script::from_str(s.as_str())
     }
 
     /// Deploy the entire script to the [`Sodg`].
@@ -146,7 +142,7 @@ impl Script {
             "PUT" => {
                 let v = self.parse(args.get(0).context("V is expected")?, g)?;
                 let d = Self::parse_data(args.get(1).context("Data is expected")?)?;
-                g.put(v, d.clone())
+                g.put(v, &d)
                     .context(format!("Failed to PUT({v}, {d})"))
             }
             cmd => Err(anyhow!("Unknown command: {cmd}")),

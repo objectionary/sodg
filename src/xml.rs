@@ -104,7 +104,7 @@ use crate::Hex;
 fn prints_simple_graph() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    g.put(0, Hex::from_str_bytes("hello"))?;
+    g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;
     g.bind(0, 1, "foo")?;
     let xml = g.to_xml()?;
