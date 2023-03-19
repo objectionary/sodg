@@ -31,8 +31,8 @@ impl Sodg {
         let g = self.slice_some(loc, |_v, _to, _a| true)?;
         trace!(
             "#slice: taken {} vertices out of {} by '{}' locator",
-            self.vertices.len(),
             g.vertices.len(),
+            self.vertices.len(),
             loc
         );
         Ok(g)
@@ -80,8 +80,8 @@ impl Sodg {
         };
         trace!(
             "#slice_some: taken {} vertices out of {} by '{}' locator",
-            self.vertices.len(),
             g.vertices.len(),
+            self.vertices.len(),
             loc
         );
         Ok(g)
