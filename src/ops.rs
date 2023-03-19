@@ -42,7 +42,7 @@ impl Sodg {
     ///
     /// # Errors
     ///
-    /// If it's impossible to add, an error will be returned.
+    /// If alerts trigger any error, the error will be returned here.
     pub fn add(&mut self, v1: u32) -> Result<()> {
         if self.vertices.contains_key(&v1) {
             return Ok(());
@@ -75,6 +75,8 @@ impl Sodg {
     /// If `v1` equals to `v2`, an `Err` will be returned.
     ///
     /// The label `a` can't be empty. If it is empty, an `Err` will be returned.
+    ///
+    /// If alerts trigger any error, the error will be returned here.
     pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
         let vtx1 = self
             .vertices
@@ -112,6 +114,8 @@ impl Sodg {
     /// # Errors
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
+    ///
+    /// If alerts trigger any error, the error will be returned here.
     pub fn put(&mut self, v: u32, d: &Hex) -> Result<()> {
         let vtx = self
             .vertices
@@ -151,6 +155,8 @@ impl Sodg {
     /// # Errors
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
+    ///
+    /// If garbage collection triggers any error, the error will be returned here.
     pub fn data(&mut self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices

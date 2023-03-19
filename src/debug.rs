@@ -41,7 +41,7 @@ impl Debug for Sodg {
             if !&v.data.is_empty() {
                 attrs.push(format!("{}", v.data));
             }
-            lines.push(format!("ν{} -> ⟦{}⟧", i, attrs.join(", ")));
+            lines.push(format!("ν{i} -> ⟦{}⟧", attrs.join(", ")));
         }
         f.write_str(lines.join("\n").as_str())
     }

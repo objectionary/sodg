@@ -46,7 +46,7 @@ impl Sodg {
             for v in &vx {
                 for e in &g.vertices.get(v).unwrap().edges {
                     if !g.vertices.contains_key(&e.to) {
-                        errors.push(format!("Edge ν{}.{} arrives to lost ν{}", v, e.a, e.to));
+                        errors.push(format!("Edge ν{v}.{} arrives to lost ν{}", e.a, e.to));
                     }
                 }
             }
@@ -57,7 +57,7 @@ impl Sodg {
             for v in &vx {
                 for e in &g.vertices.get(v).unwrap().edges {
                     if e.to == *v {
-                        errors.push(format!("Edge ν{}.{} arrives to ν{} (loop)", v, e.a, e.to));
+                        errors.push(format!("Edge ν{v}.{} arrives to ν{} (loop)", e.a, e.to));
                     }
                 }
             }
@@ -68,7 +68,7 @@ impl Sodg {
             for v in &vx {
                 for e in &g.vertices.get(v).unwrap().edges {
                     if e.a.is_empty() {
-                        errors.push(format!("Edge from ν{} to ν{} has empty label", v, e.to));
+                        errors.push(format!("Edge from ν{v} to ν{} has empty label", e.to));
                     }
                 }
             }
@@ -80,8 +80,8 @@ impl Sodg {
                 for e in &g.vertices.get(v).unwrap().edges {
                     if !g.vertices.contains_key(&e.to) {
                         errors.push(format!(
-                            "Edge ν{}.{} points to ν{}, which doesn't exist",
-                            v, e.a, e.to
+                            "Edge ν{v}.{} points to ν{}, which doesn't exist",
+                            e.a, e.to
                         ));
                     }
                 }
