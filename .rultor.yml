@@ -18,7 +18,7 @@ release:
     cargo --color=never test -vv -- --nocapture
     cargo --color=never test --features sober -vv -- --nocapture
     cargo --color=never fmt --check
-    cargo clippy
+    cargo clippy --no-deps
     git commit -am "${tag}"
     mkdir -p ~/.cargo && cp ../credentials ~/.cargo
     cargo --color=never publish
