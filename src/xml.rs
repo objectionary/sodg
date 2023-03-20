@@ -76,25 +76,18 @@ impl Sodg {
                 let mut e_node = XMLElement::new("e");
                 e_node.add_attribute("a", e.a.as_str());
                 e_node.add_attribute("to", e.to.to_string().as_str());
-                v_node
-                    .add_child(e_node)
-                    .map_err(|_| anyhow::Error::msg(""))?;
+                v_node.add_child(e_node)?;
             }
             if !vtx.data.is_empty() {
                 let mut data_node = XMLElement::new("data");
-                data_node
-                    .add_text(vtx.data.print().replace('-', " "))
-                    .map_err(|_| anyhow::Error::msg(""))?;
-                v_node
-                    .add_child(data_node)
-                    .map_err(|_| anyhow::Error::msg(""))?;
+                data_node.add_text(vtx.data.print().replace('-', " "))?;
+                v_node.add_child(data_node)?;
             }
-            root.add_child(v_node).map_err(|_| anyhow::Error::msg(""))?;
+            root.add_child(v_node)?;
         }
         xml.set_root_element(root);
         let mut writer: Vec<u8> = Vec::new();
-        xml.generate(&mut writer)
-            .map_err(|_| anyhow::Error::msg(""))?;
+        xml.generate(&mut writer)?;
         Ok(std::str::from_utf8(&writer)?.to_string())
     }
 }
