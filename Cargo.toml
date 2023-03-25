@@ -17,7 +17,7 @@ gc = []
 [dependencies]
 anyhow = "1.0.70"
 log = "0.4.17"
-regex = "1.7.1"
+regex = "1.7.3"
 lazy_static = "1.4.0"
 simple_logger = "4.0.0"
 sxd-xpath = "0.4.2"
