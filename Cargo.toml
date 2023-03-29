@@ -32,5 +32,5 @@ rstest = "0.16.0"
 
 [dev-dependencies]
 fsutils = "0.1.7"
-tempfile = "3.4.0"
+tempfile = "3.5.0"
 predicates = "3.0.2"
