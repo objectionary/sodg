@@ -44,7 +44,7 @@ impl Sodg {
             let mut errors = Vec::new();
             for v in &vx {
                 for e in &g.vertices.get(*v).unwrap().edges {
-                    if !g.vertices.contains_key(e.to) {
+                    if !g.vertices.contains(e.to) {
                         errors.push(format!("Edge ν{v}.{} arrives to lost ν{}", e.a, e.to));
                     }
                 }
@@ -77,7 +77,7 @@ impl Sodg {
             let mut errors = Vec::new();
             for v in &vx {
                 for e in &g.vertices.get(*v).unwrap().edges {
-                    if !g.vertices.contains_key(e.to) {
+                    if !g.vertices.contains(e.to) {
                         errors.push(format!(
                             "Edge ν{v}.{} points to ν{}, which doesn't exist",
                             e.a, e.to

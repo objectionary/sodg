@@ -73,7 +73,7 @@ impl Vertices {
         self.map.remove(&v);
     }
 
-    pub fn contains_key(&self, v: u32) -> bool {
+    pub fn contains(&self, v: u32) -> bool {
         self.map.contains_key(&v)
     }
 

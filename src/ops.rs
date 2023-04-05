@@ -45,7 +45,7 @@ impl Sodg {
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn add(&mut self, v1: u32) -> Result<()> {
-        if self.vertices.contains_key(v1) {
+        if self.vertices.contains(v1) {
             return Ok(());
         }
         self.vertices.insert(v1);
