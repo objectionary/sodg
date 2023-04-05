@@ -103,7 +103,7 @@ pub enum Hex {
 #[derive(Eq, PartialEq, Clone, Serialize, Deserialize)]
 pub(crate) struct Vertex {
     /// This is a list of edges departing from this vertex.
-    pub edges: HashMap<String, u32>,
+    pub edges: FxHashMap<String, u32>,
     /// This is the data in the vertex (possibly empty).
     pub data: Hex,
     /// This is a supplementary list of parent nodes, staying here for caching.

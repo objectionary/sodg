@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 use crate::{Hex, Vertex};
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 #[cfg(feature = "gc")]
 use std::collections::HashSet;
 
@@ -35,7 +35,7 @@ impl Vertex {
     /// ```
     pub fn empty() -> Self {
         Self {
-            edges: HashMap::new(),
+            edges: FxHashMap::default(),
             data: Hex::empty(),
             #[cfg(feature = "gc")]
             parents: HashSet::new(),
