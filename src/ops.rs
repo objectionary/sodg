@@ -21,7 +21,6 @@
 use crate::Edge;
 use crate::Hex;
 use crate::Sodg;
-use crate::Vertex;
 use anyhow::{Context, Result};
 #[cfg(debug_assertions)]
 use log::trace;
@@ -49,7 +48,7 @@ impl Sodg {
         if self.vertices.contains_key(v1) {
             return Ok(());
         }
-        self.vertices.insert(v1, Vertex::empty());
+        self.vertices.activate(v1);
         #[cfg(not(debug_assertions))]
         {
             self.next_v = v1 + 1;

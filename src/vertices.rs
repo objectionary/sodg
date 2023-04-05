@@ -61,6 +61,10 @@ impl Vertices {
         self.map.insert(v, vtx);
     }
 
+    pub fn activate(&mut self, v: u32) {
+        self.map.insert(v, Vertex::empty());
+    }
+
     pub fn get(&self, v: u32) -> Option<&Vertex> {
         self.map.get(&v)
     }
