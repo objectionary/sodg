@@ -49,7 +49,7 @@ impl Vertices {
         }
     }
 
-    pub fn keys(&self) -> Keys<'_, u32, Vertex> {
+    pub fn keys(&self) -> Keys<u32, Vertex> {
         self.map.keys()
     }
 
