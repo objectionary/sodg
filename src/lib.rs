@@ -65,6 +65,7 @@ mod xml;
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
+use rustc_hash::FxHashMap;
 
 /// A function that is called when a problem is found in [`Sodg`].
 ///
@@ -161,7 +162,7 @@ pub struct Script {
 #[derive(Serialize, Deserialize)]
 pub struct Sodg {
     /// This is a map of vertices with their unique numbers/IDs.
-    vertices: HashMap<u32, Vertex>,
+    vertices: FxHashMap<u32, Vertex>,
     /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.
     #[serde(skip_serializing, skip_deserializing)]
     next_v: u32,

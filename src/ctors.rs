@@ -20,7 +20,7 @@
 
 use crate::Sodg;
 use rstest::rstest;
-use std::collections::HashMap;
+use rustc_hash::FxHashMap;
 
 #[cfg(feature = "sober")]
 use std::collections::HashSet;
@@ -34,7 +34,7 @@ impl Sodg {
     #[must_use]
     pub fn empty() -> Self {
         let mut g = Self {
-            vertices: HashMap::new(),
+            vertices: FxHashMap::default(),
             next_v: 0,
             alerts: vec![],
             alerts_active: true,

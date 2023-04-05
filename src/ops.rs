@@ -23,6 +23,7 @@ use crate::Hex;
 use crate::Sodg;
 use crate::Vertex;
 use anyhow::{Context, Result};
+#[cfg(debug_assertions)]
 use log::trace;
 
 impl Sodg {
@@ -43,12 +44,15 @@ impl Sodg {
     /// # Errors
     ///
     /// If alerts trigger any error, the error will be returned here.
+    #[inline]
     pub fn add(&mut self, v1: u32) -> Result<()> {
         if self.vertices.contains_key(&v1) {
             return Ok(());
         }
         self.vertices.insert(v1, Vertex::empty());
+        #[cfg(debug_assertions)]
         self.validate(vec![v1])?;
+        #[cfg(debug_assertions)]
         trace!("#add: vertex ν{v1} added");
         Ok(())
     }
@@ -77,11 +81,13 @@ impl Sodg {
     /// The label `a` can't be empty. If it is empty, an `Err` will be returned.
     ///
     /// If alerts trigger any error, the error will be returned here.
+    #[inline]
     pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
         let vtx1 = self
             .vertices
             .get_mut(&v1)
             .context(format!("Can't depart from ν{v1}, it's absent"))?;
+        #[cfg(debug_assertions)]
         let before = vtx1.edges.clone().into_iter().find(|e| e.a == a);
         vtx1.edges.retain(|e| e.a != a);
         vtx1.edges.push(Edge::new(v2, a));
@@ -90,7 +96,9 @@ impl Sodg {
             .get_mut(&v2)
             .context(format!("Can't arrive at ν{v2}, it's absent"))?;
         vtx2.parents.insert(v1);
+        #[cfg(debug_assertions)]
         self.validate(vec![v1, v2])?;
+        #[cfg(debug_assertions)]
         if let Some(e) = before {
             trace!("#bind: edge ν{}.{} → ν{} replaced →ν{}", v1, a, v2, e.to);
         } else {
@@ -116,13 +124,16 @@ impl Sodg {
     /// If vertex `v1` is absent, an `Err` will be returned.
     ///
     /// If alerts trigger any error, the error will be returned here.
+    #[inline]
     pub fn put(&mut self, v: u32, d: &Hex) -> Result<()> {
         let vtx = self
             .vertices
             .get_mut(&v)
             .context(format!("Can't find ν{v}"))?;
         vtx.data = d.clone();
+        #[cfg(debug_assertions)]
         self.validate(vec![v])?;
+        #[cfg(debug_assertions)]
         trace!("#data: data of ν{v} set to {d}");
         Ok(())
     }
@@ -157,6 +168,7 @@ impl Sodg {
     /// If vertex `v1` is absent, an `Err` will be returned.
     ///
     /// If garbage collection triggers any error, the error will be returned here.
+    #[inline]
     pub fn data(&mut self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
@@ -166,6 +178,7 @@ impl Sodg {
         vtx.taken = true;
         #[cfg(feature = "gc")]
         self.collect(v)?;
+        #[cfg(debug_assertions)]
         trace!("#data: data of ν{v} retrieved");
         Ok(data)
     }
@@ -202,6 +215,7 @@ impl Sodg {
     /// # Errors
     ///
     /// If vertex `v1` is absent, `Err` will be returned.
+    #[inline]
     pub fn kids(&self, v: u32) -> Result<Vec<(String, u32)>> {
         let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
         let kids = vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect();
@@ -223,6 +237,7 @@ impl Sodg {
     ///
     /// If vertex `v1` is absent, `None` will be returned.
     #[must_use]
+    #[inline]
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         self.vertices
             .get(&v)

@@ -44,6 +44,9 @@ impl Display for Hex {
 }
 
 impl Hex {
+    /// Empty Hex, for performance improvement.
+    const BLANK: [u8; 24] = [0_u8; 24];
+
     /// Make an empty `Hex`.
     ///
     /// For example:
@@ -55,8 +58,9 @@ impl Hex {
     /// assert_eq!("--", d.print());
     /// ```
     #[must_use]
-    pub fn empty() -> Self {
-        Self::from_vec(Vec::new())
+    #[inline]
+    pub const fn empty() -> Self {
+        Self::Bytes(Self::BLANK, 0)
     }
 
     /// Take the bytes contained.

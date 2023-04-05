@@ -22,7 +22,8 @@ use crate::DeadRelay;
 use crate::Sodg;
 use anyhow::{anyhow, Result};
 use log::trace;
-use std::collections::{HashMap, HashSet};
+use rustc_hash::FxHashMap;
+use std::collections::HashSet;
 
 impl Sodg {
     /// Take a slice of the graph, keeping only the vertex specified
@@ -77,7 +78,7 @@ impl Sodg {
                 }
             }
         }
-        let mut new_vertices = HashMap::new();
+        let mut new_vertices = FxHashMap::default();
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             let mut nv = vtx.clone();
             nv.edges.retain(|e| done.contains(&e.to));
