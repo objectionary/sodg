@@ -69,7 +69,7 @@ impl Script {
         for cmd in &self.commands() {
             trace!("#deploy_to: deploying command no.{} '{}'...", pos + 1, cmd);
             self.deploy_one(cmd, g)
-                .context(format!("Failure at the command no.{pos}: '{cmd}'"))?;
+                .with_context(|| format!("Failure at the command no.{pos}: '{cmd}'"))?;
             pos += 1;
         }
         Ok(pos)
@@ -99,7 +99,9 @@ impl Script {
         lazy_static! {
             static ref LINE: Regex = Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap();
         }
-        let cap = LINE.captures(cmd).context(format!("Can't parse '{cmd}'"))?;
+        let cap = LINE
+            .captures(cmd)
+            .with_context(|| format!("Can't parse '{cmd}'"))?;
         let args: Vec<String> = cap[2]
             .split(',')
             .map(str::trim)
@@ -108,20 +110,21 @@ impl Script {
             .collect();
         match &cap[1] {
             "ADD" => {
-                let v = self.parse(args.get(0).context("V is expected")?, g)?;
-                g.add(v).context(format!("Failed to ADD({v})"))
+                let v = self.parse(args.get(0).with_context(|| "V is expected")?, g)?;
+                g.add(v).with_context(|| format!("Failed to ADD({v})"))
             }
             "BIND" => {
-                let v1 = self.parse(args.get(0).context("V1 is expected")?, g)?;
-                let v2 = self.parse(args.get(1).context("V2 is expected")?, g)?;
-                let a = args.get(2).context("Label is expected")?;
+                let v1 = self.parse(args.get(0).with_context(|| "V1 is expected")?, g)?;
+                let v2 = self.parse(args.get(1).with_context(|| "V2 is expected")?, g)?;
+                let a = args.get(2).with_context(|| "Label is expected")?;
                 g.bind(v1, v2, a)
-                    .context(format!("Failed to BIND({v1}, {v2}, {a})"))
+                    .with_context(|| format!("Failed to BIND({v1}, {v2}, {a})"))
             }
             "PUT" => {
-                let v = self.parse(args.get(0).context("V is expected")?, g)?;
-                let d = Self::parse_data(args.get(1).context("Data is expected")?)?;
-                g.put(v, &d).context(format!("Failed to PUT({v}, {d})"))
+                let v = self.parse(args.get(0).with_context(|| "V is expected")?, g)?;
+                let d = Self::parse_data(args.get(1).with_context(|| "Data is expected")?)?;
+                g.put(v, &d)
+                    .with_context(|| format!("Failed to PUT({v}, {d})"))
             }
             cmd => Err(anyhow!("Unknown command: {cmd}")),
         }
@@ -155,16 +158,20 @@ impl Script {
     ///
     /// If impossible to parse, an error will be returned.
     fn parse(&mut self, s: &str, g: &mut Sodg) -> Result<u32> {
-        let head = s.chars().next().context("Empty identifier".to_string())?;
+        let head = s
+            .chars()
+            .next()
+            .with_context(|| "Empty identifier".to_string())?;
         if head == '$' || head == 'ν' {
             let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
             if head == '$' {
                 Ok(*self.vars.entry(tail).or_insert_with(|| g.next_id()))
             } else {
-                Ok(u32::from_str(tail.as_str()).context(format!("Parsing of '{s}' failed"))?)
+                Ok(u32::from_str(tail.as_str())
+                    .with_context(|| format!("Parsing of '{s}' failed"))?)
             }
         } else {
-            let v = u32::from_str(s).context(format!("Parsing of '{s}' failed"))?;
+            let v = u32::from_str(s).with_context(|| format!("Parsing of '{s}' failed"))?;
             Ok(v)
         }
     }

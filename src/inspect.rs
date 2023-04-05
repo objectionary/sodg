@@ -36,7 +36,7 @@ impl Sodg {
     pub fn inspect(&self, loc: &str) -> Result<String> {
         let v = self
             .find(0, loc, &DeadRelay::default())
-            .context(format!("Can't locate '{loc}'"))?;
+            .with_context(|| format!("Can't locate '{loc}'"))?;
         let mut seen = HashSet::new();
         Ok(format!(
             "{}/ν{}\n{}",
@@ -51,7 +51,7 @@ impl Sodg {
         let mut lines = vec![];
         self.vertices
             .get(&v)
-            .context(format!("Can't find ν{v}"))?
+            .with_context(|| format!("Can't find ν{v}"))?
             .edges
             .iter()
             .sorted()

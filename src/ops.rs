@@ -90,7 +90,7 @@ impl Sodg {
         let vtx1 = self
             .vertices
             .get_mut(&v1)
-            .context(format!("Can't depart from ν{v1}, it's absent"))?;
+            .with_context(|| format!("Can't depart from ν{v1}, it's absent"))?;
         #[cfg(debug_assertions)]
         let before = vtx1.edges.clone().into_iter().find(|e| e.a == a);
         vtx1.edges.retain(|e| e.a != a);
@@ -98,7 +98,7 @@ impl Sodg {
         let vtx2 = self
             .vertices
             .get_mut(&v2)
-            .context(format!("Can't arrive at ν{v2}, it's absent"))?;
+            .with_context(|| format!("Can't arrive at ν{v2}, it's absent"))?;
         vtx2.parents.insert(v1);
         #[cfg(debug_assertions)]
         self.validate(vec![v1, v2])?;
@@ -133,7 +133,7 @@ impl Sodg {
         let vtx = self
             .vertices
             .get_mut(&v)
-            .context(format!("Can't find ν{v}"))?;
+            .with_context(|| format!("Can't find ν{v}"))?;
         vtx.data = d.clone();
         #[cfg(debug_assertions)]
         self.validate(vec![v])?;
@@ -177,7 +177,7 @@ impl Sodg {
         let vtx = self
             .vertices
             .get_mut(&v)
-            .context(format!("Can't find ν{v}"))?;
+            .with_context(|| format!("Can't find ν{v}"))?;
         let data = vtx.data.clone();
         vtx.taken = true;
         #[cfg(feature = "gc")]
@@ -221,7 +221,10 @@ impl Sodg {
     /// If vertex `v1` is absent, `Err` will be returned.
     #[inline]
     pub fn kids(&self, v: u32) -> Result<Vec<(String, u32)>> {
-        let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
+        let vtx = self
+            .vertices
+            .get(&v)
+            .with_context(|| format!("Can't find ν{v}"))?;
         let kids = vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect();
         Ok(kids)
     }

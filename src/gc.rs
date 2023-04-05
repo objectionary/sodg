@@ -37,20 +37,20 @@ impl Sodg {
         let mut queue = VecDeque::new();
         queue.push_back(start);
         while !queue.is_empty() {
-            let v = queue
-                .pop_front()
-                .context("A non-empty queue failed to yield an element, this shouldn't happen")?;
+            let v = queue.pop_front().with_context(|| {
+                "A non-empty queue failed to yield an element, this shouldn't happen"
+            })?;
             let vtx = self
                 .vertices
                 .get(&v)
-                .context(format!("Failed to get v{v}"))?
+                .with_context(|| format!("Failed to get v{v}"))?
                 .clone();
             if vtx.parents.is_empty() && vtx.taken {
                 for edge in &vtx.edges {
                     queue.push_back(edge.to);
                     self.vertices
                         .get_mut(&edge.to)
-                        .context(format!("Failed to get v{}", edge.to))?
+                        .with_context(|| format!("Failed to get v{}", edge.to))?
                         .parents
                         .remove(&v);
                     trace!("#collect: ν{v} removed");

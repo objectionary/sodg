@@ -206,10 +206,12 @@ impl Hex {
     ///
     /// If it's impossible to convert to an integer, an error will be returned.
     pub fn to_i64(&self) -> Result<i64> {
-        let a: &[u8; 8] = &self.bytes().try_into().context(format!(
-            "There is not enough bytes, can't make INT (just {} while we need eight)",
-            self.bytes().len()
-        ))?;
+        let a: &[u8; 8] = &self.bytes().try_into().with_context(|| {
+            format!(
+                "There is not enough bytes, can't make INT (just {} while we need eight)",
+                self.bytes().len()
+            )
+        })?;
         Ok(i64::from_be_bytes(*a))
     }
 
@@ -227,10 +229,12 @@ impl Hex {
     ///
     /// If it's impossible to convert to a float, an error will be returned.
     pub fn to_f64(&self) -> Result<f64> {
-        let a: &[u8; 8] = &self.bytes().try_into().context(format!(
-            "There is not enough bytes, can't make FLOAT (just {} while we need eight)",
-            self.bytes().len()
-        ))?;
+        let a: &[u8; 8] = &self.bytes().try_into().with_context(|| {
+            format!(
+                "There is not enough bytes, can't make FLOAT (just {} while we need eight)",
+                self.bytes().len()
+            )
+        })?;
         Ok(f64::from_be_bytes(*a))
     }
 
@@ -248,10 +252,8 @@ impl Hex {
     ///
     /// If it's impossible to convert to a UTF-8 string, an error will be returned.
     pub fn to_utf8(&self) -> Result<String> {
-        String::from_utf8(self.bytes().to_vec()).context(format!(
-            "The string inside Hex is not UTF-8 ({} bytes)",
-            self.len()
-        ))
+        String::from_utf8(self.bytes().to_vec())
+            .with_context(|| format!("The string inside Hex is not UTF-8 ({} bytes)", self.len()))
     }
 
     /// Turn it into a hexadecimal string.

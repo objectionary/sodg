@@ -83,7 +83,7 @@ pub fn on_heap(total: usize) -> i64 {
 }
 
 fn main() {
-    let total = 10000;
+    let total = 1000000;
     let start1 = Instant::now();
     let s1 = on_graph(total);
     let e1 = start1.elapsed();

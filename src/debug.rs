@@ -55,7 +55,10 @@ impl Sodg {
     ///
     /// If the vertex is absent, an error may be returned.
     pub fn v_print(&self, v: u32) -> Result<String> {
-        let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
+        let vtx = self
+            .vertices
+            .get(&v)
+            .with_context(|| format!("Can't find ν{v}"))?;
         let list: Vec<String> = vtx.edges.iter().map(|e| e.a.clone()).collect();
         Ok(format!(
             "ν{v}⟦{}{}⟧",
