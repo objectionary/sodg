@@ -21,7 +21,7 @@
 use crate::DeadRelay;
 use crate::Sodg;
 use crate::Vertices;
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use log::trace;
 use std::collections::HashSet;
 
@@ -82,7 +82,11 @@ impl Sodg {
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             let mut nv = vtx.clone();
             nv.edges.retain(|e| done.contains(&e.to));
-            new_vertices.insert(*v, nv);
+            new_vertices.activate(*v);
+            let vtx = new_vertices.get_mut(*v).with_context(|| "Can't find?")?;
+            for e in nv.edges {
+                vtx.edges.push(e);
+            }
         }
         let g = Self {
             vertices: new_vertices,
