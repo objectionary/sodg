@@ -20,9 +20,9 @@ impl Sodg {
     /// use sodg::{Hex, Sodg};
     /// let mut g = Sodg::empty();
     /// g.add(1).unwrap();
-    /// g.put(1, Hex::from(0)).unwrap();
+    /// g.put(1, &Hex::from(0)).unwrap();
     /// g.add(2).unwrap();
-    /// g.put(2, Hex::from(0)).unwrap();
+    /// g.put(2, &Hex::from(0)).unwrap();
     /// g.bind(1, 2, "x").unwrap();
     /// g.data(2).unwrap(); // Try to collect 2
     /// assert!(g.data(2).is_ok());
@@ -42,14 +42,14 @@ impl Sodg {
             })?;
             let vtx = self
                 .vertices
-                .get(&v)
+                .get(v)
                 .with_context(|| format!("Failed to get v{v}"))?
                 .clone();
             if vtx.parents.is_empty() && vtx.taken {
                 for edge in &vtx.edges {
                     queue.push_back(edge.to);
                     self.vertices
-                        .get_mut(&edge.to)
+                        .get_mut(edge.to)
                         .with_context(|| format!("Failed to get v{}", edge.to))?
                         .parents
                         .remove(&v);
