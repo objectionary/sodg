@@ -36,7 +36,7 @@ impl Debug for Sodg {
             let mut attrs = v
                 .edges
                 .iter()
-                .map(|e| format!("\n\t{} ➞ ν{}", e.a, e.to))
+                .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
             if !&v.data.is_empty() {
                 attrs.push(format!("{}", v.data));
@@ -59,7 +59,7 @@ impl Sodg {
             .vertices
             .get(v)
             .with_context(|| format!("Can't find ν{v}"))?;
-        let list: Vec<String> = vtx.edges.iter().map(|e| e.a.clone()).collect();
+        let list: Vec<String> = vtx.edges.iter().map(|e| e.0.clone()).collect();
         Ok(format!(
             "ν{v}⟦{}{}⟧",
             if vtx.data.is_empty() { "" } else { "Δ, " },

@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Edge;
 use crate::Hex;
 use crate::Sodg;
 use anyhow::{Context, Result};
@@ -91,9 +90,8 @@ impl Sodg {
             .get_mut(v1)
             .with_context(|| format!("Can't depart from ν{v1}, it's absent"))?;
         #[cfg(debug_assertions)]
-        let before = vtx1.edges.clone().into_iter().find(|e| e.a == a);
-        vtx1.edges.retain(|e| e.a != a);
-        vtx1.edges.push(Edge::new(v2, a));
+        let before = vtx1.edges.clone().into_iter().find(|e| e.0 == a);
+        vtx1.edges.insert(a.to_string(), v2);
         #[cfg(feature = "gc")]
         let vtx2 = self
             .vertices
@@ -105,7 +103,7 @@ impl Sodg {
         self.validate(vec![v1, v2])?;
         #[cfg(debug_assertions)]
         if let Some(e) = before {
-            trace!("#bind: edge ν{}.{} → ν{} replaced →ν{}", v1, a, v2, e.to);
+            trace!("#bind: edge ν{}.{} → ν{} replaced →ν{}", v1, a, v2, e.1);
         } else {
             trace!("#bind: edge added ν{}.{} → ν{}", v1, a, v2);
         }
@@ -214,7 +212,9 @@ impl Sodg {
     /// g.bind(0, 42, "a").unwrap();
     /// g.bind(0, 42, "b").unwrap();
     /// g.bind(0, 42, "c").unwrap();
-    /// assert_eq!("a,b,c", g.kids(0).unwrap().into_iter().map(|(a, _)| a).collect::<Vec<String>>().join(","));
+    /// let mut names = g.kids(0).unwrap().into_iter().map(|(a, _)| a).collect::<Vec<String>>();
+    /// names.sort();
+    /// assert_eq!("a,b,c", names.join(","));
     /// ```
     ///
     /// # Errors
@@ -226,7 +226,7 @@ impl Sodg {
             .vertices
             .get(v)
             .with_context(|| format!("Can't find ν{v}"))?;
-        let kids = vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect();
+        let kids = vtx.edges.iter().map(|(a, to)| (a.clone(), *to)).collect();
         Ok(kids)
     }
 
@@ -249,7 +249,7 @@ impl Sodg {
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         self.vertices
             .get(v)
-            .and_then(|vtx| vtx.edges.iter().find(|e| e.a == a).map(|e| e.to))
+            .and_then(|vtx| vtx.edges.iter().find(|e| e.0 == a).map(|e| *e.1))
     }
 }
 
@@ -351,9 +351,12 @@ fn finds_all_kids() -> Result<()> {
     g.bind(0, 1, "one")?;
     g.bind(0, 1, "two")?;
     assert_eq!(2, g.kids(0)?.len());
-    let (a, to) = g.kids(0)?.first().unwrap().clone();
-    assert_eq!("one", a);
-    assert_eq!(1, to);
+    let mut names = vec![];
+    for (a, to) in g.kids(0)? {
+        names.push(format!("{a}/{to}"));
+    }
+    names.sort();
+    assert_eq!("one/1,two/1", names.join(","));
     Ok(())
 }
 
@@ -366,8 +369,9 @@ fn builds_list_of_kids() -> Result<()> {
     g.bind(0, 1, "one")?;
     g.bind(0, 1, "two")?;
     g.bind(0, 1, "three")?;
-    let names: Vec<String> = g.kids(0)?.into_iter().map(|(a, _)| a).collect();
-    assert_eq!("one,two,three", names.join(","));
+    let mut names: Vec<String> = g.kids(0)?.into_iter().map(|(a, _)| a).collect();
+    names.sort();
+    assert_eq!("one,three,two", names.join(","));
     Ok(())
 }
 

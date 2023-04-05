@@ -67,25 +67,25 @@ impl Sodg {
                     .get(v)
                     .ok_or_else(|| anyhow!("Can't find ν{v}"))?;
                 for e in &vtx.edges {
-                    if done.contains(&e.to) {
+                    if done.contains(e.1) {
                         continue;
                     }
-                    if !p(v, e.to, e.a.clone()) {
+                    if !p(v, *e.1, e.0.clone()) {
                         continue;
                     }
-                    done.insert(e.to);
-                    todo.insert(e.to);
+                    done.insert(*e.1);
+                    todo.insert(*e.1);
                 }
             }
         }
         let mut new_vertices = Vertices::new();
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             let mut nv = vtx.clone();
-            nv.edges.retain(|e| done.contains(&e.to));
+            nv.edges.retain(|_, v| done.contains(v));
             new_vertices.insert(*v);
             let vtx = new_vertices.get_mut(*v).with_context(|| "Can't find?")?;
             for e in nv.edges {
-                vtx.edges.push(e);
+                vtx.edges.insert(e.0, e.1);
             }
         }
         let g = Self {

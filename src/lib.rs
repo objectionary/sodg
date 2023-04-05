@@ -47,7 +47,6 @@ mod clone;
 mod ctors;
 mod debug;
 mod dot;
-mod edge;
 mod find;
 mod gc;
 mod hex;
@@ -104,7 +103,7 @@ pub enum Hex {
 #[derive(Eq, PartialEq, Clone, Serialize, Deserialize)]
 pub(crate) struct Vertex {
     /// This is a list of edges departing from this vertex.
-    pub edges: Vec<Edge>,
+    pub edges: HashMap<String, u32>,
     /// This is the data in the vertex (possibly empty).
     pub data: Hex,
     /// This is a supplementary list of parent nodes, staying here for caching.
@@ -118,15 +117,6 @@ pub(crate) struct Vertex {
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Vertices {
     map: FxHashMap<u32, Vertex>,
-}
-
-/// An edge between vertices in the graph.
-#[derive(Clone, Serialize, Deserialize, Eq, PartialOrd, PartialEq, Ord)]
-pub(crate) struct Edge {
-    /// The vertex that it points to.
-    pub to: u32,
-    /// The label of the edge.
-    pub a: String,
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.

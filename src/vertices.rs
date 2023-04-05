@@ -31,7 +31,7 @@ impl Debug for Vertices {
             let mut attrs = v
                 .edges
                 .iter()
-                .map(|e| format!("\n\t{} ➞ ν{}", e.a, e.to))
+                .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
             if !&v.data.is_empty() {
                 attrs.push(format!("{}", v.data));

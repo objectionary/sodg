@@ -77,17 +77,17 @@ digraph {
                     format!("/* {} */", vtx.data)
                 }
             ));
-            for e in vtx.edges.iter().sorted_by_key(|e| e.a.clone()) {
+            for e in vtx.edges.iter().sorted_by_key(|e| e.0.clone()) {
                 lines.push(format!(
                     "  v{v} -> v{} [label=\"{}\"{}{}];",
-                    e.to,
-                    e.a,
-                    if e.a.starts_with('ρ') || e.a.starts_with('σ') {
+                    e.1,
+                    e.0,
+                    if e.0.starts_with('ρ') || e.0.starts_with('σ') {
                         ",color=gray,fontcolor=gray"
                     } else {
                         ""
                     },
-                    if e.a.starts_with('π') {
+                    if e.0.starts_with('π') {
                         ",style=dashed"
                     } else {
                         ""

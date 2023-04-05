@@ -44,8 +44,8 @@ impl Sodg {
             let mut errors = Vec::new();
             for v in &vx {
                 for e in &g.vertices.get(*v).unwrap().edges {
-                    if !g.vertices.contains(e.to) {
-                        errors.push(format!("Edge ν{v}.{} arrives to lost ν{}", e.a, e.to));
+                    if !g.vertices.contains(*e.1) {
+                        errors.push(format!("Edge ν{v}.{} arrives to lost ν{}", e.0, e.1));
                     }
                 }
             }
@@ -55,8 +55,8 @@ impl Sodg {
             let mut errors = Vec::new();
             for v in &vx {
                 for e in &g.vertices.get(*v).unwrap().edges {
-                    if e.to == *v {
-                        errors.push(format!("Edge ν{v}.{} arrives to ν{} (loop)", e.a, e.to));
+                    if e.1 == v {
+                        errors.push(format!("Edge ν{v}.{} arrives to ν{} (loop)", e.0, e.1));
                     }
                 }
             }
@@ -66,8 +66,8 @@ impl Sodg {
             let mut errors = Vec::new();
             for v in &vx {
                 for e in &g.vertices.get(*v).unwrap().edges {
-                    if e.a.is_empty() {
-                        errors.push(format!("Edge from ν{v} to ν{} has empty label", e.to));
+                    if e.0.is_empty() {
+                        errors.push(format!("Edge from ν{v} to ν{} has empty label", e.1));
                     }
                 }
             }
@@ -77,10 +77,10 @@ impl Sodg {
             let mut errors = Vec::new();
             for v in &vx {
                 for e in &g.vertices.get(*v).unwrap().edges {
-                    if !g.vertices.contains(e.to) {
+                    if !g.vertices.contains(*e.1) {
                         errors.push(format!(
                             "Edge ν{v}.{} points to ν{}, which doesn't exist",
-                            e.a, e.to
+                            e.0, e.1
                         ));
                     }
                 }
@@ -91,35 +91,35 @@ impl Sodg {
             let mut errors = Vec::new();
             for v in &vx {
                 for e in &g.vertices.get(*v).unwrap().edges {
-                    if e.a.is_empty() {
+                    if e.0.is_empty() {
                         errors.push(format!(
                             "Edge label from ν{} to ν{} is an empty string",
-                            v, e.to
+                            v, e.1
                         ));
                     }
-                    if e.a.contains(' ') {
+                    if e.0.contains(' ') {
                         errors.push(format!(
                             "Edge label from ν{} to ν{} has prohibited spaces: '{}'",
-                            v, e.to, e.a
+                            v, e.1, e.0
                         ));
                     }
-                    let parts: Vec<&str> = e.a.split('/').collect();
+                    let parts: Vec<&str> = e.0.split('/').collect();
                     if parts.len() > 2 {
                         errors.push(format!(
                             "Edge label from ν{} to ν{} has more than one slash: '{}'",
-                            v, e.to, e.a
+                            v, e.1, e.0
                         ));
                     }
                     if parts[0].contains('.') {
                         errors.push(format!(
                             "Edge label from ν{} to ν{} has a dot inside the head part: '{}'",
-                            v, e.to, e.a
+                            v, e.1, e.0
                         ));
                     }
                     if parts.len() == 2 && parts[1].is_empty() {
                         errors.push(format!(
                             "Edge label from ν{} to ν{} has an empty tail part: '{}'",
-                            v, e.to, e.a
+                            v, e.1, e.0
                         ));
                     }
                 }

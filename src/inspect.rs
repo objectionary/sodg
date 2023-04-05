@@ -56,11 +56,11 @@ impl Sodg {
             .iter()
             .sorted()
             .for_each(|e| {
-                let skip = seen.contains(&e.to);
+                let skip = seen.contains(e.1);
                 let line = format!(
                     "  .{} ➞ ν{}{}",
-                    e.a,
-                    e.to,
+                    e.0,
+                    e.1,
                     if skip {
                         "…".to_string()
                     } else {
@@ -69,8 +69,8 @@ impl Sodg {
                 );
                 lines.push(line);
                 if !skip {
-                    seen.insert(e.to);
-                    self.inspect_v(e.to, seen)
+                    seen.insert(*e.1);
+                    self.inspect_v(*e.1, seen)
                         .unwrap()
                         .iter()
                         .for_each(|t| lines.push(format!("  {t}")));
