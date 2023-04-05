@@ -48,7 +48,7 @@ impl Sodg {
     /// ```
     #[must_use]
     pub fn is_empty(&self) -> bool {
-        self.vertices.is_empty()
+        self.vertices.len() == 0
     }
 }
 

@@ -57,12 +57,8 @@ impl Vertices {
         self.map.len()
     }
 
-    pub fn is_empty(&self) -> bool {
-        self.map.is_empty()
-    }
-
-    pub fn insert(&mut self, v: u32, vtx: Vertex) -> Option<Vertex> {
-        self.map.insert(v, vtx)
+    pub fn insert(&mut self, v: u32, vtx: Vertex) {
+        self.map.insert(v, vtx);
     }
 
     pub fn get(&self, v: u32) -> Option<&Vertex> {
@@ -73,8 +69,8 @@ impl Vertices {
         self.map.get_mut(&v)
     }
 
-    pub fn remove(&mut self, v: u32) -> Option<Vertex> {
-        self.map.remove(&v)
+    pub fn remove(&mut self, v: u32) {
+        self.map.remove(&v);
     }
 
     pub fn contains_key(&self, v: u32) -> bool {
