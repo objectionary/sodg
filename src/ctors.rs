@@ -21,7 +21,6 @@
 use crate::Sodg;
 use rstest::rstest;
 use rustc_hash::FxHashMap;
-
 #[cfg(feature = "sober")]
 use std::collections::HashSet;
 
@@ -189,6 +188,7 @@ fn prohibits_labels_with_empty_tail() -> Result<()> {
 }
 
 #[test]
+#[cfg(feature = "gc")]
 fn prohibits_orphan_edges() -> Result<()> {
     let mut g = Sodg::empty();
     g.alerts_off();

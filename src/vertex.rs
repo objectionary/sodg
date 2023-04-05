@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 use crate::{Hex, Vertex};
+#[cfg(feature = "gc")]
 use std::collections::HashSet;
 
 impl Vertex {
@@ -31,10 +32,11 @@ impl Vertex {
     /// let mut sodg = Sodg::empty();
     /// sodg.add(0).unwrap();
     /// ```
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self {
-            edges: vec![],
+            edges: Vec::new(),
             data: Hex::empty(),
+            #[cfg(feature = "gc")]
             parents: HashSet::new(),
             taken: false,
         }

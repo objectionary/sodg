@@ -65,7 +65,9 @@ mod xml;
 use anyhow::Result;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+#[cfg(feature = "gc")]
+use std::collections::HashSet;
 
 /// A function that is called when a problem is found in [`Sodg`].
 ///
@@ -105,6 +107,7 @@ pub(crate) struct Vertex {
     /// This is the data in the vertex (possibly empty).
     pub data: Hex,
     /// This is a supplementary list of parent nodes, staying here for caching.
+    #[cfg(feature = "gc")]
     pub parents: HashSet<u32>,
     /// This is `TRUE` if the data has been already taken by the use of [`Sodg::data`].
     pub taken: bool,

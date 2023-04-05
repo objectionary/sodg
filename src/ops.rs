@@ -95,10 +95,12 @@ impl Sodg {
         let before = vtx1.edges.clone().into_iter().find(|e| e.a == a);
         vtx1.edges.retain(|e| e.a != a);
         vtx1.edges.push(Edge::new(v2, a));
+        #[cfg(feature = "gc")]
         let vtx2 = self
             .vertices
             .get_mut(&v2)
             .with_context(|| format!("Can't arrive at ν{v2}, it's absent"))?;
+        #[cfg(feature = "gc")]
         vtx2.parents.insert(v1);
         #[cfg(debug_assertions)]
         self.validate(vec![v1, v2])?;
