@@ -63,9 +63,9 @@ mod vertex;
 mod xml;
 
 use anyhow::Result;
+use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
-use rustc_hash::FxHashMap;
 
 /// A function that is called when a problem is found in [`Sodg`].
 ///

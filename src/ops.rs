@@ -50,6 +50,10 @@ impl Sodg {
             return Ok(());
         }
         self.vertices.insert(v1, Vertex::empty());
+        #[cfg(not(debug_assertions))]
+        {
+            self.next_v = v1 + 1;
+        }
         #[cfg(debug_assertions)]
         self.validate(vec![v1])?;
         #[cfg(debug_assertions)]

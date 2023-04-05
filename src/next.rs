@@ -25,6 +25,7 @@ impl Sodg {
     ///
     /// This ID will never be returned by [`Sodg::next_id`] again. Also, this ID will not
     /// be equal to any of the existing IDs of vertices.
+    #[cfg(debug_assertions)]
     pub fn next_id(&mut self) -> u32 {
         let mut id = self.next_v;
         for v in self.vertices.keys() {
@@ -34,6 +35,13 @@ impl Sodg {
         }
         self.next_v = id + 1;
         id
+    }
+
+    /// Get next unique ID of a vertex (in release mode).
+    #[cfg(not(debug_assertions))]
+    #[inline]
+    pub fn next_id(&mut self) -> u32 {
+        self.next_v
     }
 }
 
