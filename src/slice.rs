@@ -82,7 +82,7 @@ impl Sodg {
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             let mut nv = vtx.clone();
             nv.edges.retain(|e| done.contains(&e.to));
-            new_vertices.activate(*v);
+            new_vertices.insert(*v);
             let vtx = new_vertices.get_mut(*v).with_context(|| "Can't find?")?;
             for e in nv.edges {
                 vtx.edges.push(e);

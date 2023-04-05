@@ -48,7 +48,7 @@ impl Sodg {
         if self.vertices.contains_key(v1) {
             return Ok(());
         }
-        self.vertices.activate(v1);
+        self.vertices.insert(v1);
         #[cfg(not(debug_assertions))]
         {
             self.next_v = v1 + 1;

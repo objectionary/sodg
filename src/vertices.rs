@@ -57,7 +57,7 @@ impl Vertices {
         self.map.len()
     }
 
-    pub fn activate(&mut self, v: u32) {
+    pub fn insert(&mut self, v: u32) {
         self.map.insert(v, Vertex::empty());
     }
 
