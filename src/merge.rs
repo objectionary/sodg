@@ -91,8 +91,8 @@ impl Sodg {
             .ok_or_else(|| anyhow!("Can't find ν{right} in the right graph"))?
             .data
             .clone();
-        if !d.is_empty() {
-            self.put(left, &d)?;
+        if d.is_some() {
+            self.put(left, &d.unwrap())?;
         }
         for (a, to) in g.kids(right)? {
             let matched = if let Some(t) = self.kid(left, &a) {

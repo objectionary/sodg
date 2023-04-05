@@ -33,8 +33,8 @@ impl Debug for Vertices {
                 .iter()
                 .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
-            if !&v.data.is_empty() {
-                attrs.push(format!("{}", v.data));
+            if let Some(d) = &v.data {
+                attrs.push(format!("{d}"));
             }
             lines.push(format!("ν{i} -> ⟦{}⟧", attrs.join(", ")));
         }

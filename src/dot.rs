@@ -66,16 +66,14 @@ digraph {
         {
             lines.push(format!(
                 "  v{v}[shape=circle,label=\"ν{v}\"{}]; {}",
-                if vtx.data.is_empty() {
+                if vtx.data.is_none() {
                     ""
                 } else {
                     ",color=\"#f96900\""
                 },
-                if vtx.data.is_empty() {
-                    String::new()
-                } else {
-                    format!("/* {} */", vtx.data)
-                }
+                vtx.data
+                    .as_ref()
+                    .map_or_else(String::new, |d| format!("/* {d} */"))
             ));
             for e in vtx.edges.iter().sorted_by_key(|e| e.0.clone()) {
                 lines.push(format!(

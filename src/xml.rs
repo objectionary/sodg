@@ -78,9 +78,9 @@ impl Sodg {
                 e_node.add_attribute("to", e.1.to_string().as_str());
                 v_node.add_child(e_node)?;
             }
-            if !vtx.data.is_empty() {
+            if let Some(d) = &vtx.data {
                 let mut data_node = XMLElement::new("data");
-                data_node.add_text(vtx.data.print().replace('-', " "))?;
+                data_node.add_text(d.print().replace('-', " "))?;
                 v_node.add_child(data_node)?;
             }
             root.add_child(v_node)?;

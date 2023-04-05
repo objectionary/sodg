@@ -38,8 +38,8 @@ impl Debug for Sodg {
                 .iter()
                 .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
-            if !&v.data.is_empty() {
-                attrs.push(format!("{}", v.data));
+            if let Some(d) = v.data.clone() {
+                attrs.push(format!("{d}"));
             }
             lines.push(format!("ν{i} -> ⟦{}⟧", attrs.join(", ")));
         }
@@ -62,7 +62,7 @@ impl Sodg {
         let list: Vec<String> = vtx.edges.iter().map(|e| e.0.clone()).collect();
         Ok(format!(
             "ν{v}⟦{}{}⟧",
-            if vtx.data.is_empty() { "" } else { "Δ, " },
+            if vtx.data.is_none() { "" } else { "Δ, " },
             list.join(", ")
         ))
     }

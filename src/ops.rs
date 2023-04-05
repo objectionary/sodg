@@ -133,7 +133,7 @@ impl Sodg {
             .vertices
             .get_mut(v)
             .with_context(|| format!("Can't find ν{v}"))?;
-        vtx.data = d.clone();
+        vtx.data = Some(d.clone());
         #[cfg(debug_assertions)]
         self.validate(vec![v])?;
         #[cfg(debug_assertions)]
@@ -177,13 +177,16 @@ impl Sodg {
             .vertices
             .get_mut(v)
             .with_context(|| format!("Can't find ν{v}"))?;
-        let data = vtx.data.clone();
-        vtx.taken = true;
-        #[cfg(feature = "gc")]
-        self.collect(v)?;
-        #[cfg(debug_assertions)]
-        trace!("#data: data of ν{v} retrieved");
-        Ok(data)
+        if let Some(d) = vtx.data.clone() {
+            vtx.taken = true;
+            #[cfg(feature = "gc")]
+            self.collect(v)?;
+            #[cfg(debug_assertions)]
+            trace!("#data: data of ν{v} retrieved");
+            Ok(d)
+        } else {
+            Ok(Hex::empty())
+        }
     }
 
     /// Find all kids of a vertex.

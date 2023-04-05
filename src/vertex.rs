@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Hex, Vertex};
+use crate::Vertex;
 use rustc_hash::FxHashMap;
 #[cfg(feature = "gc")]
 use std::collections::HashSet;
@@ -36,7 +36,7 @@ impl Vertex {
     pub fn empty() -> Self {
         Self {
             edges: FxHashMap::default(),
-            data: Hex::empty(),
+            data: None,
             #[cfg(feature = "gc")]
             parents: HashSet::new(),
             taken: false,
