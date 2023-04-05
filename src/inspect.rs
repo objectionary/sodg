@@ -50,7 +50,7 @@ impl Sodg {
         seen.insert(v);
         let mut lines = vec![];
         self.vertices
-            .get(&v)
+            .get(v)
             .with_context(|| format!("Can't find ν{v}"))?
             .edges
             .iter()

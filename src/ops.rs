@@ -46,7 +46,7 @@ impl Sodg {
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn add(&mut self, v1: u32) -> Result<()> {
-        if self.vertices.contains_key(&v1) {
+        if self.vertices.contains_key(v1) {
             return Ok(());
         }
         self.vertices.insert(v1, Vertex::empty());
@@ -89,7 +89,7 @@ impl Sodg {
     pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
         let vtx1 = self
             .vertices
-            .get_mut(&v1)
+            .get_mut(v1)
             .with_context(|| format!("Can't depart from ν{v1}, it's absent"))?;
         #[cfg(debug_assertions)]
         let before = vtx1.edges.clone().into_iter().find(|e| e.a == a);
@@ -98,7 +98,7 @@ impl Sodg {
         #[cfg(feature = "gc")]
         let vtx2 = self
             .vertices
-            .get_mut(&v2)
+            .get_mut(v2)
             .with_context(|| format!("Can't arrive at ν{v2}, it's absent"))?;
         #[cfg(feature = "gc")]
         vtx2.parents.insert(v1);
@@ -134,7 +134,7 @@ impl Sodg {
     pub fn put(&mut self, v: u32, d: &Hex) -> Result<()> {
         let vtx = self
             .vertices
-            .get_mut(&v)
+            .get_mut(v)
             .with_context(|| format!("Can't find ν{v}"))?;
         vtx.data = d.clone();
         #[cfg(debug_assertions)]
@@ -178,7 +178,7 @@ impl Sodg {
     pub fn data(&mut self, v: u32) -> Result<Hex> {
         let vtx = self
             .vertices
-            .get_mut(&v)
+            .get_mut(v)
             .with_context(|| format!("Can't find ν{v}"))?;
         let data = vtx.data.clone();
         vtx.taken = true;
@@ -225,7 +225,7 @@ impl Sodg {
     pub fn kids(&self, v: u32) -> Result<Vec<(String, u32)>> {
         let vtx = self
             .vertices
-            .get(&v)
+            .get(v)
             .with_context(|| format!("Can't find ν{v}"))?;
         let kids = vtx.edges.iter().map(|x| (x.a.clone(), x.to)).collect();
         Ok(kids)
@@ -249,7 +249,7 @@ impl Sodg {
     #[inline]
     pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
         self.vertices
-            .get(&v)
+            .get(v)
             .and_then(|vtx| vtx.edges.iter().find(|e| e.a == a).map(|e| e.to))
     }
 }

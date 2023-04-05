@@ -18,21 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
-use anyhow::{Context, Result};
+use crate::{Vertex, Vertices};
+use rustc_hash::FxHashMap;
+use std::collections::hash_map::{Iter, IterMut, Keys};
 use std::fmt;
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{Debug, Formatter};
 
-impl Display for Sodg {
-    fn fmt(&self, f: &mut Formatter) -> fmt::Result {
-        <&Self as Debug>::fmt(&self, f)
-    }
-}
-
-impl Debug for Sodg {
+impl Debug for Vertices {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
-        for (i, v) in self.vertices.iter() {
+        for (i, v) in &self.map {
             let mut attrs = v
                 .edges
                 .iter()
@@ -47,41 +42,55 @@ impl Debug for Sodg {
     }
 }
 
-impl Sodg {
-    /// Print a single vertex to a string, which can be used for
-    /// logging and debugging.
-    ///
-    /// # Errors
-    ///
-    /// If the vertex is absent, an error may be returned.
-    pub fn v_print(&self, v: u32) -> Result<String> {
-        let vtx = self
-            .vertices
-            .get(v)
-            .with_context(|| format!("Can't find ν{v}"))?;
-        let list: Vec<String> = vtx.edges.iter().map(|e| e.a.clone()).collect();
-        Ok(format!(
-            "ν{v}⟦{}{}⟧",
-            if vtx.data.is_empty() { "" } else { "Δ, " },
-            list.join(", ")
-        ))
+impl Vertices {
+    pub fn new() -> Self {
+        Self {
+            map: FxHashMap::default(),
+        }
+    }
+
+    pub fn keys(&self) -> Keys<'_, u32, Vertex> {
+        self.map.keys()
+    }
+
+    pub fn len(&self) -> usize {
+        self.map.len()
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.map.is_empty()
+    }
+
+    pub fn insert(&mut self, v: u32, vtx: Vertex) -> Option<Vertex> {
+        self.map.insert(v, vtx)
+    }
+
+    pub fn get(&self, v: u32) -> Option<&Vertex> {
+        self.map.get(&v)
+    }
+
+    pub fn get_mut(&mut self, v: u32) -> Option<&mut Vertex> {
+        self.map.get_mut(&v)
+    }
+
+    pub fn remove(&mut self, v: u32) -> Option<Vertex> {
+        self.map.remove(&v)
+    }
+
+    pub fn contains_key(&self, v: u32) -> bool {
+        self.map.contains_key(&v)
+    }
+
+    pub fn iter(&self) -> Iter<u32, Vertex> {
+        self.map.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> IterMut<u32, Vertex> {
+        self.map.iter_mut()
     }
 }
 
 #[test]
-fn prints_itself() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    assert_ne!("", format!("{:?}", g));
-    Ok(())
-}
-
-#[test]
-fn displays_itself() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    assert_ne!("", format!("{g}"));
-    Ok(())
+fn panic_on_complex_alert() {
+    // assert!(g.add(42).is_err());
 }

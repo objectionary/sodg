@@ -20,9 +20,9 @@
 
 use crate::DeadRelay;
 use crate::Sodg;
+use crate::Vertices;
 use anyhow::{anyhow, Result};
 use log::trace;
-use rustc_hash::FxHashMap;
 use std::collections::HashSet;
 
 impl Sodg {
@@ -64,7 +64,7 @@ impl Sodg {
                 done.insert(v);
                 let vtx = self
                     .vertices
-                    .get(&v)
+                    .get(v)
                     .ok_or_else(|| anyhow!("Can't find ν{v}"))?;
                 for e in &vtx.edges {
                     if done.contains(&e.to) {
@@ -78,7 +78,7 @@ impl Sodg {
                 }
             }
         }
-        let mut new_vertices = FxHashMap::default();
+        let mut new_vertices = Vertices::new();
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             let mut nv = vtx.clone();
             nv.edges.retain(|e| done.contains(&e.to));

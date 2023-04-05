@@ -19,8 +19,8 @@
 // SOFTWARE.
 
 use crate::Sodg;
+use crate::Vertices;
 use rstest::rstest;
-use rustc_hash::FxHashMap;
 #[cfg(feature = "sober")]
 use std::collections::HashSet;
 
@@ -33,7 +33,7 @@ impl Sodg {
     #[must_use]
     pub fn empty() -> Self {
         let mut g = Self {
-            vertices: FxHashMap::default(),
+            vertices: Vertices::new(),
             next_v: 0,
             alerts: vec![],
             alerts_active: true,
@@ -43,8 +43,8 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in &g.vertices.get(v).unwrap().edges {
-                    if !g.vertices.contains_key(&e.to) {
+                for e in &g.vertices.get(*v).unwrap().edges {
+                    if !g.vertices.contains_key(e.to) {
                         errors.push(format!("Edge ν{v}.{} arrives to lost ν{}", e.a, e.to));
                     }
                 }
@@ -54,7 +54,7 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in &g.vertices.get(v).unwrap().edges {
+                for e in &g.vertices.get(*v).unwrap().edges {
                     if e.to == *v {
                         errors.push(format!("Edge ν{v}.{} arrives to ν{} (loop)", e.a, e.to));
                     }
@@ -65,7 +65,7 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in &g.vertices.get(v).unwrap().edges {
+                for e in &g.vertices.get(*v).unwrap().edges {
                     if e.a.is_empty() {
                         errors.push(format!("Edge from ν{v} to ν{} has empty label", e.to));
                     }
@@ -76,8 +76,8 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in &g.vertices.get(v).unwrap().edges {
-                    if !g.vertices.contains_key(&e.to) {
+                for e in &g.vertices.get(*v).unwrap().edges {
+                    if !g.vertices.contains_key(e.to) {
                         errors.push(format!(
                             "Edge ν{v}.{} points to ν{}, which doesn't exist",
                             e.a, e.to
@@ -90,7 +90,7 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in &g.vertices.get(v).unwrap().edges {
+                for e in &g.vertices.get(*v).unwrap().edges {
                     if e.a.is_empty() {
                         errors.push(format!(
                             "Edge label from ν{} to ν{} is an empty string",

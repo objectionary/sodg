@@ -60,6 +60,7 @@ mod script;
 mod serialization;
 mod slice;
 mod vertex;
+mod vertices;
 mod xml;
 
 use anyhow::Result;
@@ -111,6 +112,12 @@ pub(crate) struct Vertex {
     pub parents: HashSet<u32>,
     /// This is `TRUE` if the data has been already taken by the use of [`Sodg::data`].
     pub taken: bool,
+}
+
+/// Internal structure, map of all vertices.
+#[derive(Serialize, Deserialize, Clone)]
+pub(crate) struct Vertices {
+    map: FxHashMap<u32, Vertex>,
 }
 
 /// An edge between vertices in the graph.
@@ -165,7 +172,7 @@ pub struct Script {
 #[derive(Serialize, Deserialize)]
 pub struct Sodg {
     /// This is a map of vertices with their unique numbers/IDs.
-    vertices: FxHashMap<u32, Vertex>,
+    vertices: Vertices,
     /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.
     #[serde(skip_serializing, skip_deserializing)]
     next_v: u32,

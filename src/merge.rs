@@ -87,7 +87,7 @@ impl Sodg {
         mapped.insert(right, left);
         let d = g
             .vertices
-            .get(&right)
+            .get(right)
             .ok_or_else(|| anyhow!("Can't find ν{right} in the right graph"))?
             .data
             .clone();
@@ -121,7 +121,7 @@ impl Sodg {
     }
 
     fn join(&mut self, left: u32, right: u32) -> Result<()> {
-        for vtx in &mut self.vertices {
+        for vtx in self.vertices.iter_mut() {
             for e in &mut vtx.1.edges {
                 if e.to == right {
                     e.to = left;
@@ -137,7 +137,7 @@ impl Sodg {
             }
             self.bind(left, e.1, &e.0)?;
         }
-        self.vertices.remove(&right);
+        self.vertices.remove(right);
         Ok(())
     }
 }
