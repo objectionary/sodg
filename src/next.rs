@@ -25,23 +25,11 @@ impl Sodg {
     ///
     /// This ID will never be returned by [`Sodg::next_id`] again. Also, this ID will not
     /// be equal to any of the existing IDs of vertices.
-    #[cfg(debug_assertions)]
     pub fn next_id(&mut self) -> u32 {
         let mut id = self.next_v;
-        for v in self.vertices.keys() {
-            if *v >= id {
-                id = *v + 1;
-            }
-        }
+        id = self.vertices.try_id(id);
         self.next_v = id + 1;
         id
-    }
-
-    /// Get next unique ID of a vertex (in release mode).
-    #[cfg(not(debug_assertions))]
-    #[inline]
-    pub fn next_id(&mut self) -> u32 {
-        self.next_v
     }
 }
 
@@ -53,6 +41,7 @@ fn simple_next_id() -> Result<()> {
     let mut g = Sodg::empty();
     assert_eq!(0, g.next_id());
     assert_eq!(1, g.next_id());
+    assert_eq!(2, g.next_id());
     Ok(())
 }
 
@@ -63,5 +52,33 @@ fn calculates_next_id() -> Result<()> {
     g.add(42)?;
     assert_eq!(43, g.next_id());
     assert_eq!(44, g.next_id());
+    Ok(())
+}
+
+#[test]
+fn next_id_after_inject() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(1)?;
+    assert_eq!(0, g.next_id());
+    assert_eq!(2, g.next_id());
+    Ok(())
+}
+
+#[test]
+fn next_id_after_sequence() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    g.add(1)?;
+    assert_eq!(2, g.next_id());
+    assert_eq!(3, g.next_id());
+    Ok(())
+}
+
+#[test]
+fn next_id_after_zero() -> Result<()> {
+    let mut g = Sodg::empty();
+    g.add(0)?;
+    assert_eq!(1, g.next_id());
+    assert_eq!(2, g.next_id());
     Ok(())
 }

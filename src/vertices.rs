@@ -69,6 +69,24 @@ impl Vertices {
         self.map.get_mut(&v)
     }
 
+    pub fn try_id(&self, id: u32) -> u32 {
+        if !self.contains(id) {
+            return id;
+        }
+        let mut next = None;
+        for v in self.keys() {
+            if let Some(before) = next {
+                if *v > before {
+                    next = Some(*v);
+                }
+            }
+            if next.is_none() {
+                next = Some(*v);
+            }
+        }
+        next.map_or(0, |x| x + 1)
+    }
+
     pub fn remove(&mut self, v: u32) {
         self.map.remove(&v);
     }

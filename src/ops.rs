@@ -132,7 +132,7 @@ impl Sodg {
         let vtx = self
             .vertices
             .get_mut(v)
-            .with_context(|| format!("Can't find ν{v}"))?;
+            .with_context(|| format!("Can't find ν{v} in put()"))?;
         vtx.data = Some(d.clone());
         #[cfg(debug_assertions)]
         self.validate(vec![v])?;
@@ -176,7 +176,7 @@ impl Sodg {
         let vtx = self
             .vertices
             .get_mut(v)
-            .with_context(|| format!("Can't find ν{v}"))?;
+            .with_context(|| format!("Can't find ν{v} in data()"))?;
         if let Some(d) = vtx.data.clone() {
             vtx.taken = true;
             #[cfg(feature = "gc")]
@@ -228,7 +228,7 @@ impl Sodg {
         let vtx = self
             .vertices
             .get(v)
-            .with_context(|| format!("Can't find ν{v}"))?;
+            .with_context(|| format!("Can't find ν{v} in kids()"))?;
         let kids = vtx.edges.iter().map(|(a, to)| (a.clone(), *to)).collect();
         Ok(kids)
     }

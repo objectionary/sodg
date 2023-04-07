@@ -332,7 +332,7 @@ fn merges_into_empty_graph() -> Result<()> {
     extra.bind(3, 1, "c")?;
     g.merge(&extra, 1, 1)?;
     assert_eq!(3, g.vertices.len());
-    assert_eq!(2, g.kid(1, "a").unwrap());
+    assert_eq!(0, g.kid(1, "a").unwrap());
     Ok(())
 }
 
