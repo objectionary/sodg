@@ -250,14 +250,11 @@ impl Sodg {
     }
 }
 
-#[cfg(test)]
-use crate::DeadRelay;
-
 #[test]
 fn adds_simple_vertex() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
-    assert_eq!(1, g.find(1, "", &DeadRelay::default())?);
+    assert_eq!(1, g.len());
     Ok(())
 }
 
@@ -268,7 +265,7 @@ fn binds_simple_vertices() -> Result<()> {
     g.add(2)?;
     let k = "hello";
     g.bind(1, 2, k)?;
-    assert_eq!(2, g.find(1, k, &DeadRelay::default())?);
+    assert_eq!(2, g.kid(1, k).unwrap());
     Ok(())
 }
 
@@ -279,7 +276,7 @@ fn pre_defined_ids() -> Result<()> {
     g.add(2)?;
     let k = "a-привет";
     g.bind(1, 2, k)?;
-    assert_eq!(2, g.find(1, k, &DeadRelay::default())?);
+    assert_eq!(2, g.kid(1, k).unwrap());
     Ok(())
 }
 
@@ -290,8 +287,8 @@ fn binds_two_names() -> Result<()> {
     g.add(2)?;
     g.bind(1, 2, "first")?;
     g.bind(1, 2, "second")?;
-    assert_eq!(2, g.find(1, "first", &DeadRelay::default())?);
-    assert_eq!(2, g.find(1, "second", &DeadRelay::default())?);
+    assert_eq!(2, g.kid(1, "first").unwrap());
+    assert_eq!(2, g.kid(1, "second").unwrap());
     Ok(())
 }
 

@@ -48,7 +48,6 @@ mod ctors;
 mod debug;
 mod dot;
 mod edges;
-mod find;
 mod gc;
 mod hex;
 mod inspect;
@@ -63,7 +62,6 @@ mod vertex;
 mod vertices;
 mod xml;
 
-use anyhow::Result;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -154,14 +152,14 @@ pub struct Script {
 ///
 /// ```
 /// use sodg::Sodg;
-/// use sodg::DeadRelay;
 /// let mut sodg = Sodg::empty();
 /// sodg.add(0).unwrap();
 /// sodg.add(1).unwrap();
 /// sodg.bind(0, 1, "a").unwrap();
 /// sodg.add(2).unwrap();
 /// sodg.bind(1, 2, "b").unwrap();
-/// assert_eq!(2, sodg.find(0, "a.b", &mut DeadRelay::default()).unwrap());
+/// assert_eq!(1, sodg.kids(0).unwrap().len());
+/// assert_eq!(1, sodg.kids(1).unwrap().len());
 /// ```
 ///
 /// This package is used in [reo](https://github.com/objectionary/reo)
@@ -182,59 +180,6 @@ pub struct Sodg {
     alerts_active: bool,
     #[cfg(feature = "sober")]
     finds: HashSet<String>,
-}
-
-/// A relay that is used by [`Sodg::find()`] when it can't find an attribute.
-///
-/// The finding algorithm asks the relay for the name of the attribute to use instead
-/// of the not found one, which is provided as the `a` argument to the relay. The
-/// `v` argument provided to the relay is the ID of the vertex
-/// where the attribute `a` is not found.
-///
-/// A relay may return a new vertex ID as a string `"ν42"`, for example.
-/// Pretty much anything that the relay returns will be used
-/// as a new search string, starting from the `v` vertex.
-pub trait Relay {
-    /// A method to be called when the searching algorithm
-    /// fails to find the required attribute.
-    ///
-    /// The method must accept two arguments:
-    /// 1) the ID of the vertex where the search algorithm found a problem,
-    /// 2) the name of the edge it is trying to find.
-    ///
-    /// The method must return a new locator, which the algorithm will use.
-    /// If it is just a string, it will be treated as a name of the attribute to
-    /// try instead. If it starts from `"ν"`, it is treated as an absolute
-    /// locator on the entire graph.
-    ///
-    /// # Errors
-    ///
-    /// If nothing can be found, an [`Err`] may be returned.
-    fn re(&self, v: u32, a: &str) -> Result<String>;
-}
-
-/// A [`Relay`] that doesn't even try to find anything, but returns an error.
-///
-/// If you don't know what [`Relay`] to use, use [`DeadRelay::new()`].
-pub struct DeadRelay;
-
-/// A [`Relay`] that is made of a lambda function.
-///
-/// The function must accept two arguments:
-/// 1) `v` is the ID of the vertex where an attribute is not found,
-/// and 2) `a` is the name of the attribute.
-/// The function must return a new locator where the
-/// search algorithm must continue. It can be just a name of a new attribute,
-/// or an absolute locator (starting from `"ν"`) with dots inside.
-pub struct LambdaRelay {
-    /// The function to call
-    lambda: fn(u32, &str) -> Result<String>,
-}
-
-/// A [`Relay`] that always returns the same `String`.
-pub struct ConstRelay {
-    /// The constant to return
-    s: String,
 }
 
 #[cfg(test)]

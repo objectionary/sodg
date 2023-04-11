@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::DeadRelay;
 use crate::Sodg;
 use crate::Vertices;
 use anyhow::{anyhow, Context, Result};
@@ -32,13 +31,12 @@ impl Sodg {
     /// # Errors
     ///
     /// If impossible to slice, an error will be returned.
-    pub fn slice(&self, loc: &str) -> Result<Self> {
-        let g = self.slice_some(loc, |_, _, _| true)?;
+    pub fn slice(&self, v: u32) -> Result<Self> {
+        let g = self.slice_some(v, |_, _, _| true)?;
         trace!(
-            "#slice: taken {} vertices out of {} by '{}' locator",
+            "#slice: taken {} vertices out of {} at ν{v}",
             g.vertices.len(),
-            self.vertices.len(),
-            loc
+            self.vertices.len()
         );
         Ok(g)
     }
@@ -51,10 +49,10 @@ impl Sodg {
     /// # Errors
     ///
     /// If impossible to slice, an error will be returned.
-    pub fn slice_some(&self, loc: &str, p: impl Fn(u32, u32, String) -> bool) -> Result<Self> {
+    pub fn slice_some(&self, v: u32, p: impl Fn(u32, u32, String) -> bool) -> Result<Self> {
         let mut todo = HashSet::new();
         let mut done = HashSet::new();
-        todo.insert(self.find(0, loc, &DeadRelay::default())?);
+        todo.insert(v);
         loop {
             if todo.is_empty() {
                 break;
@@ -97,10 +95,9 @@ impl Sodg {
             finds: HashSet::new(),
         };
         trace!(
-            "#slice_some: taken {} vertices out of {} by '{}' locator",
+            "#slice_some: taken {} vertices out of {} at ν{v}",
             g.vertices.len(),
-            self.vertices.len(),
-            loc
+            self.vertices.len()
         );
         Ok(g)
     }
@@ -114,8 +111,8 @@ fn makes_a_slice() -> Result<()> {
     g.bind(0, 1, "foo")?;
     g.add(2)?;
     g.bind(0, 2, "bar")?;
-    assert_eq!(1, g.slice("foo")?.vertices.len());
-    assert_eq!(1, g.slice("bar")?.vertices.len());
+    assert_eq!(1, g.slice(1)?.vertices.len());
+    assert_eq!(1, g.slice(2)?.vertices.len());
     Ok(())
 }
 
@@ -127,7 +124,7 @@ fn makes_a_partial_slice() -> Result<()> {
     g.bind(0, 1, "foo")?;
     g.add(2)?;
     g.bind(1, 2, "bar")?;
-    let slice = g.slice_some("foo", |_v, _to, _a| false)?;
+    let slice = g.slice_some(1, |_v, _to, _a| false)?;
     assert_eq!(1, slice.vertices.len());
     Ok(())
 }
@@ -140,7 +137,7 @@ fn skips_some_vertices() -> Result<()> {
     g.bind(0, 1, "foo")?;
     g.add(2)?;
     g.bind(0, 2, "+bar")?;
-    let slice = g.slice_some("ν0", |_, _, a| !a.starts_with('+'))?;
+    let slice = g.slice_some(0, |_, _, a| !a.starts_with('+'))?;
     assert_eq!(2, slice.vertices.len());
     assert_eq!(1, slice.kids(0)?.len());
     Ok(())

@@ -93,6 +93,6 @@ fn saves_and_loads() -> Result<()> {
     let file = tmp.path().join("foo.sodg");
     g.save(file.as_path())?;
     let after = Sodg::load(file.as_path())?;
-    assert_eq!(g.inspect("")?, after.inspect("")?);
+    assert_eq!(g.inspect(0)?, after.inspect(0)?);
     Ok(())
 }

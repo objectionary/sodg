@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::DeadRelay;
 use crate::Sodg;
 use anyhow::{Context, Result};
 use itertools::Itertools;
@@ -33,14 +32,10 @@ impl Sodg {
     /// # Errors
     ///
     /// If it's impossible to inspect, an error will be returned.
-    pub fn inspect(&self, loc: &str) -> Result<String> {
-        let v = self
-            .find(0, loc, &DeadRelay::default())
-            .with_context(|| format!("Can't locate '{loc}'"))?;
+    pub fn inspect(&self, v: u32) -> Result<String> {
         let mut seen = HashSet::new();
         Ok(format!(
-            "{}/ν{}\n{}",
-            loc,
+            "ν{}\n{}",
             v,
             self.inspect_v(v, &mut seen)?.join("\n")
         ))
@@ -90,7 +85,7 @@ fn inspects_simple_object() -> Result<()> {
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;
     g.bind(0, 1, "foo")?;
-    let txt = g.inspect("")?;
+    let txt = g.inspect(0)?;
     println!("{}", txt);
     assert_ne!("".to_string(), txt);
     Ok(())
