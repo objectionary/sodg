@@ -89,8 +89,6 @@ impl Sodg {
             .vertices
             .get_mut(v1)
             .with_context(|| format!("Can't depart from ν{v1}, it's absent"))?;
-        #[cfg(debug_assertions)]
-        let before = vtx1.edges.clone().into_iter().find(|e| e.0 == a);
         vtx1.edges.insert(a.to_string(), v2);
         #[cfg(feature = "gc")]
         let vtx2 = self
@@ -102,11 +100,7 @@ impl Sodg {
         #[cfg(debug_assertions)]
         self.validate(vec![v1, v2])?;
         #[cfg(debug_assertions)]
-        if let Some(e) = before {
-            trace!("#bind: edge ν{}.{} → ν{} replaced →ν{}", v1, a, v2, e.1);
-        } else {
-            trace!("#bind: edge added ν{}.{} → ν{}", v1, a, v2);
-        }
+        trace!("#bind: edge added ν{}.{} → ν{}", v1, a, v2);
         Ok(())
     }
 

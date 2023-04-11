@@ -122,7 +122,7 @@ impl Sodg {
 
     fn join(&mut self, left: u32, right: u32) -> Result<()> {
         for vtx in self.vertices.iter_mut() {
-            for e in &mut vtx.1.edges {
+            for e in vtx.1.edges.iter_mut() {
                 if *e.1 == right {
                     *e.1 = left;
                 }

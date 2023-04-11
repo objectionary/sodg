@@ -43,7 +43,7 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
+                for e in g.vertices.get(*v).unwrap().edges.iter() {
                     if !g.vertices.contains(*e.1) {
                         errors.push(format!("Edge ν{v}.{} arrives to lost ν{}", e.0, e.1));
                     }
@@ -54,7 +54,7 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
+                for e in g.vertices.get(*v).unwrap().edges.iter() {
                     if e.1 == v {
                         errors.push(format!("Edge ν{v}.{} arrives to ν{} (loop)", e.0, e.1));
                     }
@@ -65,7 +65,7 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
+                for e in g.vertices.get(*v).unwrap().edges.iter() {
                     if e.0.is_empty() {
                         errors.push(format!("Edge from ν{v} to ν{} has empty label", e.1));
                     }
@@ -76,7 +76,7 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
+                for e in g.vertices.get(*v).unwrap().edges.iter() {
                     if !g.vertices.contains(*e.1) {
                         errors.push(format!(
                             "Edge ν{v}.{} points to ν{}, which doesn't exist",
@@ -90,7 +90,7 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
+                for e in g.vertices.get(*v).unwrap().edges.iter() {
                     if e.0.is_empty() {
                         errors.push(format!(
                             "Edge label from ν{} to ν{} is an empty string",

@@ -47,6 +47,7 @@ mod clone;
 mod ctors;
 mod debug;
 mod dot;
+mod edges;
 mod find;
 mod gc;
 mod hex;
@@ -100,10 +101,10 @@ pub enum Hex {
 }
 
 /// A vertex in the [`Sodg`].
-#[derive(Eq, PartialEq, Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct Vertex {
     /// This is a list of edges departing from this vertex.
-    pub edges: FxHashMap<String, u32>,
+    pub edges: Edges,
     /// This is the data in the vertex (possibly empty).
     pub data: Option<Hex>,
     /// This is a supplementary list of parent nodes, staying here for caching.
@@ -117,6 +118,12 @@ pub(crate) struct Vertex {
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Vertices {
     map: FxHashMap<u32, Vertex>,
+}
+
+/// Internal structure, map of all edges.
+#[derive(Serialize, Deserialize, Clone)]
+pub(crate) struct Edges {
+    map: FxHashMap<String, u32>,
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.

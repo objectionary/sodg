@@ -18,35 +18,38 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Edges, Vertex};
-#[cfg(feature = "gc")]
-use std::collections::HashSet;
+use crate::Edges;
+use rustc_hash::FxHashMap;
+use std::collections::hash_map::{Iter, IterMut};
 
-impl Vertex {
-    /// Make an empty one.
-    ///
-    /// For example:
-    ///
-    /// ```
-    /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
-    /// sodg.add(0).unwrap();
-    /// ```
-    pub fn empty() -> Self {
+impl Edges {
+    pub fn new() -> Self {
         Self {
-            edges: Edges::new(),
-            data: None,
-            #[cfg(feature = "gc")]
-            parents: HashSet::new(),
-            taken: false,
+            map: FxHashMap::default(),
         }
+    }
+
+    pub fn iter(&self) -> Iter<String, u32> {
+        self.map.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> IterMut<String, u32> {
+        self.map.iter_mut()
+    }
+
+    pub fn insert(&mut self, a: String, v: u32) {
+        self.map.insert(a, v);
+    }
+
+    pub fn retain<F>(&mut self, f: F)
+    where
+        F: FnMut(&String, &mut u32) -> bool,
+    {
+        self.map.retain(f);
     }
 }
 
-#[cfg(test)]
-use anyhow::Result;
-
 #[test]
-fn makes_an_empty_vertex() -> Result<()> {
-    Ok(())
+fn panic_on_complex_alert() {
+    // assert!(g.add(42).is_err());
 }
