@@ -18,9 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Edges, Label};
+use crate::{Edges, EdgesIter, Label};
 use rustc_hash::FxHashMap;
-use std::collections::hash_map::{Iter, IterMut};
+use std::collections::hash_map::IterMut;
+
+impl<'a> Iterator for EdgesIter<'a> {
+    type Item = (&'a Label, &'a u32);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+}
 
 impl Edges {
     pub fn new() -> Self {
@@ -29,8 +37,10 @@ impl Edges {
         }
     }
 
-    pub fn iter(&self) -> Iter<Label, u32> {
-        self.map.iter()
+    pub fn iter(&self) -> EdgesIter {
+        EdgesIter {
+            iter: self.map.iter(),
+        }
     }
 
     pub fn iter_mut(&mut self) -> IterMut<Label, u32> {

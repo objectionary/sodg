@@ -66,6 +66,7 @@ mod xml;
 
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
+use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 #[cfg(feature = "gc")]
 use std::collections::HashSet;
@@ -132,6 +133,11 @@ pub(crate) struct Vertices {
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Edges {
     map: FxHashMap<Label, u32>,
+}
+
+/// Iterator over edges
+pub(crate) struct EdgesIter<'a> {
+    iter: Iter<'a, Label, u32>,
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.
