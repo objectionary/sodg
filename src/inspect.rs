@@ -89,7 +89,7 @@ fn inspects_simple_object() -> Result<()> {
     g.add(1)?;
     let txt = g.inspect(0)?;
     g.bind(0, 1, Label::Alpha(0))?;
-    println!("{}", txt);
-    assert_ne!("".to_string(), txt);
+    println!("{txt}");
+    assert_ne!(String::new(), txt);
     Ok(())
 }

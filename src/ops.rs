@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Hex, Label};
 use crate::Sodg;
+use crate::{Hex, Label};
 use anyhow::{Context, Result};
 #[cfg(debug_assertions)]
 use log::trace;
@@ -91,7 +91,7 @@ impl Sodg {
             .vertices
             .get_mut(v1)
             .with_context(|| format!("Can't depart from ν{v1}, it's absent"))?;
-        vtx1.edges.insert(a.clone(), v2);
+        vtx1.edges.insert(a, v2);
         #[cfg(feature = "gc")]
         let vtx2 = self
             .vertices
@@ -227,7 +227,7 @@ impl Sodg {
             .vertices
             .get(v)
             .with_context(|| format!("Can't find ν{v} in kids()"))?;
-        let kids = vtx.edges.iter().map(|(a, to)| (a.clone(), *to)).collect();
+        let kids = vtx.edges.iter().map(|(a, to)| (*a, *to)).collect();
         Ok(kids)
     }
 
@@ -273,7 +273,7 @@ fn binds_simple_vertices() -> Result<()> {
     g.add(1)?;
     g.add(2)?;
     let k = Label::from_str("hello")?;
-    g.bind(1, 2, k.clone())?;
+    g.bind(1, 2, k)?;
     assert_eq!(2, g.kid(1, k).unwrap());
     Ok(())
 }
@@ -284,7 +284,7 @@ fn pre_defined_ids() -> Result<()> {
     g.add(1)?;
     g.add(2)?;
     let k = Label::from_str("a-привет")?;
-    g.bind(1, 2, k.clone())?;
+    g.bind(1, 2, k)?;
     assert_eq!(2, g.kid(1, k).unwrap());
     Ok(())
 }
@@ -295,9 +295,9 @@ fn binds_two_names() -> Result<()> {
     g.add(1)?;
     g.add(2)?;
     let first = Label::from_str("first")?;
-    g.bind(1, 2, first.clone())?;
+    g.bind(1, 2, first)?;
     let second = Label::from_str("second")?;
-    g.bind(1, 2, second.clone())?;
+    g.bind(1, 2, second)?;
     assert_eq!(2, g.kid(1, first).unwrap());
     assert_eq!(2, g.kid(1, second).unwrap());
     Ok(())
@@ -374,7 +374,11 @@ fn builds_list_of_kids() -> Result<()> {
     g.bind(0, 1, Label::from_str("one")?)?;
     g.bind(0, 1, Label::from_str("two")?)?;
     g.bind(0, 1, Label::from_str("three")?)?;
-    let mut names: Vec<String> = g.kids(0)?.into_iter().map(|(a, _)| format!("{a}")).collect();
+    let mut names: Vec<String> = g
+        .kids(0)?
+        .into_iter()
+        .map(|(a, _)| format!("{a}"))
+        .collect();
     names.sort();
     assert_eq!("one,three,two", names.join(","));
     Ok(())

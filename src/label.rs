@@ -19,35 +19,31 @@
 // SOFTWARE.
 
 use crate::Label;
+use anyhow::anyhow;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
-use anyhow::anyhow;
 
 impl FromStr for Label {
     type Err = anyhow::Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(
-            if s.starts_with('α') {
-                let tail : String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
-                Self::Alpha(tail.parse::<usize>()?)
-            } else if s.len() == 1 {
-                Self::Greek(s.chars().next().unwrap())
-            } else {
-                let v : Vec<char> = s.chars().collect();
-                let mut a : [char; 8] = [' '; 8];
-                let mut i = 0;
-                for c in v {
-                    if i > 7 {
-                        return Err(anyhow!("Can't parse more than {} chars", a.len()));
-                    }
-                    a[i] = c;
-                    i += 1;
+        Ok(if s.starts_with('α') {
+            let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
+            Self::Alpha(tail.parse::<usize>()?)
+        } else if s.len() == 1 {
+            Self::Greek(s.chars().next().unwrap())
+        } else {
+            let v: Vec<char> = s.chars().collect();
+            let mut a: [char; 8] = [' '; 8];
+            for (i, c) in v.into_iter().enumerate() {
+                if i > 7 {
+                    return Err(anyhow!("Can't parse more than {} chars", a.len()));
                 }
-                Self::Str(a)
+                a[i] = c;
             }
-        )
+            Self::Str(a)
+        })
     }
 }
 
@@ -60,9 +56,11 @@ impl Display for Label {
 impl Debug for Label {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match *self {
-            Label::Greek(c) => f.write_str(format!("{c}").as_str()),
-            Label::Alpha(i) => f.write_str(format!("α{i}").as_str()),
-            Label::Str(a) => f.write_str(a.iter().filter(|c| **c != ' ').collect::<String>().as_str()),
+            Self::Greek(c) => f.write_str(format!("{c}").as_str()),
+            Self::Alpha(i) => f.write_str(format!("α{i}").as_str()),
+            Self::Str(a) => {
+                f.write_str(a.iter().filter(|c| **c != ' ').collect::<String>().as_str())
+            }
         }
     }
 }

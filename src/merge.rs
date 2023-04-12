@@ -95,7 +95,7 @@ impl Sodg {
             self.put(left, &d.unwrap())?;
         }
         for (a, to) in g.kids(right)? {
-            let matched = if let Some(t) = self.kid(left, a.clone()) {
+            let matched = if let Some(t) = self.kid(left, a) {
                 t
             } else if let Some(t) = mapped.get(&to) {
                 self.bind(left, *t, a)?;
@@ -129,7 +129,7 @@ impl Sodg {
             }
         }
         for e in self.kids(right)? {
-            if self.kid(left, e.0.clone()).is_some() {
+            if self.kid(left, e.0).is_some() {
                 return Err(anyhow!(
                     "Can't merge ν{right} into ν{left}, due to conflict in '{}'",
                     e.0

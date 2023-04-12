@@ -626,7 +626,7 @@ fn creates_from_big_slice() -> Result<()> {
 #[test]
 fn concatenates_from_hex_vec() -> Result<()> {
     let a = Hex::from_vec(vec![0x12, 0xAB]);
-    let b = Hex::from_slice("as_bytesss".as_bytes());
+    let b = Hex::from_slice(b"as_bytesss");
     let c = Hex::from_vec(vec![0x12, 0xAD]);
     let res = a.concat(&b).concat(&c);
     assert_eq!(14, res.len());

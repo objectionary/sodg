@@ -76,7 +76,7 @@ digraph {
                     .as_ref()
                     .map_or_else(String::new, |d| format!("/* {d} */"))
             ));
-            for e in vtx.edges.iter().sorted_by_key(|e| e.0.clone()) {
+            for e in vtx.edges.iter().sorted_by_key(|e| *e.0) {
                 lines.push(format!(
                     "  v{v} -> v{} [label=\"{}\"{}{}];",
                     e.1,
@@ -89,7 +89,9 @@ digraph {
                                 ""
                             }
                         }
-                        _ => { "" }
+                        _ => {
+                            ""
+                        }
                     },
                     match *e.0 {
                         Label::Greek(g) => {
@@ -99,7 +101,9 @@ digraph {
                                 ""
                             }
                         }
-                        _ => { "" }
+                        _ => {
+                            ""
+                        }
                     }
                 ));
             }

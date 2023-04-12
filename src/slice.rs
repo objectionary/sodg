@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Label, Sodg};
 use crate::Vertices;
+use crate::{Label, Sodg};
 use anyhow::{anyhow, Context, Result};
 use log::trace;
 use std::collections::HashSet;
@@ -68,7 +68,7 @@ impl Sodg {
                     if done.contains(e.1) {
                         continue;
                     }
-                    if !p(v, *e.1, e.0.clone()) {
+                    if !p(v, *e.1, *e.0) {
                         continue;
                     }
                     done.insert(*e.1);
@@ -83,7 +83,7 @@ impl Sodg {
             new_vertices.insert(*v);
             let vtx = new_vertices.get_mut(*v).with_context(|| "Can't find?")?;
             for e in nv.edges.iter() {
-                vtx.edges.insert(e.0.clone(), *e.1);
+                vtx.edges.insert(*e.0, *e.1);
             }
         }
         let g = Self {

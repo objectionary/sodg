@@ -52,6 +52,7 @@ mod edges;
 mod gc;
 mod hex;
 mod inspect;
+mod label;
 mod merge;
 mod misc;
 mod next;
@@ -62,7 +63,6 @@ mod slice;
 mod vertex;
 mod vertices;
 mod xml;
-mod label;
 
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -105,7 +105,7 @@ pub enum Hex {
 pub enum Label {
     Greek(char),
     Alpha(usize),
-    Str([char; 8])
+    Str([char; 8]),
 }
 
 /// A vertex in the [`Sodg`].

@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Label, Sodg};
 use crate::{Hex, Script};
+use crate::{Label, Sodg};
 use anyhow::{anyhow, Context, Result};
 use lazy_static::lazy_static;
 use log::trace;
@@ -117,8 +117,9 @@ impl Script {
             "BIND" => {
                 let v1 = self.parse(args.get(0).with_context(|| "V1 is expected")?, g)?;
                 let v2 = self.parse(args.get(1).with_context(|| "V2 is expected")?, g)?;
-                let a = Label::from_str(args.get(2).with_context(|| "Label is expected")?.as_str())?;
-                g.bind(v1, v2, a.clone())
+                let a =
+                    Label::from_str(args.get(2).with_context(|| "Label is expected")?.as_str())?;
+                g.bind(v1, v2, a)
                     .with_context(|| format!("Failed to BIND({v1}, {v2}, {a})"))
             }
             "PUT" => {
