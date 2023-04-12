@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Edges;
+use crate::{Edges, Label};
 use rustc_hash::FxHashMap;
 use std::collections::hash_map::{Iter, IterMut};
 
@@ -29,21 +29,21 @@ impl Edges {
         }
     }
 
-    pub fn iter(&self) -> Iter<String, u32> {
+    pub fn iter(&self) -> Iter<Label, u32> {
         self.map.iter()
     }
 
-    pub fn iter_mut(&mut self) -> IterMut<String, u32> {
+    pub fn iter_mut(&mut self) -> IterMut<Label, u32> {
         self.map.iter_mut()
     }
 
-    pub fn insert(&mut self, a: String, v: u32) {
+    pub fn insert(&mut self, a: Label, v: u32) {
         self.map.insert(a, v);
     }
 
     pub fn retain<F>(&mut self, f: F)
     where
-        F: FnMut(&String, &mut u32) -> bool,
+        F: FnMut(&Label, &mut u32) -> bool,
     {
         self.map.retain(f);
     }

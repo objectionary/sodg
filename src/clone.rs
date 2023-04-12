@@ -37,12 +37,15 @@ impl Clone for Sodg {
 #[cfg(test)]
 use anyhow::Result;
 
+#[cfg(test)]
+use crate::Label;
+
 #[test]
 fn makes_a_clone() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
-    g.bind(0, 1, "foo")?;
+    g.bind(0, 1, Label::Alpha(0))?;
     let c = g.clone();
     assert_eq!(2, c.vertices.len());
     Ok(())

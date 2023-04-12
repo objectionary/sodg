@@ -81,13 +81,19 @@ use tempfile::TempDir;
 #[cfg(test)]
 use crate::Hex;
 
+#[cfg(test)]
+use crate::Label;
+
+#[cfg(test)]
+use std::str::FromStr;
+
 #[test]
 fn saves_and_loads() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;
-    g.bind(0, 1, "foo")?;
+    g.bind(0, 1, Label::from_str("foo")?)?;
     g.put(1, &Hex::from_str_bytes("foo"))?;
     let tmp = TempDir::new()?;
     let file = tmp.path().join("foo.sodg");

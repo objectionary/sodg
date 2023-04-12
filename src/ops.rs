@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Hex;
+use crate::{Hex, Label};
 use crate::Sodg;
 use anyhow::{Context, Result};
 #[cfg(debug_assertions)]
@@ -30,11 +30,12 @@ impl Sodg {
     /// For example:
     ///
     /// ```
-    /// use sodg::Sodg;
+    /// use std::str::FromStr;
+    /// use sodg::{Label, Sodg};
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
-    /// g.bind(0, 42, "hello").unwrap();
+    /// g.bind(0, 42, Label::from_str("hello").unwrap()).unwrap();
     /// ```
     ///
     /// If vertex `v1` already exists in the graph, `Ok` will be returned.
@@ -64,12 +65,13 @@ impl Sodg {
     /// For example:
     ///
     /// ```
-    /// use sodg::Sodg;
+    /// use std::str::FromStr;
+    /// use sodg::{Label, Sodg};
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
-    /// g.bind(0, 42, "forward").unwrap();
-    /// g.bind(42, 0, "backward").unwrap();
+    /// g.bind(0, 42, Label::from_str("forward").unwrap()).unwrap();
+    /// g.bind(42, 0, Label::from_str("backward").unwrap()).unwrap();
     /// ```
     ///
     /// If an edge with this label already exists, it will be replaced with a new edge.
@@ -84,12 +86,12 @@ impl Sodg {
     ///
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
-    pub fn bind(&mut self, v1: u32, v2: u32, a: &str) -> Result<()> {
+    pub fn bind(&mut self, v1: u32, v2: u32, a: Label) -> Result<()> {
         let vtx1 = self
             .vertices
             .get_mut(v1)
             .with_context(|| format!("Can't depart from ν{v1}, it's absent"))?;
-        vtx1.edges.insert(a.to_string(), v2);
+        vtx1.edges.insert(a.clone(), v2);
         #[cfg(feature = "gc")]
         let vtx2 = self
             .vertices
@@ -188,28 +190,30 @@ impl Sodg {
     /// For example:
     ///
     /// ```
-    /// use sodg::Sodg;
+    /// use std::str::FromStr;
+    /// use sodg::{Label, Sodg};
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
-    /// g.bind(0, 42, "k").unwrap();
+    /// g.bind(0, 42, Label::from_str("k").unwrap()).unwrap();
     /// let (a, to) = g.kids(0).unwrap().first().unwrap().clone();
-    /// assert_eq!("k", a);
+    /// assert_eq!("k", a.to_string());
     /// assert_eq!(42, to);
     /// ```
     ///
     /// Just in case, if you need to put all names into a single line:
     ///
     /// ```
+    /// use std::str::FromStr;
     /// use itertools::Itertools;
-    /// use sodg::Sodg;
+    /// use sodg::{Label, Sodg};
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
-    /// g.bind(0, 42, "a").unwrap();
-    /// g.bind(0, 42, "b").unwrap();
-    /// g.bind(0, 42, "c").unwrap();
-    /// let mut names = g.kids(0).unwrap().into_iter().map(|(a, _)| a).collect::<Vec<String>>();
+    /// g.bind(0, 42, Label::from_str("a").unwrap()).unwrap();
+    /// g.bind(0, 42, Label::from_str("b").unwrap()).unwrap();
+    /// g.bind(0, 42, Label::from_str("c").unwrap()).unwrap();
+    /// let mut names = g.kids(0).unwrap().into_iter().map(|(a, _)| a.to_string()).collect::<Vec<String>>();
     /// names.sort();
     /// assert_eq!("a,b,c", names.join(","));
     /// ```
@@ -218,7 +222,7 @@ impl Sodg {
     ///
     /// If vertex `v1` is absent, `Err` will be returned.
     #[inline]
-    pub fn kids(&self, v: u32) -> Result<Vec<(String, u32)>> {
+    pub fn kids(&self, v: u32) -> Result<Vec<(Label, u32)>> {
         let vtx = self
             .vertices
             .get(v)
@@ -232,23 +236,28 @@ impl Sodg {
     /// For example:
     ///
     /// ```
-    /// use sodg::Sodg;
+    /// use std::str::FromStr;
+    /// use sodg::{Label, Sodg};
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
-    /// g.bind(0, 42, "k").unwrap();
-    /// assert_eq!(42, g.kid(0, "k").unwrap());
+    /// let k = Label::from_str("k").unwrap();
+    /// g.bind(0, 42, k).unwrap();
+    /// assert_eq!(42, g.kid(0, k).unwrap());
     /// ```
     ///
     /// If vertex `v1` is absent, `None` will be returned.
     #[must_use]
     #[inline]
-    pub fn kid(&self, v: u32, a: &str) -> Option<u32> {
+    pub fn kid(&self, v: u32, a: Label) -> Option<u32> {
         self.vertices
             .get(v)
-            .and_then(|vtx| vtx.edges.iter().find(|e| e.0 == a).map(|e| *e.1))
+            .and_then(|vtx| vtx.edges.iter().find(|e| *e.0 == a).map(|e| *e.1))
     }
 }
+
+#[cfg(test)]
+use std::str::FromStr;
 
 #[test]
 fn adds_simple_vertex() -> Result<()> {
@@ -263,8 +272,8 @@ fn binds_simple_vertices() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
-    let k = "hello";
-    g.bind(1, 2, k)?;
+    let k = Label::from_str("hello")?;
+    g.bind(1, 2, k.clone())?;
     assert_eq!(2, g.kid(1, k).unwrap());
     Ok(())
 }
@@ -274,8 +283,8 @@ fn pre_defined_ids() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
-    let k = "a-привет";
-    g.bind(1, 2, k)?;
+    let k = Label::from_str("a-привет")?;
+    g.bind(1, 2, k.clone())?;
     assert_eq!(2, g.kid(1, k).unwrap());
     Ok(())
 }
@@ -285,10 +294,12 @@ fn binds_two_names() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
-    g.bind(1, 2, "first")?;
-    g.bind(1, 2, "second")?;
-    assert_eq!(2, g.kid(1, "first").unwrap());
-    assert_eq!(2, g.kid(1, "second").unwrap());
+    let first = Label::from_str("first")?;
+    g.bind(1, 2, first.clone())?;
+    let second = Label::from_str("second")?;
+    g.bind(1, 2, second.clone())?;
+    assert_eq!(2, g.kid(1, first).unwrap());
+    assert_eq!(2, g.kid(1, second).unwrap());
     Ok(())
 }
 
@@ -297,10 +308,10 @@ fn overwrites_edge() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
-    g.bind(1, 2, "foo")?;
+    g.bind(1, 2, Label::from_str("foo")?)?;
     g.add(3)?;
-    g.bind(1, 3, "foo")?;
-    assert_eq!(3, g.kid(1, "foo").unwrap());
+    g.bind(1, 3, Label::from_str("foo")?)?;
+    assert_eq!(3, g.kid(1, Label::from_str("foo")?).unwrap());
     Ok(())
 }
 
@@ -309,9 +320,9 @@ fn binds_to_root() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
-    g.bind(0, 1, "x")?;
-    assert!(g.kid(0, "ρ").is_none());
-    assert!(g.kid(0, "σ").is_none());
+    g.bind(0, 1, Label::from_str("x")?)?;
+    assert!(g.kid(0, Label::from_str("ρ")?).is_none());
+    assert!(g.kid(0, Label::from_str("σ")?).is_none());
     Ok(())
 }
 
@@ -342,8 +353,8 @@ fn finds_all_kids() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
-    g.bind(0, 1, "one")?;
-    g.bind(0, 1, "two")?;
+    g.bind(0, 1, Label::from_str("one")?)?;
+    g.bind(0, 1, Label::from_str("two")?)?;
     assert_eq!(2, g.kids(0)?.len());
     let mut names = vec![];
     for (a, to) in g.kids(0)? {
@@ -360,10 +371,10 @@ fn builds_list_of_kids() -> Result<()> {
     g.alerts_off();
     g.add(0)?;
     g.add(1)?;
-    g.bind(0, 1, "one")?;
-    g.bind(0, 1, "two")?;
-    g.bind(0, 1, "three")?;
-    let mut names: Vec<String> = g.kids(0)?.into_iter().map(|(a, _)| a).collect();
+    g.bind(0, 1, Label::from_str("one")?)?;
+    g.bind(0, 1, Label::from_str("two")?)?;
+    g.bind(0, 1, Label::from_str("three")?)?;
+    let mut names: Vec<String> = g.kids(0)?.into_iter().map(|(a, _)| format!("{a}")).collect();
     names.sort();
     assert_eq!("one,three,two", names.join(","));
     Ok(())
@@ -382,14 +393,14 @@ fn gets_data_from_empty_vertex() -> Result<()> {
 fn gets_absent_kid() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
-    assert!(g.kid(0, "hello").is_none());
+    assert!(g.kid(0, Label::from_str("hello")?).is_none());
     Ok(())
 }
 
 #[test]
 fn gets_kid_from_absent_vertex() -> Result<()> {
     let g = Sodg::empty();
-    assert!(g.kid(0, "hello").is_none());
+    assert!(g.kid(0, Label::from_str("hello")?).is_none());
     Ok(())
 }
 

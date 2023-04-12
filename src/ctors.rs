@@ -20,7 +20,6 @@
 
 use crate::Sodg;
 use crate::Vertices;
-use rstest::rstest;
 #[cfg(feature = "sober")]
 use std::collections::HashSet;
 
@@ -66,60 +65,10 @@ impl Sodg {
             let mut errors = Vec::new();
             for v in &vx {
                 for e in g.vertices.get(*v).unwrap().edges.iter() {
-                    if e.0.is_empty() {
-                        errors.push(format!("Edge from ν{v} to ν{} has empty label", e.1));
-                    }
-                }
-            }
-            errors
-        });
-        g.alert_on(|g, vx| {
-            let mut errors = Vec::new();
-            for v in &vx {
-                for e in g.vertices.get(*v).unwrap().edges.iter() {
                     if !g.vertices.contains(*e.1) {
                         errors.push(format!(
                             "Edge ν{v}.{} points to ν{}, which doesn't exist",
                             e.0, e.1
-                        ));
-                    }
-                }
-            }
-            errors
-        });
-        g.alert_on(|g, vx| {
-            let mut errors = Vec::new();
-            for v in &vx {
-                for e in g.vertices.get(*v).unwrap().edges.iter() {
-                    if e.0.is_empty() {
-                        errors.push(format!(
-                            "Edge label from ν{} to ν{} is an empty string",
-                            v, e.1
-                        ));
-                    }
-                    if e.0.contains(' ') {
-                        errors.push(format!(
-                            "Edge label from ν{} to ν{} has prohibited spaces: '{}'",
-                            v, e.1, e.0
-                        ));
-                    }
-                    let parts: Vec<&str> = e.0.split('/').collect();
-                    if parts.len() > 2 {
-                        errors.push(format!(
-                            "Edge label from ν{} to ν{} has more than one slash: '{}'",
-                            v, e.1, e.0
-                        ));
-                    }
-                    if parts[0].contains('.') {
-                        errors.push(format!(
-                            "Edge label from ν{} to ν{} has a dot inside the head part: '{}'",
-                            v, e.1, e.0
-                        ));
-                    }
-                    if parts.len() == 2 && parts[1].is_empty() {
-                        errors.push(format!(
-                            "Edge label from ν{} to ν{} has an empty tail part: '{}'",
-                            v, e.1, e.0
                         ));
                     }
                 }
@@ -136,6 +85,9 @@ impl Sodg {
 #[cfg(test)]
 use anyhow::Result;
 
+#[cfg(test)]
+use crate::Label;
+
 #[test]
 fn makes_an_empty_sodg() -> Result<()> {
     let mut g = Sodg::empty();
@@ -149,40 +101,7 @@ fn prohibits_loops() -> Result<()> {
     let mut g = Sodg::empty();
     g.alerts_off();
     g.add(0)?;
-    g.bind(0, 0, "foo")?;
-    assert!(g.alerts_on().is_err());
-    Ok(())
-}
-
-#[test]
-fn prohibits_empty_labels() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.alerts_off();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "")?;
-    assert!(g.alerts_on().is_err());
-    Ok(())
-}
-
-#[test]
-fn prohibits_labels_with_dot() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.alerts_off();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "a.b")?;
-    assert!(g.alerts_on().is_err());
-    Ok(())
-}
-
-#[test]
-fn prohibits_labels_with_empty_tail() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.alerts_off();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "a/")?;
+    g.bind(0, 0, Label::Alpha(0))?;
     assert!(g.alerts_on().is_err());
     Ok(())
 }
@@ -193,19 +112,6 @@ fn prohibits_orphan_edges() -> Result<()> {
     let mut g = Sodg::empty();
     g.alerts_off();
     g.add(0)?;
-    assert!(g.bind(0, 1, "foo").is_err());
+    assert!(g.bind(0, 1, Label::Alpha(0)).is_err());
     Ok(())
-}
-
-#[rstest]
-#[case("")]
-#[case("with spaces")]
-#[case("with/two/slashes")]
-fn prohibits_labels_of_broken_format(#[case] a: &str) {
-    let mut g = Sodg::empty();
-    g.alerts_off();
-    g.add(0).unwrap();
-    g.add(1).unwrap();
-    g.bind(0, 1, a).unwrap();
-    assert!(g.alerts_on().is_err());
 }

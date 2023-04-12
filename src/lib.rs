@@ -29,11 +29,12 @@
 //! di-graph with two vertices and an edge between them:
 //!
 //! ```
-//! use sodg::Sodg;
+//! use std::str::FromStr;
+//! use sodg::{Label, Sodg};
 //! let mut sodg = Sodg::empty();
 //! sodg.add(0).unwrap();
 //! sodg.add(1).unwrap();
-//! sodg.bind(0, 1, "foo").unwrap();
+//! sodg.bind(0, 1, Label::from_str("foo").unwrap()).unwrap();
 //! ```
 
 #![doc(html_root_url = "https://docs.rs/sodg/0.0.0")]
@@ -61,6 +62,7 @@ mod slice;
 mod vertex;
 mod vertices;
 mod xml;
+mod label;
 
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
@@ -98,6 +100,14 @@ pub enum Hex {
     Bytes([u8; 24], usize),
 }
 
+/// A label on an edge.
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Copy, Serialize, Deserialize)]
+pub enum Label {
+    Greek(char),
+    Alpha(usize),
+    Str([char; 8])
+}
+
 /// A vertex in the [`Sodg`].
 #[derive(Clone, Serialize, Deserialize)]
 pub(crate) struct Vertex {
@@ -121,7 +131,7 @@ pub(crate) struct Vertices {
 /// Internal structure, map of all edges.
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Edges {
-    map: FxHashMap<String, u32>,
+    map: FxHashMap<Label, u32>,
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.
@@ -151,13 +161,13 @@ pub struct Script {
 /// put data into some of them, and read data back, for example:
 ///
 /// ```
-/// use sodg::Sodg;
+/// use sodg::{Label, Sodg};
 /// let mut sodg = Sodg::empty();
 /// sodg.add(0).unwrap();
 /// sodg.add(1).unwrap();
-/// sodg.bind(0, 1, "a").unwrap();
+/// sodg.bind(0, 1, Label::Alpha(0)).unwrap();
 /// sodg.add(2).unwrap();
-/// sodg.bind(1, 2, "b").unwrap();
+/// sodg.bind(1, 2, Label::Alpha(1)).unwrap();
 /// assert_eq!(1, sodg.kids(0).unwrap().len());
 /// assert_eq!(1, sodg.kids(1).unwrap().len());
 /// ```

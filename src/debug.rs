@@ -59,7 +59,7 @@ impl Sodg {
             .vertices
             .get(v)
             .with_context(|| format!("Can't find ν{v}"))?;
-        let list: Vec<String> = vtx.edges.iter().map(|e| e.0.clone()).collect();
+        let list: Vec<String> = vtx.edges.iter().map(|e| format!("{}", e.0.clone())).collect();
         Ok(format!(
             "ν{v}⟦{}{}⟧",
             if vtx.data.is_none() { "" } else { "Δ, " },

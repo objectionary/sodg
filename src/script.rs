@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
+use crate::{Label, Sodg};
 use crate::{Hex, Script};
 use anyhow::{anyhow, Context, Result};
 use lazy_static::lazy_static;
@@ -41,14 +41,15 @@ impl Script {
     /// For example:
     ///
     /// ```
-    /// use sodg::Script;
+    /// use std::str::FromStr;
+    /// use sodg::{Label, Script};
     /// use sodg::Sodg;
     /// let mut s = Script::from_str(
     ///   "ADD(0); ADD($ν1); BIND(ν0, $ν1, foo);"
     /// );
     /// let mut g = Sodg::empty();
     /// let total = s.deploy_to(&mut g).unwrap();
-    /// assert_eq!(1, g.kid(0, "foo").unwrap());
+    /// assert_eq!(1, g.kid(0, Label::from_str("foo").unwrap()).unwrap());
     /// ```
     #[allow(clippy::should_implement_trait)]
     #[must_use]
@@ -116,8 +117,8 @@ impl Script {
             "BIND" => {
                 let v1 = self.parse(args.get(0).with_context(|| "V1 is expected")?, g)?;
                 let v2 = self.parse(args.get(1).with_context(|| "V2 is expected")?, g)?;
-                let a = args.get(2).with_context(|| "Label is expected")?;
-                g.bind(v1, v2, a)
+                let a = Label::from_str(args.get(2).with_context(|| "Label is expected")?.as_str())?;
+                g.bind(v1, v2, a.clone())
                     .with_context(|| format!("Failed to BIND({v1}, {v2}, {a})"))
             }
             "PUT" => {
@@ -193,6 +194,6 @@ fn simple_command() -> Result<()> {
     let total = s.deploy_to(&mut g)?;
     assert_eq!(4, total);
     assert_eq!("привет", g.data(1)?.to_utf8()?);
-    assert_eq!(1, g.kid(0, "foo").unwrap());
+    assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
     Ok(())
 }

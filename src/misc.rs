@@ -40,11 +40,12 @@ impl Sodg {
     /// For example:
     ///
     /// ```
-    /// use sodg::Sodg;
+    /// use std::str::FromStr;
+    /// use sodg::{Label, Sodg};
     /// let mut sodg = Sodg::empty();
     /// sodg.add(0).unwrap();
     /// sodg.add(42).unwrap();
-    /// sodg.bind(0, 42, "hello").unwrap();
+    /// sodg.bind(0, 42, Label::from_str("hello").unwrap()).unwrap();
     /// ```
     #[must_use]
     pub fn is_empty(&self) -> bool {

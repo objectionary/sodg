@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use sodg::{Hex, Sodg};
+use sodg::{Hex, Label, Sodg};
 use std::time::Instant;
 
 trait Book {
@@ -54,18 +54,18 @@ pub fn on_graph(total: usize) -> i64 {
         g.add(v1).unwrap();
         let v2 = g.next_id();
         g.add(v2).unwrap();
-        g.bind(v1, v2, "price").unwrap();
+        g.bind(v1, v2, Label::Alpha(0)).unwrap();
         let v3 = g.next_id();
         g.add(v3).unwrap();
-        g.bind(v2, v3, "Δ").unwrap();
+        g.bind(v2, v3, Label::Greek('Δ')).unwrap();
         g.put(v3, &Hex::from(42)).unwrap();
         let v4 = g.next_id();
         g.add(v4).unwrap();
-        g.bind(v4, v1, "φ").unwrap();
-        assert!(g.kid(v4, "price").is_none());
-        g.kid(v4, "φ").unwrap();
-        g.kid(v1, "price").unwrap();
-        let k = g.kid(v2, "Δ").unwrap();
+        g.bind(v4, v1, Label::Greek('φ')).unwrap();
+        assert!(g.kid(v4, Label::Alpha(0)).is_none());
+        g.kid(v4, Label::Greek('φ')).unwrap();
+        g.kid(v1, Label::Alpha(0)).unwrap();
+        let k = g.kid(v2, Label::Greek('Δ')).unwrap();
         sum += g.data(k).unwrap().to_i64().unwrap() / 2;
     }
     std::hint::black_box(sum)

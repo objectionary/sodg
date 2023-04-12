@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
+use crate::{Label, Sodg};
 use itertools::Itertools;
 
 impl Sodg {
@@ -27,14 +27,15 @@ impl Sodg {
     /// For example, for this code:
     ///
     /// ```
-    /// use sodg::Hex;
+    /// use std::str::FromStr;
+    /// use sodg::{Hex, Label};
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
     /// g.put(0, &Hex::from_str_bytes("hello")).unwrap();
     /// g.add(1).unwrap();
-    /// g.bind(0, 1, "foo").unwrap();
-    /// g.bind(0, 1, "bar").unwrap();
+    /// g.bind(0, 1, Label::from_str("foo").unwrap()).unwrap();
+    /// g.bind(0, 1, Label::from_str("bar").unwrap()).unwrap();
     /// let dot = g.to_dot();
     /// println!("{}", dot);
     /// ```
@@ -80,15 +81,25 @@ digraph {
                     "  v{v} -> v{} [label=\"{}\"{}{}];",
                     e.1,
                     e.0,
-                    if e.0.starts_with('ρ') || e.0.starts_with('σ') {
-                        ",color=gray,fontcolor=gray"
-                    } else {
-                        ""
+                    match *e.0 {
+                        Label::Greek(g) => {
+                            if g == 'ρ' || g == 'σ' {
+                                ",color=gray,fontcolor=gray"
+                            } else {
+                                ""
+                            }
+                        }
+                        _ => { "" }
                     },
-                    if e.0.starts_with('π') {
-                        ",style=dashed"
-                    } else {
-                        ""
+                    match *e.0 {
+                        Label::Greek(g) => {
+                            if g == 'π' {
+                                ",style=dashed"
+                            } else {
+                                ""
+                            }
+                        }
+                        _ => { "" }
                     }
                 ));
             }
@@ -110,7 +121,7 @@ fn simple_graph_to_dot() -> Result<()> {
     g.add(0)?;
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;
-    g.bind(0, 1, "foo")?;
+    g.bind(0, 1, Label::Alpha(0))?;
     let dot = g.to_dot();
     assert!(dot.contains("shape=circle,label=\"ν0\""));
     Ok(())

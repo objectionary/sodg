@@ -29,14 +29,15 @@ impl Sodg {
     /// For example, for this code:
     ///
     /// ```
-    /// use sodg::Hex;
+    /// use std::str::FromStr;
+    /// use sodg::{Hex, Label};
     /// use sodg::Sodg;
     /// let mut g = Sodg::empty();
     /// g.add(0).unwrap();
     /// g.put(0, &Hex::from_str_bytes("hello")).unwrap();
     /// g.add(1).unwrap();
-    /// g.bind(0, 1, "foo").unwrap();
-    /// g.bind(0, 1, "bar").unwrap();
+    /// g.bind(0, 1, Label::from_str("foo").unwrap()).unwrap();
+    /// g.bind(0, 1, Label::from_str("bar").unwrap()).unwrap();
     /// let xml = g.to_xml().unwrap();
     /// println!("{}", xml);
     /// ```
@@ -74,7 +75,7 @@ impl Sodg {
             v_node.add_attribute("id", v.to_string().as_str());
             for e in vtx.edges.iter().sorted_by_key(|e| e.0.clone()) {
                 let mut e_node = XMLElement::new("e");
-                e_node.add_attribute("a", e.0.as_str());
+                e_node.add_attribute("a", e.0.to_string().as_str());
                 e_node.add_attribute("to", e.1.to_string().as_str());
                 v_node.add_child(e_node)?;
             }
@@ -98,13 +99,19 @@ use sxd_xpath::evaluate_xpath;
 #[cfg(test)]
 use crate::Hex;
 
+#[cfg(test)]
+use crate::Label;
+
+#[cfg(test)]
+use std::str::FromStr;
+
 #[test]
 fn prints_simple_graph() -> Result<()> {
     let mut g = Sodg::empty();
     g.add(0)?;
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;
-    g.bind(0, 1, "foo")?;
+    g.bind(0, 1, Label::from_str("foo")?)?;
     let xml = g.to_xml()?;
     let parser = sxd_document::parser::parse(xml.as_str())?;
     let doc = parser.as_document();

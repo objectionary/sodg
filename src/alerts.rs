@@ -29,7 +29,8 @@ impl Sodg {
     /// more than one edge to depart from any vertex:
     ///
     /// ```
-    /// use sodg::Sodg;
+    /// use std::str::FromStr;
+    /// use sodg::{Label, Sodg};
     /// let mut g = Sodg::empty();
     /// g.alerts_on().unwrap();
     /// g.alert_on(|g, vx| {
@@ -43,8 +44,8 @@ impl Sodg {
     /// g.add(0).unwrap();
     /// g.add(1).unwrap();
     /// g.add(2).unwrap();
-    /// g.bind(0, 1, "first").unwrap();
-    /// assert!(g.bind(0, 2, "second").is_err());
+    /// g.bind(0, 1, Label::from_str("first").unwrap()).unwrap();
+    /// assert!(g.bind(0, 2, Label::from_str("second").unwrap()).is_err());
     /// ```
     pub fn alert_on(&mut self, a: Alert) {
         self.alerts.push(a);
