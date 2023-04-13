@@ -64,9 +64,9 @@ mod vertex;
 mod vertices;
 mod xml;
 
+use hashbrown::hash_map::Iter;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
-use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 #[cfg(feature = "gc")]
 use std::collections::HashSet;
@@ -132,7 +132,7 @@ pub(crate) struct Vertices {
 /// Internal structure, map of all edges.
 #[derive(Clone)]
 pub(crate) struct Edges {
-    map: FxHashMap<Label, u32>,
+    map: hashbrown::HashMap<Label, u32>,
 }
 
 /// Iterator over edges

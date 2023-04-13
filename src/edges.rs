@@ -19,7 +19,6 @@
 // SOFTWARE.
 
 use crate::{Edges, EdgesIter, Label};
-use rustc_hash::FxHashMap;
 use serde::de::{MapAccess, Visitor};
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -79,7 +78,7 @@ impl<'a> Iterator for EdgesIter<'a> {
 impl Edges {
     pub fn new() -> Self {
         Self {
-            map: FxHashMap::default(),
+            map: hashbrown::HashMap::new(),
         }
     }
 

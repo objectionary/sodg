@@ -15,6 +15,7 @@ sober = []
 gc = []
 
 [dependencies]
+hashbrown = "0.13"
 anyhow = "1.0.70"
 log = "0.4.17"
 regex = "1.7.3"
