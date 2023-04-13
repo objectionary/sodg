@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Vertices;
+use crate::{Edges, Vertices};
 use crate::{Label, Sodg};
 use anyhow::{anyhow, Context, Result};
 use log::trace;
@@ -79,7 +79,13 @@ impl Sodg {
         let mut new_vertices = Vertices::new();
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             let mut nv = vtx.clone();
-            nv.edges.retain(|_, v| done.contains(v));
+            let mut ne = Edges::new();
+            for (k, v) in nv.edges.iter() {
+                if done.contains(v) {
+                    ne.insert(*k, *v);
+                }
+            }
+            nv.edges = ne;
             new_vertices.insert(*v);
             let vtx = new_vertices.get_mut(*v).with_context(|| "Can't find?")?;
             for e in nv.edges.iter() {

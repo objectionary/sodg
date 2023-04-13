@@ -18,11 +18,66 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Edges, EdgesIter, Label};
+use crate::{Edges, EdgesIter, Label, Roll, RollIter};
 use serde::de::{MapAccess, Visitor};
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Formatter;
+
+impl<'a, K, V> Iterator for RollIter<'a, K, V> {
+    type Item = (&'a K, &'a V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.pos < 10 {
+            if let Some((k, v)) = &self.items[self.pos] {
+                self.pos += 1;
+                return Some((k, v));
+            }
+            self.pos += 1;
+        }
+        None
+    }
+}
+
+impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
+    const fn new() -> Self {
+        Self { items: [None; 10] }
+    }
+
+    const fn iter(&self) -> RollIter<K, V> {
+        RollIter {
+            pos: 0,
+            items: &self.items,
+        }
+    }
+
+    fn len(&self) -> usize {
+        let mut busy = 0;
+        for i in 0..self.items.len() {
+            if self.items[i].is_some() {
+                busy += 1;
+            }
+        }
+        busy
+    }
+
+    fn insert(&mut self, k: K, v: V) {
+        for i in 0..self.items.len() {
+            if let Some((bk, _bv)) = self.items[i] {
+                if bk == k {
+                    self.items[i] = None;
+                }
+            }
+        }
+        for i in 0..self.items.len() {
+            if self.items[i].is_none() {
+                self.items[i] = Some((k, v));
+                return;
+            }
+        }
+        panic!("Out of space!")
+    }
+}
 
 impl Serialize for Edges {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -76,13 +131,11 @@ impl<'a> Iterator for EdgesIter<'a> {
 }
 
 impl Edges {
-    pub fn new() -> Self {
-        Self {
-            map: hashbrown::HashMap::new(),
-        }
+    pub const fn new() -> Self {
+        Self { map: Roll::new() }
     }
 
-    pub fn iter(&self) -> EdgesIter {
+    pub const fn iter(&self) -> EdgesIter {
         EdgesIter {
             iter: self.map.iter(),
         }
@@ -90,13 +143,6 @@ impl Edges {
 
     pub fn insert(&mut self, a: Label, v: u32) {
         self.map.insert(a, v);
-    }
-
-    pub fn retain<F>(&mut self, f: F)
-    where
-        F: FnMut(&Label, &mut u32) -> bool,
-    {
-        self.map.retain(f);
     }
 }
 
@@ -113,5 +159,54 @@ fn serialize_and_deserialize() -> Result<()> {
     let bytes: Vec<u8> = serialize(&before)?;
     let after: Edges = deserialize(&bytes)?;
     assert_eq!(42, *after.iter().next().unwrap().1);
+    Ok(())
+}
+
+#[test]
+fn insert_and_check_length() -> Result<()> {
+    let mut roll = Roll::new();
+    roll.insert(Label::Alpha(0), 42);
+    assert_eq!(1, roll.len());
+    roll.insert(Label::Alpha(1), 16);
+    assert_eq!(2, roll.len());
+    roll.insert(Label::Alpha(0), 16);
+    assert_eq!(2, roll.len());
+    Ok(())
+}
+
+#[test]
+fn empty_length() -> Result<()> {
+    let roll: Roll<u32, u32> = Roll::new();
+    assert_eq!(0, roll.len());
+    Ok(())
+}
+
+#[test]
+fn empty_iterator() -> Result<()> {
+    let roll: Roll<u32, u32> = Roll::new();
+    assert!(roll.iter().next().is_none());
+    Ok(())
+}
+
+#[test]
+fn insert_and_jump_over_next() -> Result<()> {
+    let mut roll = Roll::new();
+    roll.insert(Label::Alpha(0), 42);
+    let mut iter = roll.iter();
+    assert_eq!(42, *iter.next().unwrap().1);
+    assert!(iter.next().is_none());
+    Ok(())
+}
+
+#[test]
+fn insert_and_iterate() -> Result<()> {
+    let mut roll = Roll::new();
+    roll.insert(Label::Alpha(0), 42);
+    roll.insert(Label::Alpha(1), 16);
+    let mut sum = 0;
+    for (_k, v) in roll.iter() {
+        sum += v;
+    }
+    assert_eq!(58, sum);
     Ok(())
 }

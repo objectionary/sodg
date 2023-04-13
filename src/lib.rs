@@ -64,7 +64,6 @@ mod vertex;
 mod vertices;
 mod xml;
 
-use hashbrown::hash_map::Iter;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -132,12 +131,24 @@ pub(crate) struct Vertices {
 /// Internal structure, map of all edges.
 #[derive(Clone)]
 pub(crate) struct Edges {
-    map: hashbrown::HashMap<Label, u32>,
+    map: Roll<Label, u32>,
 }
 
-/// Iterator over edges
+/// Iterator over edges.
 pub(crate) struct EdgesIter<'a> {
-    iter: Iter<'a, Label, u32>,
+    iter: RollIter<'a, Label, u32>,
+}
+
+/// Memory structure for edges.
+#[derive(Clone)]
+struct Roll<K: Copy + PartialEq, V: Copy> {
+    items: [Option<(K, V)>; 10],
+}
+
+/// Iterator over roll.
+pub(crate) struct RollIter<'a, K, V> {
+    pos: usize,
+    items: &'a [Option<(K, V)>; 10],
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.

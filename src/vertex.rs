@@ -32,7 +32,7 @@ impl Vertex {
     /// let mut sodg = Sodg::empty();
     /// sodg.add(0).unwrap();
     /// ```
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self {
             edges: Edges::new(),
             data: None,
