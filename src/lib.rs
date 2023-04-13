@@ -139,16 +139,18 @@ pub(crate) struct EdgesIter<'a> {
     iter: RollIter<'a, Label, u32>,
 }
 
+const ROLL_LIMIT: usize = 10;
+
 /// Memory structure for edges.
 #[derive(Clone)]
 struct Roll<K: Copy + PartialEq, V: Copy> {
-    items: [Option<(K, V)>; 10],
+    items: [Option<(K, V)>; ROLL_LIMIT],
 }
 
 /// Iterator over roll.
 pub(crate) struct RollIter<'a, K, V> {
     pos: usize,
-    items: &'a [Option<(K, V)>; 10],
+    items: &'a [Option<(K, V)>; ROLL_LIMIT],
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.

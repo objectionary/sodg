@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Edges, EdgesIter, Label, Roll, RollIter};
+use crate::{Edges, EdgesIter, Label, Roll, RollIter, ROLL_LIMIT};
 use serde::de::{MapAccess, Visitor};
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -28,7 +28,7 @@ impl<'a, K, V> Iterator for RollIter<'a, K, V> {
     type Item = (&'a K, &'a V);
 
     fn next(&mut self) -> Option<Self::Item> {
-        while self.pos < 10 {
+        while self.pos < ROLL_LIMIT {
             if let Some((k, v)) = &self.items[self.pos] {
                 self.pos += 1;
                 return Some((k, v));
@@ -41,7 +41,9 @@ impl<'a, K, V> Iterator for RollIter<'a, K, V> {
 
 impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
     const fn new() -> Self {
-        Self { items: [None; 10] }
+        Self {
+            items: [None; ROLL_LIMIT],
+        }
     }
 
     const fn iter(&self) -> RollIter<K, V> {
@@ -53,7 +55,7 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
 
     fn len(&self) -> usize {
         let mut busy = 0;
-        for i in 0..self.items.len() {
+        for i in 0..ROLL_LIMIT {
             if self.items[i].is_some() {
                 busy += 1;
             }
@@ -62,14 +64,14 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
     }
 
     fn insert(&mut self, k: K, v: V) {
-        for i in 0..self.items.len() {
+        for i in 0..ROLL_LIMIT {
             if let Some((bk, _bv)) = self.items[i] {
                 if bk == k {
                     self.items[i] = None;
                 }
             }
         }
-        for i in 0..self.items.len() {
+        for i in 0..ROLL_LIMIT {
             if self.items[i].is_none() {
                 self.items[i] = Some((k, v));
                 return;
