@@ -20,6 +20,53 @@
 
 use crate::{Edges, EdgesIter, Label};
 use rustc_hash::FxHashMap;
+use serde::de::{MapAccess, Visitor};
+use serde::ser::SerializeMap;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt::Formatter;
+
+impl Serialize for Edges {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut map = serializer.serialize_map(Some(self.map.len()))?;
+        for (a, v) in self.iter() {
+            map.serialize_entry(a, v)?;
+        }
+        map.end()
+    }
+}
+
+struct Vi;
+
+impl<'de> Visitor<'de> for Vi {
+    type Value = Edges;
+
+    fn expecting(&self, formatter: &mut Formatter) -> std::fmt::Result {
+        formatter.write_str("a map of edges")
+    }
+
+    fn visit_map<M>(self, mut access: M) -> Result<Self::Value, M::Error>
+    where
+        M: MapAccess<'de>,
+    {
+        let mut edges = Edges::new();
+        while let Some((key, value)) = access.next_entry()? {
+            edges.insert(key, value);
+        }
+        Ok(edges)
+    }
+}
+
+impl<'de> Deserialize<'de> for Edges {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_map(Vi)
+    }
+}
 
 impl<'a> Iterator for EdgesIter<'a> {
     type Item = (&'a Label, &'a u32);
@@ -54,7 +101,18 @@ impl Edges {
     }
 }
 
+#[cfg(test)]
+use anyhow::Result;
+
+#[cfg(test)]
+use bincode::{deserialize, serialize};
+
 #[test]
-fn panic_on_complex_alert() {
-    // assert!(g.add(42).is_err());
+fn serialize_and_deserialize() -> Result<()> {
+    let mut before = Edges::new();
+    before.insert(Label::Alpha(0), 42);
+    let bytes: Vec<u8> = serialize(&before)?;
+    let after: Edges = deserialize(&bytes)?;
+    assert_eq!(42, *after.iter().next().unwrap().1);
+    Ok(())
 }

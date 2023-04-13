@@ -130,7 +130,7 @@ pub(crate) struct Vertices {
 }
 
 /// Internal structure, map of all edges.
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Clone)]
 pub(crate) struct Edges {
     map: FxHashMap<Label, u32>,
 }
