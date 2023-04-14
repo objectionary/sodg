@@ -22,11 +22,13 @@ use sodg::{Label, Roll};
 use std::collections::HashMap;
 use std::time::Instant;
 
+const CAPACITY: usize = 10;
+
 pub fn with_hashmap(total: usize) -> i64 {
     let mut sum = 0;
     for _ in 0..total {
-        let mut map = HashMap::new();
-        for i in 0..8 {
+        let mut map = HashMap::with_capacity(CAPACITY);
+        for i in 0..CAPACITY - 1 {
             map.insert(Label::Alpha(i), i as i64);
         }
         sum += map.into_iter().find(|(_k, v)| *v == 1).unwrap().1
@@ -38,7 +40,7 @@ pub fn with_roll(total: usize) -> i64 {
     let mut sum = 0;
     for _ in 0..total {
         let mut roll = Roll::new();
-        for i in 0..8 {
+        for i in 0..CAPACITY - 1 {
             roll.insert(Label::Alpha(i), i as i64);
         }
         sum += roll.into_iter().find(|(_k, v)| *v == 1).unwrap().1
