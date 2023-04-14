@@ -24,24 +24,6 @@ use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Formatter;
 
-// struct Foo<'a, K> {
-//     items: &'a [Option<K>; 10],
-//     i : usize
-// }
-//
-// impl<'a, K> Foo<'a, K> {
-//     fn get(&mut self) -> Option<K> {
-//         while self.i < 10 {
-//             if self.items[self.i].is_some() {
-//                 let v = self.items[self.i].unwrap();
-//                 self.i += 1;
-//                 return Some(v);
-//             }
-//         }
-//         None
-//     }
-// }
-//
 impl<'a, K: Clone, V: Clone> Iterator for RollIntoIter<'a, K, V> {
     type Item = (K, V);
 
@@ -112,6 +94,7 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
             if let Some((bk, _bv)) = self.items[i] {
                 if bk == k {
                     self.items[i] = None;
+                    break;
                 }
             }
         }

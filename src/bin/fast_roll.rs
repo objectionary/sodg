@@ -42,7 +42,7 @@ pub fn with_roll(total: usize) -> i64 {
 }
 
 fn main() {
-    let total = 1000000;
+    let total = 4000000;
     let start1 = Instant::now();
     let s1 = with_hashmap(total);
     let e1 = start1.elapsed();
