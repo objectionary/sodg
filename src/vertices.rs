@@ -101,6 +101,23 @@ impl Vertices {
 }
 
 #[test]
-fn panic_on_complex_alert() {
-    // assert!(g.add(42).is_err());
+fn inserts_and_lists() {
+    let mut vcs = Vertices::new();
+    vcs.insert(1);
+    assert_eq!(1, *vcs.iter().next().unwrap().0);
+}
+
+#[test]
+fn inserts_and_gets() {
+    let mut vcs = Vertices::new();
+    vcs.insert(42);
+    assert!(vcs.get(42).unwrap().edges.into_iter().next().is_none());
+}
+
+#[test]
+fn inserts_and_deletes() {
+    let mut vcs = Vertices::new();
+    vcs.insert(42);
+    vcs.remove(42);
+    assert_eq!(0, vcs.len());
 }
