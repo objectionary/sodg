@@ -39,7 +39,7 @@ pub fn with_hashmap(total: usize) -> i64 {
 pub fn with_roll(total: usize) -> i64 {
     let mut sum = 0;
     for _ in 0..total {
-        let mut roll = Roll::new();
+        let mut roll: Roll<Label, i64, CAPACITY> = Roll::new();
         for i in 0..CAPACITY - 1 {
             roll.insert(Label::Alpha(i), i as i64);
         }

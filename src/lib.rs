@@ -137,26 +137,26 @@ pub(crate) struct VerticesIter<'a> {
 /// Internal structure, map of all edges.
 #[derive(Clone)]
 pub(crate) struct Edges {
-    map: Roll<Label, u32>,
+    map: Roll<Label, u32, MAX_EDGES>,
 }
 
 /// Iterator over edges.
 pub(crate) struct EdgesIntoIter<'a> {
-    iter: RollIntoIter<'a, Label, u32>,
+    iter: RollIntoIter<'a, Label, u32, MAX_EDGES>,
 }
 
-const ROLL_LIMIT: usize = 10;
+const MAX_EDGES: usize = 10;
 
 /// Memory structure for edges.
 #[derive(Clone)]
-pub struct Roll<K: Copy + PartialEq, V: Copy> {
-    items: [Option<(K, V)>; ROLL_LIMIT],
+pub struct Roll<K: Copy + PartialEq, V: Copy, const N: usize> {
+    items: [Option<(K, V)>; N],
 }
 
 /// Iterator over roll.
-pub struct RollIntoIter<'a, K, V> {
+pub struct RollIntoIter<'a, K, V, const N: usize> {
     pos: usize,
-    items: &'a [Option<(K, V)>; ROLL_LIMIT],
+    items: &'a [Option<(K, V)>; N],
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.
