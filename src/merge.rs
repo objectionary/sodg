@@ -121,14 +121,19 @@ impl Sodg {
     }
 
     fn join(&mut self, left: u32, right: u32) -> Result<()> {
-        for vtx in self.vertices.iter_mut() {
-            let mut ne = vtx.1.edges.clone();
-            for e in &vtx.1.edges {
+        let mut keys = vec![];
+        for v in self.vertices.keys() {
+            keys.push(*v);
+        }
+        for v in keys {
+            let mut vtx = self.vertices.get_mut(v).unwrap();
+            let mut ne = vtx.edges.clone();
+            for e in &vtx.edges {
                 if e.1 == right {
                     ne.insert(e.0, left);
                 }
             }
-            vtx.1.edges = ne;
+            vtx.edges = ne;
         }
         for e in self.kids(right)? {
             if self.kid(left, e.0).is_some() {

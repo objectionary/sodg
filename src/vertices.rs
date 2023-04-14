@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 use crate::{Vertex, Vertices};
-use std::collections::hash_map::{Iter, IterMut, Keys};
+use std::collections::hash_map::{Iter, Keys};
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
@@ -97,10 +97,6 @@ impl Vertices {
 
     pub fn iter(&self) -> Iter<u32, Vertex> {
         self.map.iter()
-    }
-
-    pub fn iter_mut(&mut self) -> IterMut<u32, Vertex> {
-        self.map.iter_mut()
     }
 }
 
