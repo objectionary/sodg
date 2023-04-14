@@ -227,7 +227,7 @@ impl Sodg {
             .vertices
             .get(v)
             .with_context(|| format!("Can't find ν{v} in kids()"))?;
-        let kids = vtx.edges.iter().map(|(a, to)| (*a, *to)).collect();
+        let kids = vtx.edges.into_iter().map(|(a, to)| (a, to)).collect();
         Ok(kids)
     }
 
@@ -252,7 +252,7 @@ impl Sodg {
     pub fn kid(&self, v: u32, a: Label) -> Option<u32> {
         self.vertices
             .get(v)
-            .and_then(|vtx| vtx.edges.iter().find(|e| *e.0 == a).map(|e| *e.1))
+            .and_then(|vtx| vtx.edges.into_iter().find(|e| e.0 == a).map(|e| e.1))
     }
 }
 

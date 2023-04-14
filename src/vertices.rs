@@ -30,7 +30,7 @@ impl Debug for Vertices {
         for (i, v) in &self.map {
             let mut attrs = v
                 .edges
-                .iter()
+                .into_iter()
                 .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
             if let Some(d) = &v.data {

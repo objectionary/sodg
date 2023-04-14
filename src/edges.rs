@@ -18,24 +18,55 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Edges, EdgesIter, Label, Roll, RollIter, ROLL_LIMIT};
+use crate::{Edges, EdgesIntoIter, Label, Roll, ROLL_LIMIT, RollIntoIter};
 use serde::de::{MapAccess, Visitor};
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use std::fmt::Formatter;
 
-impl<'a, K, V> Iterator for RollIter<'a, K, V> {
-    type Item = (&'a K, &'a V);
+// struct Foo<'a, K> {
+//     items: &'a [Option<K>; 10],
+//     i : usize
+// }
+//
+// impl<'a, K> Foo<'a, K> {
+//     fn get(&mut self) -> Option<K> {
+//         while self.i < 10 {
+//             if self.items[self.i].is_some() {
+//                 let v = self.items[self.i].unwrap();
+//                 self.i += 1;
+//                 return Some(v);
+//             }
+//         }
+//         None
+//     }
+// }
+//
+impl<'a, K : Clone, V : Clone> Iterator for RollIntoIter<'a, K, V> {
+    type Item = (K, V);
 
     fn next(&mut self) -> Option<Self::Item> {
         while self.pos < ROLL_LIMIT {
-            if let Some((k, v)) = &self.items[self.pos] {
+            if self.items[self.pos].is_some() {
+                let pair = self.items[self.pos].clone().unwrap();
                 self.pos += 1;
-                return Some((k, v));
+                return Some(pair);
             }
             self.pos += 1;
         }
         None
+    }
+}
+
+impl<'a, K: Copy + PartialEq, V: Copy> IntoIterator for &'a Roll<K, V> {
+    type Item = (K, V);
+    type IntoIter = RollIntoIter<'a, K, V>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        RollIntoIter {
+            pos: 0,
+            items: &self.items,
+        }
     }
 }
 
@@ -48,8 +79,8 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
     }
 
     /// Make an iterator over all pairs.
-    pub const fn iter(&self) -> RollIter<K, V> {
-        RollIter {
+    pub const fn into_iter(&self) -> RollIntoIter<K, V> {
+        RollIntoIter {
             pos: 0,
             items: &self.items,
         }
@@ -100,8 +131,8 @@ impl Serialize for Edges {
         S: Serializer,
     {
         let mut map = serializer.serialize_map(Some(self.map.len()))?;
-        for (a, v) in self.iter() {
-            map.serialize_entry(a, v)?;
+        for (a, v) in self.into_iter() {
+            map.serialize_entry(&a, &v)?;
         }
         map.end()
     }
@@ -137,23 +168,28 @@ impl<'de> Deserialize<'de> for Edges {
     }
 }
 
-impl<'a> Iterator for EdgesIter<'a> {
-    type Item = (&'a Label, &'a u32);
+impl<'a> Iterator for EdgesIntoIter<'a> {
+    type Item = (Label, u32);
 
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next()
     }
 }
 
+impl<'a> IntoIterator for &'a Edges {
+    type Item = (Label, u32);
+    type IntoIter = EdgesIntoIter<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        EdgesIntoIter {
+            iter: self.map.into_iter(),
+        }
+    }
+}
+
 impl Edges {
     pub const fn new() -> Self {
         Self { map: Roll::new() }
-    }
-
-    pub const fn iter(&self) -> EdgesIter {
-        EdgesIter {
-            iter: self.map.iter(),
-        }
     }
 
     pub fn insert(&mut self, a: Label, v: u32) {
@@ -173,7 +209,7 @@ fn serialize_and_deserialize() -> Result<()> {
     before.insert(Label::Alpha(0), 42);
     let bytes: Vec<u8> = serialize(&before)?;
     let after: Edges = deserialize(&bytes)?;
-    assert_eq!(42, *after.iter().next().unwrap().1);
+    assert_eq!(42, after.into_iter().next().unwrap().1);
     Ok(())
 }
 
@@ -199,7 +235,7 @@ fn empty_length() -> Result<()> {
 #[test]
 fn empty_iterator() -> Result<()> {
     let roll: Roll<u32, u32> = Roll::new();
-    assert!(roll.iter().next().is_none());
+    assert!(roll.into_iter().next().is_none());
     Ok(())
 }
 
@@ -207,8 +243,8 @@ fn empty_iterator() -> Result<()> {
 fn insert_and_jump_over_next() -> Result<()> {
     let mut roll = Roll::new();
     roll.insert(Label::Alpha(0), 42);
-    let mut iter = roll.iter();
-    assert_eq!(42, *iter.next().unwrap().1);
+    let mut iter = roll.into_iter();
+    assert_eq!(42, iter.next().unwrap().1);
     assert!(iter.next().is_none());
     Ok(())
 }
@@ -219,7 +255,20 @@ fn insert_and_iterate() -> Result<()> {
     roll.insert(Label::Alpha(0), 42);
     roll.insert(Label::Alpha(1), 16);
     let mut sum = 0;
-    for (_k, v) in roll.iter() {
+    for (_k, v) in roll.into_iter() {
+        sum += v;
+    }
+    assert_eq!(58, sum);
+    Ok(())
+}
+
+#[test]
+fn insert_and_into_iterate() -> Result<()> {
+    let mut roll = Roll::new();
+    roll.insert(Label::Alpha(0), 42);
+    roll.insert(Label::Alpha(1), 16);
+    let mut sum = 0;
+    for (_k, v) in roll.into_iter() {
         sum += v;
     }
     assert_eq!(58, sum);

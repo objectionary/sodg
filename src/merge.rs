@@ -123,9 +123,9 @@ impl Sodg {
     fn join(&mut self, left: u32, right: u32) -> Result<()> {
         for vtx in self.vertices.iter_mut() {
             let mut ne = vtx.1.edges.clone();
-            for e in vtx.1.edges.iter() {
-                if *e.1 == right {
-                    ne.insert(*e.0, left);
+            for e in vtx.1.edges.into_iter() {
+                if e.1 == right {
+                    ne.insert(e.0, left);
                 }
             }
             vtx.1.edges = ne;

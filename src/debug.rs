@@ -35,7 +35,7 @@ impl Debug for Sodg {
         for (i, v) in self.vertices.iter() {
             let mut attrs = v
                 .edges
-                .iter()
+                .into_iter()
                 .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
             if let Some(d) = v.data.clone() {
@@ -61,7 +61,7 @@ impl Sodg {
             .with_context(|| format!("Can't find ν{v}"))?;
         let list: Vec<String> = vtx
             .edges
-            .iter()
+            .into_iter()
             .map(|e| format!("{}", e.0.clone()))
             .collect();
         Ok(format!(

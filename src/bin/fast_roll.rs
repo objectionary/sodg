@@ -26,7 +26,7 @@ pub fn with_hashmap(total: usize) -> i64 {
     for _ in 0..total {
         let mut map = hashbrown::HashMap::new();
         map.insert(Label::Alpha(0), 1);
-        sum += map.iter().find(|(_k, v)| **v == 1).unwrap().1
+        sum += map.into_iter().find(|(_k, v)| *v == 1).unwrap().1
     }
     std::hint::black_box(sum)
 }
@@ -36,7 +36,7 @@ pub fn with_roll(total: usize) -> i64 {
     for _ in 0..total {
         let mut roll = Roll::new();
         roll.insert(Label::Alpha(0), 1);
-        sum += roll.iter().find(|(_k, v)| **v == 1).unwrap().1
+        sum += roll.into_iter().find(|(_k, v)| *v == 1).unwrap().1
     }
     std::hint::black_box(sum)
 }

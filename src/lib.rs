@@ -135,8 +135,8 @@ pub(crate) struct Edges {
 }
 
 /// Iterator over edges.
-pub(crate) struct EdgesIter<'a> {
-    iter: RollIter<'a, Label, u32>,
+pub(crate) struct EdgesIntoIter<'a> {
+    iter: RollIntoIter<'a, Label, u32>,
 }
 
 const ROLL_LIMIT: usize = 10;
@@ -148,7 +148,7 @@ pub struct Roll<K: Copy + PartialEq, V: Copy> {
 }
 
 /// Iterator over roll.
-pub struct RollIter<'a, K, V> {
+pub struct RollIntoIter<'a, K, V> {
     pos: usize,
     items: &'a [Option<(K, V)>; ROLL_LIMIT],
 }

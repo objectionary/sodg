@@ -42,8 +42,8 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in g.vertices.get(*v).unwrap().edges.iter() {
-                    if !g.vertices.contains(*e.1) {
+                for e in g.vertices.get(*v).unwrap().edges.into_iter() {
+                    if !g.vertices.contains(e.1) {
                         errors.push(format!("Edge ν{v}.{} arrives to lost ν{}", e.0, e.1));
                     }
                 }
@@ -53,8 +53,8 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in g.vertices.get(*v).unwrap().edges.iter() {
-                    if e.1 == v {
+                for e in g.vertices.get(*v).unwrap().edges.into_iter() {
+                    if e.1 == *v {
                         errors.push(format!("Edge ν{v}.{} arrives to ν{} (loop)", e.0, e.1));
                     }
                 }
@@ -64,8 +64,8 @@ impl Sodg {
         g.alert_on(|g, vx| {
             let mut errors = Vec::new();
             for v in &vx {
-                for e in g.vertices.get(*v).unwrap().edges.iter() {
-                    if !g.vertices.contains(*e.1) {
+                for e in g.vertices.get(*v).unwrap().edges.into_iter() {
+                    if !g.vertices.contains(e.1) {
                         errors.push(format!(
                             "Edge ν{v}.{} points to ν{}, which doesn't exist",
                             e.0, e.1
