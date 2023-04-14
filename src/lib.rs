@@ -154,6 +154,12 @@ pub struct Roll<K: Copy + PartialEq, V: Copy, const N: usize> {
 }
 
 /// Iterator over roll.
+pub struct RollIter<'a, K, V, const N: usize> {
+    pos: usize,
+    items: &'a [Option<(K, V)>; N],
+}
+
+/// Iterator over roll.
 pub struct RollIntoIter<'a, K, V, const N: usize> {
     pos: usize,
     items: &'a [Option<(K, V)>; N],

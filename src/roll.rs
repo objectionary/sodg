@@ -18,7 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Roll, RollIntoIter};
+use crate::{Roll, RollIntoIter, RollIter};
+
+impl<'a, K: Clone, V: Clone, const N: usize> Iterator for RollIter<'a, K, V, N> {
+    type Item = (&'a K, &'a V);
+
+    #[inline]
+    #[must_use]
+    fn next(&mut self) -> Option<Self::Item> {
+        while self.pos < N {
+            if let Some(p) = &self.items[self.pos] {
+                self.pos += 1;
+                return Some((&p.0, &p.1));
+            }
+            self.pos += 1;
+        }
+        None
+    }
+}
 
 impl<'a, K: Clone, V: Clone, const N: usize> Iterator for RollIntoIter<'a, K, V, N> {
     type Item = (K, V);
@@ -55,6 +72,16 @@ impl<K: Copy + PartialEq, V: Copy, const N: usize> Roll<K, V, N> {
     #[must_use]
     pub const fn new() -> Self {
         Self { items: [None; N] }
+    }
+
+    /// Make an iterator over all pairs.
+    #[inline]
+    #[must_use]
+    pub const fn iter(&self) -> RollIter<K, V, N> {
+        RollIter {
+            pos: 0,
+            items: &self.items,
+        }
     }
 
     /// Make an iterator over all pairs.
@@ -189,7 +216,7 @@ fn insert_and_iterate() -> Result<()> {
     roll.insert("one", 42);
     roll.insert("two", 16);
     let mut sum = 0;
-    for (_k, v) in roll.into_iter() {
+    for (_k, v) in roll.iter() {
         sum += v;
     }
     assert_eq!(58, sum);
