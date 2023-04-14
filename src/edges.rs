@@ -27,6 +27,7 @@ use std::fmt::Formatter;
 impl<'a, K: Clone, V: Clone> Iterator for RollIntoIter<'a, K, V> {
     type Item = (K, V);
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         while self.pos < ROLL_LIMIT {
             if self.items[self.pos].is_some() {
@@ -44,6 +45,7 @@ impl<'a, K: Copy + PartialEq, V: Copy> IntoIterator for &'a Roll<K, V> {
     type Item = (K, V);
     type IntoIter = RollIntoIter<'a, K, V>;
 
+    #[inline]
     fn into_iter(self) -> Self::IntoIter {
         RollIntoIter {
             pos: 0,
@@ -61,6 +63,7 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
     }
 
     /// Make an iterator over all pairs.
+    #[inline]
     pub const fn into_iter(&self) -> RollIntoIter<K, V> {
         RollIntoIter {
             pos: 0,
@@ -69,11 +72,13 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
     }
 
     /// Is it empty?
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
     /// Return the total number of pairs inside.
+    #[inline]
     pub fn len(&self) -> usize {
         let mut busy = 0;
         for i in 0..ROLL_LIMIT {
@@ -89,6 +94,7 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
     /// # Panics
     ///
     /// It may panic if you attempt to insert too many pairs.
+    #[inline]
     pub fn insert(&mut self, k: K, v: V) {
         for i in 0..ROLL_LIMIT {
             if let Some((bk, _bv)) = self.items[i] {
@@ -171,10 +177,12 @@ impl<'a> IntoIterator for &'a Edges {
 }
 
 impl Edges {
+    #[inline]
     pub const fn new() -> Self {
         Self { map: Roll::new() }
     }
 
+    #[inline]
     pub fn insert(&mut self, a: Label, v: u32) {
         self.map.insert(a, v);
     }
