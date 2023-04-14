@@ -45,7 +45,10 @@ impl Sodg {
         let merged = mapped.len();
         let scope = g.vertices.len();
         if merged != scope {
-            let must: Vec<u32> = g.vertices.keys().copied().collect();
+            let mut must = vec![];
+            for (v, _) in g.vertices.iter() {
+                must.push(*v);
+            }
             let seen: Vec<u32> = mapped.keys().copied().collect();
             let missed: HashSet<u32> = &HashSet::from_iter(must) - &HashSet::from_iter(seen);
             let mut ordered: Vec<u32> = missed.into_iter().collect();

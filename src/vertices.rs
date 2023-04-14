@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 use crate::{Vertex, Vertices};
-use std::collections::hash_map::{Iter, Keys};
+use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
@@ -49,10 +49,6 @@ impl Vertices {
         }
     }
 
-    pub fn keys(&self) -> Keys<u32, Vertex> {
-        self.map.keys()
-    }
-
     pub fn len(&self) -> usize {
         self.map.len()
     }
@@ -74,7 +70,7 @@ impl Vertices {
             return id;
         }
         let mut next = None;
-        for v in self.keys() {
+        for (v, _) in self.iter() {
             if let Some(before) = next {
                 if *v > before {
                     next = Some(*v);
@@ -105,6 +101,18 @@ fn inserts_and_lists() {
     let mut vcs = Vertices::new();
     vcs.insert(1);
     assert_eq!(1, *vcs.iter().next().unwrap().0);
+}
+
+#[test]
+fn inserts_and_iterates() {
+    let mut vcs = Vertices::new();
+    vcs.insert(42);
+    vcs.insert(16);
+    let mut keys = vec![];
+    for (v, _) in vcs.iter() {
+        keys.push(*v);
+    }
+    assert_eq!(2, keys.len());
 }
 
 #[test]
