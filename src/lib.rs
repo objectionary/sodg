@@ -66,6 +66,7 @@ mod vertices;
 mod xml;
 
 use serde::{Deserialize, Serialize};
+use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 #[cfg(feature = "gc")]
 use std::collections::HashSet;
@@ -126,6 +127,11 @@ pub(crate) struct Vertex {
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Vertices {
     map: HashMap<u32, Vertex>,
+}
+
+/// Iterator over vertices.
+pub(crate) struct VerticesIter<'a> {
+    iter: Iter<'a, u32, Vertex>,
 }
 
 /// Internal structure, map of all edges.

@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Vertex, Vertices};
-use std::collections::hash_map::Iter;
+use crate::{Vertex, Vertices, VerticesIter};
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
@@ -39,6 +38,14 @@ impl Debug for Vertices {
             lines.push(format!("ν{i} -> ⟦{}⟧", attrs.join(", ")));
         }
         f.write_str(lines.join("\n").as_str())
+    }
+}
+
+impl<'a> Iterator for VerticesIter<'a> {
+    type Item = (&'a u32, &'a Vertex);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
     }
 }
 
@@ -91,8 +98,10 @@ impl Vertices {
         self.map.contains_key(&v)
     }
 
-    pub fn iter(&self) -> Iter<u32, Vertex> {
-        self.map.iter()
+    pub fn iter(&self) -> VerticesIter {
+        VerticesIter {
+            iter: self.map.iter(),
+        }
     }
 }
 
