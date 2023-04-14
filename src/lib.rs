@@ -57,6 +57,7 @@ mod merge;
 mod misc;
 mod next;
 mod ops;
+mod roll;
 mod script;
 mod serialization;
 mod slice;
