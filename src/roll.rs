@@ -24,6 +24,7 @@ impl<'a, K: Clone, V: Clone> Iterator for RollIntoIter<'a, K, V> {
     type Item = (K, V);
 
     #[inline]
+    #[must_use]
     fn next(&mut self) -> Option<Self::Item> {
         while self.pos < ROLL_LIMIT {
             if self.items[self.pos].is_some() {
@@ -60,6 +61,7 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
 
     /// Make an iterator over all pairs.
     #[inline]
+    #[must_use]
     pub const fn into_iter(&self) -> RollIntoIter<K, V> {
         RollIntoIter {
             pos: 0,
@@ -69,12 +71,14 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
 
     /// Is it empty?
     #[inline]
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
     }
 
     /// Return the total number of pairs inside.
     #[inline]
+    #[must_use]
     pub fn len(&self) -> usize {
         let mut busy = 0;
         for i in 0..ROLL_LIMIT {
@@ -107,6 +111,38 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
             }
         }
         panic!("Out of space!")
+    }
+
+    /// Get a reference to a single value.
+    #[inline]
+    #[must_use]
+    pub fn get(&self, k: K) -> Option<&V> {
+        for i in 0..ROLL_LIMIT {
+            if let Some(p) = &self.items[i] {
+                if p.0 == k {
+                    return Some(&p.1);
+                }
+            }
+        }
+        None
+    }
+
+    /// Get a mutable reference to a single value.
+    ///
+    /// # Panics
+    ///
+    /// If can't turn it into a mutable state.
+    #[inline]
+    #[must_use]
+    pub fn get_mut(&mut self, k: K) -> Option<&mut V> {
+        for i in 0..ROLL_LIMIT {
+            if let Some(p) = &mut self.items[i] {
+                if p.0 == k {
+                    return Some(&mut self.items[i].as_mut().unwrap().1);
+                }
+            }
+        }
+        None
     }
 }
 
@@ -172,5 +208,24 @@ fn insert_and_into_iterate() -> Result<()> {
         sum += v;
     }
     assert_eq!(58, sum);
+    Ok(())
+}
+
+#[test]
+fn insert_and_gets() -> Result<()> {
+    let mut roll = Roll::new();
+    roll.insert("one", 42);
+    roll.insert("two", 16);
+    assert_eq!(16, *roll.get("two").unwrap());
+    Ok(())
+}
+
+#[test]
+fn insert_and_gets_mut() -> Result<()> {
+    let mut roll = Roll::new();
+    roll.insert(42, [1, 2, 3]);
+    let a = roll.get_mut(42).unwrap();
+    a[0] = 500;
+    assert_eq!(500, roll.get(42).unwrap()[0]);
     Ok(())
 }
