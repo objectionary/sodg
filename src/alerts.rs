@@ -67,7 +67,11 @@ impl Sodg {
     /// An error may be returned if validation fails, after the alerts are turned ON.
     pub fn alerts_on(&mut self) -> Result<()> {
         self.alerts_active = true;
-        self.validate(self.vertices.keys().copied().collect())
+        let mut keys = vec![];
+        for (v, _) in self.vertices.iter() {
+            keys.push(*v);
+        }
+        self.validate(keys)
     }
 
     /// Check all alerts for the given list of vertices.

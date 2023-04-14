@@ -122,7 +122,7 @@ impl Sodg {
 
     fn join(&mut self, left: u32, right: u32) -> Result<()> {
         let mut keys = vec![];
-        for v in self.vertices.keys() {
+        for (v, _) in self.vertices.iter() {
             keys.push(*v);
         }
         for v in keys {

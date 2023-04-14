@@ -30,7 +30,11 @@ impl Sodg {
     /// Get all IDs of vertices, in a vector.
     #[must_use]
     pub fn ids(&self) -> Vec<u32> {
-        self.vertices.keys().copied().collect()
+        let mut ids = vec![];
+        for (v, _) in self.vertices.iter() {
+            ids.push(*v);
+        }
+        ids
     }
 
     /// Is it empty?
