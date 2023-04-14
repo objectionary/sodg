@@ -19,16 +19,16 @@
 // SOFTWARE.
 
 use sodg::{Label, Roll};
+use std::collections::HashMap;
 use std::time::Instant;
-use tinymap::ArrayMap;
 
 pub fn with_hashmap(total: usize) -> i64 {
     let mut sum = 0;
     for _ in 0..total {
-        let mut map: ArrayMap<Label, i64, 10> = ArrayMap::new();
-        map.insert(Label::Alpha(0), 1);
-        map.insert(Label::Alpha(1), 2);
-        map.insert(Label::Alpha(2), 2);
+        let mut map = HashMap::new();
+        for i in 0..8 {
+            map.insert(Label::Alpha(i), i as i64);
+        }
         sum += map.into_iter().find(|(_k, v)| *v == 1).unwrap().1
     }
     std::hint::black_box(sum)
@@ -38,9 +38,9 @@ pub fn with_roll(total: usize) -> i64 {
     let mut sum = 0;
     for _ in 0..total {
         let mut roll = Roll::new();
-        roll.insert(Label::Alpha(0), 1);
-        roll.insert(Label::Alpha(1), 2);
-        roll.insert(Label::Alpha(2), 2);
+        for i in 0..8 {
+            roll.insert(Label::Alpha(i), i as i64);
+        }
         sum += roll.into_iter().find(|(_k, v)| *v == 1).unwrap().1
     }
     std::hint::black_box(sum)

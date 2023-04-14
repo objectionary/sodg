@@ -19,8 +19,8 @@
 // SOFTWARE.
 
 use crate::{Vertex, Vertices};
-use rustc_hash::FxHashMap;
 use std::collections::hash_map::{Iter, IterMut, Keys};
+use std::collections::HashMap;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 
@@ -45,7 +45,7 @@ impl Debug for Vertices {
 impl Vertices {
     pub fn new() -> Self {
         Self {
-            map: FxHashMap::default(),
+            map: HashMap::new(),
         }
     }
 

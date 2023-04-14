@@ -65,7 +65,6 @@ mod vertex;
 mod vertices;
 mod xml;
 
-use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 #[cfg(feature = "gc")]
@@ -126,7 +125,7 @@ pub(crate) struct Vertex {
 /// Internal structure, map of all vertices.
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Vertices {
-    map: FxHashMap<u32, Vertex>,
+    map: HashMap<u32, Vertex>,
 }
 
 /// Internal structure, map of all edges.
