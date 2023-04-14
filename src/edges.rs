@@ -40,20 +40,28 @@ impl<'a, K, V> Iterator for RollIter<'a, K, V> {
 }
 
 impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
-    const fn new() -> Self {
+    #[must_use]
+    pub const fn new() -> Self {
         Self {
             items: [None; ROLL_LIMIT],
         }
     }
 
-    const fn iter(&self) -> RollIter<K, V> {
+    /// Make an iterator over all pairs.
+    pub const fn iter(&self) -> RollIter<K, V> {
         RollIter {
             pos: 0,
             items: &self.items,
         }
     }
 
-    fn len(&self) -> usize {
+    /// Is it empty?
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
+
+    /// Return the total number of pairs inside.
+    pub fn len(&self) -> usize {
         let mut busy = 0;
         for i in 0..ROLL_LIMIT {
             if self.items[i].is_some() {
@@ -63,7 +71,12 @@ impl<K: Copy + PartialEq, V: Copy> Roll<K, V> {
         busy
     }
 
-    fn insert(&mut self, k: K, v: V) {
+    /// Insert a single pair into it.
+    ///
+    /// # Panics
+    ///
+    /// It may panic if you attempt to insert too many pairs.
+    pub fn insert(&mut self, k: K, v: V) {
         for i in 0..ROLL_LIMIT {
             if let Some((bk, _bv)) = self.items[i] {
                 if bk == k {

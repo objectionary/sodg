@@ -143,12 +143,12 @@ const ROLL_LIMIT: usize = 10;
 
 /// Memory structure for edges.
 #[derive(Clone)]
-struct Roll<K: Copy + PartialEq, V: Copy> {
+pub struct Roll<K: Copy + PartialEq, V: Copy> {
     items: [Option<(K, V)>; ROLL_LIMIT],
 }
 
 /// Iterator over roll.
-pub(crate) struct RollIter<'a, K, V> {
+pub struct RollIter<'a, K, V> {
     pos: usize,
     items: &'a [Option<(K, V)>; ROLL_LIMIT],
 }
