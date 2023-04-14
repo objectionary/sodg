@@ -20,12 +20,15 @@
 
 use sodg::{Label, Roll};
 use std::time::Instant;
+use tinymap::ArrayMap;
 
 pub fn with_hashmap(total: usize) -> i64 {
     let mut sum = 0;
     for _ in 0..total {
-        let mut map = hashbrown::HashMap::new();
+        let mut map: ArrayMap<Label, i64, 10> = ArrayMap::new();
         map.insert(Label::Alpha(0), 1);
+        map.insert(Label::Alpha(1), 2);
+        map.insert(Label::Alpha(2), 2);
         sum += map.into_iter().find(|(_k, v)| *v == 1).unwrap().1
     }
     std::hint::black_box(sum)
@@ -36,6 +39,8 @@ pub fn with_roll(total: usize) -> i64 {
     for _ in 0..total {
         let mut roll = Roll::new();
         roll.insert(Label::Alpha(0), 1);
+        roll.insert(Label::Alpha(1), 2);
+        roll.insert(Label::Alpha(2), 2);
         sum += roll.into_iter().find(|(_k, v)| *v == 1).unwrap().1
     }
     std::hint::black_box(sum)
@@ -51,7 +56,6 @@ fn main() {
     let s2 = with_roll(total);
     let e2 = start2.elapsed();
     println!("with_roll: {:?}", e2);
-    println!("gain: {}x", e1.as_nanos() / e2.as_nanos());
-    println!("loss: {}x", e2.as_nanos() / e1.as_nanos());
+    println!("gain: {:.2}x", e1.as_nanos() as f64 / e2.as_nanos() as f64);
     assert_eq!(s1, s2);
 }

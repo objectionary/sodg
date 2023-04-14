@@ -92,7 +92,6 @@ fn main() {
     let s2 = on_heap(total);
     let e2 = start2.elapsed();
     println!("on_heap: {:?}", e2);
-    println!("gain: {}x", e2.as_nanos() / e1.as_nanos());
-    println!("loss: {}x", e1.as_nanos() / e2.as_nanos());
+    println!("gain: {:.2}x", e2.as_nanos() as f64 / e1.as_nanos() as f64);
     assert_eq!(s1, s2);
 }
