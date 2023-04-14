@@ -64,7 +64,7 @@ impl Sodg {
                     .vertices
                     .get(v)
                     .ok_or_else(|| anyhow!("Can't find ν{v}"))?;
-                for e in vtx.edges.into_iter() {
+                for e in &vtx.edges {
                     if done.contains(&e.1) {
                         continue;
                     }
@@ -80,7 +80,7 @@ impl Sodg {
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             let mut nv = vtx.clone();
             let mut ne = Edges::new();
-            for (k, v) in nv.edges.into_iter() {
+            for (k, v) in &nv.edges {
                 if done.contains(&v) {
                     ne.insert(k, v);
                 }
@@ -88,7 +88,7 @@ impl Sodg {
             nv.edges = ne;
             new_vertices.insert(*v);
             let vtx = new_vertices.get_mut(*v).with_context(|| "Can't find?")?;
-            for e in nv.edges.into_iter() {
+            for e in &nv.edges {
                 vtx.edges.insert(e.0, e.1);
             }
         }

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Edges, EdgesIntoIter, Label, Roll, ROLL_LIMIT, RollIntoIter};
+use crate::{Edges, EdgesIntoIter, Label, Roll, RollIntoIter, ROLL_LIMIT};
 use serde::de::{MapAccess, Visitor};
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -42,7 +42,7 @@ use std::fmt::Formatter;
 //     }
 // }
 //
-impl<'a, K : Clone, V : Clone> Iterator for RollIntoIter<'a, K, V> {
+impl<'a, K: Clone, V: Clone> Iterator for RollIntoIter<'a, K, V> {
     type Item = (K, V);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -131,7 +131,7 @@ impl Serialize for Edges {
         S: Serializer,
     {
         let mut map = serializer.serialize_map(Some(self.map.len()))?;
-        for (a, v) in self.into_iter() {
+        for (a, v) in self {
             map.serialize_entry(&a, &v)?;
         }
         map.end()
