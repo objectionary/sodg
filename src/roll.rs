@@ -409,3 +409,10 @@ fn insert_composite() -> Result<()> {
     assert_eq!(0, roll.into_iter().next().unwrap().1.r.len());
     Ok(())
 }
+
+#[test]
+fn large_roll_in_heap() -> Result<()> {
+    let roll: Box<Roll<u64, [u64; 10], 10>> = Box::new(Roll::new());
+    assert_eq!(0, roll.len());
+    Ok(())
+}
