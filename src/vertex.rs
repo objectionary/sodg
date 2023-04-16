@@ -22,17 +22,17 @@ use crate::{Edges, Vertex};
 #[cfg(feature = "gc")]
 use std::collections::HashSet;
 
-impl Vertex {
+impl<const N : usize> Vertex<N> {
     /// Make an empty one.
     ///
     /// For example:
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
+    /// let mut sodg : Sodg<16, 4> = Sodg::empty();
     /// sodg.add(0).unwrap();
     /// ```
-    pub const fn empty() -> Self {
+    pub fn empty() -> Self {
         Self {
             edges: Edges::new(),
             data: None,
@@ -46,7 +46,13 @@ impl Vertex {
 #[cfg(test)]
 use anyhow::Result;
 
+#[cfg(test)]
+use crate::Label;
+
 #[test]
 fn makes_an_empty_vertex() -> Result<()> {
+    let mut v : Vertex<4> = Vertex::empty();
+    v.edges.insert(Label::Alpha(0), 1);
+    assert_eq!(1, v.edges.into_iter().next().unwrap().1);
     Ok(())
 }

@@ -31,7 +31,7 @@
 //! ```
 //! use std::str::FromStr;
 //! use sodg::{Label, Sodg};
-//! let mut sodg = Sodg::empty();
+//! let mut sodg : Sodg<16, 4> = Sodg::empty();
 //! sodg.add(0).unwrap();
 //! sodg.add(1).unwrap();
 //! sodg.bind(0, 1, Label::from_str("foo").unwrap()).unwrap();
@@ -66,7 +66,6 @@ mod vertices;
 mod xml;
 
 use serde::{Deserialize, Serialize};
-use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 #[cfg(feature = "gc")]
 use std::collections::HashSet;
@@ -75,7 +74,7 @@ use std::collections::HashSet;
 ///
 /// Instances of this type can be used in [`Sodg::alert_on`] method,
 /// in order to ensure runtime consistency of data inside the graph.
-pub type Alert = fn(g: &Sodg, vx: Vec<u32>) -> Vec<String>;
+pub type Alert<const M : usize, const N : usize> = fn(g: &Sodg<M, N>, vx: Vec<u32>) -> Vec<String>;
 
 /// An object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
@@ -111,9 +110,9 @@ pub enum Label {
 
 /// A vertex in the [`Sodg`].
 #[derive(Clone, Serialize, Deserialize)]
-pub(crate) struct Vertex {
+pub(crate) struct Vertex<const N : usize> {
     /// This is a list of edges departing from this vertex.
-    pub edges: Edges,
+    pub edges: Edges<N>,
     /// This is the data in the vertex (possibly empty).
     pub data: Option<Hex>,
     /// This is a supplementary list of parent nodes, staying here for caching.
@@ -125,44 +124,49 @@ pub(crate) struct Vertex {
 
 /// Internal structure, map of all vertices.
 #[derive(Serialize, Deserialize, Clone)]
-pub(crate) struct Vertices {
-    map: HashMap<u32, Vertex>,
+pub(crate) struct Vertices<const M : usize, const N : usize> {
+    map: Roll<u32, Vertex<N>, M>,
 }
 
 /// Iterator over vertices.
-pub(crate) struct VerticesIter<'a> {
-    iter: Iter<'a, u32, Vertex>,
+pub(crate) struct VerticesIter<'a, const M : usize, const N : usize> {
+    iter: RollIter<'a, u32, Vertex<N>, M>,
 }
 
 /// Internal structure, map of all edges.
-#[derive(Clone)]
-pub(crate) struct Edges {
-    map: Roll<Label, u32, MAX_EDGES>,
+#[derive(Serialize, Deserialize, Clone)]
+pub(crate) struct Edges<const N : usize> {
+    map: Roll<Label, u32, N>,
 }
 
 /// Iterator over edges.
-pub(crate) struct EdgesIntoIter<'a> {
-    iter: RollIntoIter<'a, Label, u32, MAX_EDGES>,
+pub(crate) struct EdgesIntoIter<'a, const N : usize> {
+    iter: RollIntoIter<'a, Label, u32, N>,
 }
 
-const MAX_EDGES: usize = 10;
+/// Item in the roll.
+#[derive(Clone)]
+enum RollItem<K, V> {
+    Present((K, V)),
+    Absent
+}
 
 /// Memory structure for edges.
 #[derive(Clone)]
-pub struct Roll<K: Copy + PartialEq, V: Copy, const N: usize> {
-    items: [Option<(K, V)>; N],
+pub struct Roll<K: Copy + PartialEq, V: Clone, const N: usize> {
+    items: [RollItem<K, V>; N],
 }
 
 /// Iterator over roll.
 pub struct RollIter<'a, K, V, const N: usize> {
     pos: usize,
-    items: &'a [Option<(K, V)>; N],
+    items: &'a [RollItem<K, V>; N],
 }
 
 /// Iterator over roll.
 pub struct RollIntoIter<'a, K, V, const N: usize> {
     pos: usize,
-    items: &'a [Option<(K, V)>; N],
+    items: &'a [RollItem<K, V>; N],
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.
@@ -193,7 +197,7 @@ pub struct Script {
 ///
 /// ```
 /// use sodg::{Label, Sodg};
-/// let mut sodg = Sodg::empty();
+/// let mut sodg : Sodg<16, 4> = Sodg::empty();
 /// sodg.add(0).unwrap();
 /// sodg.add(1).unwrap();
 /// sodg.bind(0, 1, Label::Alpha(0)).unwrap();
@@ -206,15 +210,15 @@ pub struct Script {
 /// This package is used in [reo](https://github.com/objectionary/reo)
 /// project, as a memory model for objects and dependencies between them.
 #[derive(Serialize, Deserialize)]
-pub struct Sodg {
+pub struct Sodg<const M : usize, const N : usize> {
     /// This is a map of vertices with their unique numbers/IDs.
-    vertices: Vertices,
+    vertices: Vertices<M, N>,
     /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.
     #[serde(skip_serializing, skip_deserializing)]
     next_v: u32,
     /// This is the list of alerts, which is managed by the [`Sodg::alert_on`] function.
     #[serde(skip_serializing, skip_deserializing)]
-    alerts: Vec<Alert>,
+    alerts: Vec<Alert<M, N>>,
     /// This is the flag that either enables or disables alerts, through [`Sodg::alerts_on`]
     /// and [`Sodg::alerts_off`].
     #[serde(skip_serializing, skip_deserializing)]

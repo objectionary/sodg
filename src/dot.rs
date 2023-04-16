@@ -21,7 +21,7 @@
 use crate::{Label, Sodg};
 use itertools::Itertools;
 
-impl Sodg {
+impl<const M : usize, const N : usize> Sodg<M, N> {
     /// Print SODG as a DOT graph.
     ///
     /// For example, for this code:
@@ -30,7 +30,7 @@ impl Sodg {
     /// use std::str::FromStr;
     /// use sodg::{Hex, Label};
     /// use sodg::Sodg;
-    /// let mut g = Sodg::empty();
+    /// let mut g : Sodg<16, 4> = Sodg::empty();
     /// g.add(0).unwrap();
     /// g.put(0, &Hex::from_str_bytes("hello")).unwrap();
     /// g.add(1).unwrap();
@@ -121,7 +121,7 @@ use anyhow::Result;
 
 #[test]
 fn simple_graph_to_dot() -> Result<()> {
-    let mut g = Sodg::empty();
+    let mut g : Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;

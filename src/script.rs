@@ -47,7 +47,7 @@ impl Script {
     /// let mut s = Script::from_str(
     ///   "ADD(0); ADD($ν1); BIND(ν0, $ν1, foo);"
     /// );
-    /// let mut g = Sodg::empty();
+    /// let mut g : Sodg<16, 4> = Sodg::empty();
     /// let total = s.deploy_to(&mut g).unwrap();
     /// assert_eq!(1, g.kid(0, Label::from_str("foo").unwrap()).unwrap());
     /// ```
@@ -65,7 +65,7 @@ impl Script {
     /// # Errors
     ///
     /// If impossible to deploy, an error will be returned.
-    pub fn deploy_to(&mut self, g: &mut Sodg) -> Result<usize> {
+    pub fn deploy_to<const M : usize, const N : usize>(&mut self, g: &mut Sodg<M, N>) -> Result<usize> {
         let mut pos = 0;
         for cmd in &self.commands() {
             trace!("#deploy_to: deploying command no.{} '{}'...", pos + 1, cmd);
@@ -96,7 +96,7 @@ impl Script {
     /// # Errors
     ///
     /// If impossible to deploy, an error will be returned.
-    fn deploy_one(&mut self, cmd: &str, g: &mut Sodg) -> Result<()> {
+    fn deploy_one<const M : usize, const N : usize>(&mut self, cmd: &str, g: &mut Sodg<M, N>) -> Result<()> {
         lazy_static! {
             static ref LINE: Regex = Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap();
         }
@@ -159,7 +159,7 @@ impl Script {
     /// # Errors
     ///
     /// If impossible to parse, an error will be returned.
-    fn parse(&mut self, s: &str, g: &mut Sodg) -> Result<u32> {
+    fn parse<const M : usize, const N : usize>(&mut self, s: &str, g: &mut Sodg<M, N>) -> Result<u32> {
         let head = s
             .chars()
             .next()
@@ -184,7 +184,7 @@ use std::str;
 
 #[test]
 fn simple_command() -> Result<()> {
-    let mut g = Sodg::empty();
+    let mut g : Sodg<4, 4> = Sodg::empty();
     let mut s = Script::from_str(
         "
         ADD(0);  ADD($ν1); # adding two vertices

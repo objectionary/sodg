@@ -24,7 +24,7 @@ use anyhow::{anyhow, Context, Result};
 use log::trace;
 use std::collections::HashSet;
 
-impl Sodg {
+impl<const M : usize, const N : usize> Sodg<M, N> {
     /// Take a slice of the graph, keeping only the vertex specified
     /// by the locator and its kids, recursively found in the entire graph.
     ///
@@ -114,7 +114,7 @@ use std::str::FromStr;
 
 #[test]
 fn makes_a_slice() -> Result<()> {
-    let mut g = Sodg::empty();
+    let mut g : Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;
@@ -127,7 +127,7 @@ fn makes_a_slice() -> Result<()> {
 
 #[test]
 fn makes_a_partial_slice() -> Result<()> {
-    let mut g = Sodg::empty();
+    let mut g : Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;
@@ -140,7 +140,7 @@ fn makes_a_partial_slice() -> Result<()> {
 
 #[test]
 fn skips_some_vertices() -> Result<()> {
-    let mut g = Sodg::empty();
+    let mut g : Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;
