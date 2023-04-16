@@ -9,7 +9,7 @@ use std::collections::VecDeque;
 #[cfg(feature = "gc")]
 use log::trace;
 
-impl<const M : usize, const N : usize> Sodg<M, N> {
+impl<const M: usize, const N: usize> Sodg<M, N> {
     /// Attempt to collect the vertex (delete it from the graph).
     ///
     /// If there are no edges leading to it, then it is deleted and

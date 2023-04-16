@@ -23,7 +23,7 @@ use anyhow::Result;
 use itertools::Itertools;
 use xml_builder::{XMLBuilder, XMLElement, XMLVersion};
 
-impl<const M : usize, const N : usize> Sodg<M, N> {
+impl<const M: usize, const N: usize> Sodg<M, N> {
     /// Make XML graph.
     ///
     /// For example, for this code:
@@ -107,7 +107,7 @@ use std::str::FromStr;
 
 #[test]
 fn prints_simple_graph() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;

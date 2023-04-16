@@ -20,7 +20,7 @@
 
 use crate::{Edges, EdgesIntoIter, Label, Roll};
 
-impl<'a, const N : usize> Iterator for EdgesIntoIter<'a, N> {
+impl<'a, const N: usize> Iterator for EdgesIntoIter<'a, N> {
     type Item = (Label, u32);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -28,7 +28,7 @@ impl<'a, const N : usize> Iterator for EdgesIntoIter<'a, N> {
     }
 }
 
-impl<'a, const N : usize> IntoIterator for &'a Edges<N> {
+impl<'a, const N: usize> IntoIterator for &'a Edges<N> {
     type Item = (Label, u32);
     type IntoIter = EdgesIntoIter<'a, N>;
 
@@ -39,7 +39,7 @@ impl<'a, const N : usize> IntoIterator for &'a Edges<N> {
     }
 }
 
-impl<const N : usize> Edges<N> {
+impl<const N: usize> Edges<N> {
     #[inline]
     pub fn new() -> Self {
         Self { map: Roll::new() }
@@ -59,7 +59,7 @@ use bincode::{deserialize, serialize};
 
 #[test]
 fn serialize_and_deserialize() -> Result<()> {
-    let mut before : Edges<4> = Edges::new();
+    let mut before: Edges<4> = Edges::new();
     before.insert(Label::Alpha(0), 42);
     let bytes: Vec<u8> = serialize(&before)?;
     let after: Edges<4> = deserialize(&bytes)?;

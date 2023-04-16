@@ -74,7 +74,7 @@ use std::collections::HashSet;
 ///
 /// Instances of this type can be used in [`Sodg::alert_on`] method,
 /// in order to ensure runtime consistency of data inside the graph.
-pub type Alert<const M : usize, const N : usize> = fn(g: &Sodg<M, N>, vx: Vec<u32>) -> Vec<String>;
+pub type Alert<const M: usize, const N: usize> = fn(g: &Sodg<M, N>, vx: Vec<u32>) -> Vec<String>;
 
 /// An object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
@@ -110,7 +110,7 @@ pub enum Label {
 
 /// A vertex in the [`Sodg`].
 #[derive(Clone, Serialize, Deserialize)]
-pub(crate) struct Vertex<const N : usize> {
+pub(crate) struct Vertex<const N: usize> {
     /// This is a list of edges departing from this vertex.
     pub edges: Edges<N>,
     /// This is the data in the vertex (possibly empty).
@@ -124,23 +124,23 @@ pub(crate) struct Vertex<const N : usize> {
 
 /// Internal structure, map of all vertices.
 #[derive(Serialize, Deserialize, Clone)]
-pub(crate) struct Vertices<const M : usize, const N : usize> {
+pub(crate) struct Vertices<const M: usize, const N: usize> {
     map: Roll<u32, Vertex<N>, M>,
 }
 
 /// Iterator over vertices.
-pub(crate) struct VerticesIter<'a, const M : usize, const N : usize> {
+pub(crate) struct VerticesIter<'a, const M: usize, const N: usize> {
     iter: RollIter<'a, u32, Vertex<N>, M>,
 }
 
 /// Internal structure, map of all edges.
 #[derive(Serialize, Deserialize, Clone)]
-pub(crate) struct Edges<const N : usize> {
+pub(crate) struct Edges<const N: usize> {
     map: Roll<Label, u32, N>,
 }
 
 /// Iterator over edges.
-pub(crate) struct EdgesIntoIter<'a, const N : usize> {
+pub(crate) struct EdgesIntoIter<'a, const N: usize> {
     iter: RollIntoIter<'a, Label, u32, N>,
 }
 
@@ -148,7 +148,7 @@ pub(crate) struct EdgesIntoIter<'a, const N : usize> {
 #[derive(Clone)]
 enum RollItem<K, V> {
     Present((K, V)),
-    Absent
+    Absent,
 }
 
 /// Memory structure for edges.
@@ -210,7 +210,7 @@ pub struct Script {
 /// This package is used in [reo](https://github.com/objectionary/reo)
 /// project, as a memory model for objects and dependencies between them.
 #[derive(Serialize, Deserialize)]
-pub struct Sodg<const M : usize, const N : usize> {
+pub struct Sodg<const M: usize, const N: usize> {
     /// This is a map of vertices with their unique numbers/IDs.
     vertices: Vertices<M, N>,
     /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.

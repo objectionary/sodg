@@ -23,13 +23,13 @@ use anyhow::{Context, Result};
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 
-impl<const M : usize, const N : usize> Display for Sodg<M, N> {
+impl<const M: usize, const N: usize> Display for Sodg<M, N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         <&Self as Debug>::fmt(&self, f)
     }
 }
 
-impl<const M : usize, const N : usize> Debug for Sodg<M, N> {
+impl<const M: usize, const N: usize> Debug for Sodg<M, N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
         for (i, v) in self.vertices.iter() {
@@ -47,7 +47,7 @@ impl<const M : usize, const N : usize> Debug for Sodg<M, N> {
     }
 }
 
-impl<const M : usize, const N : usize> Sodg<M, N> {
+impl<const M: usize, const N: usize> Sodg<M, N> {
     /// Print a single vertex to a string, which can be used for
     /// logging and debugging.
     ///
@@ -74,7 +74,7 @@ impl<const M : usize, const N : usize> Sodg<M, N> {
 
 #[test]
 fn prints_itself() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     assert_ne!("", format!("{g:?}"));
@@ -83,7 +83,7 @@ fn prints_itself() -> Result<()> {
 
 #[test]
 fn displays_itself() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     assert_ne!("", format!("{g}"));

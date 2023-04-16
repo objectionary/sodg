@@ -22,7 +22,7 @@ use crate::{Roll, Vertex, Vertices, VerticesIter};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 
-impl<const M : usize, const N : usize> Debug for Vertices<M, N> {
+impl<const M: usize, const N: usize> Debug for Vertices<M, N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
         for (i, v) in &self.map {
@@ -40,7 +40,7 @@ impl<const M : usize, const N : usize> Debug for Vertices<M, N> {
     }
 }
 
-impl<'a, const M : usize, const N : usize> Iterator for VerticesIter<'a, M, N> {
+impl<'a, const M: usize, const N: usize> Iterator for VerticesIter<'a, M, N> {
     type Item = (&'a u32, &'a Vertex<N>);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -48,11 +48,9 @@ impl<'a, const M : usize, const N : usize> Iterator for VerticesIter<'a, M, N> {
     }
 }
 
-impl<const M : usize, const N : usize> Vertices<M, N> {
+impl<const M: usize, const N: usize> Vertices<M, N> {
     pub fn new() -> Self {
-        Self {
-            map: Roll::new(),
-        }
+        Self { map: Roll::new() }
     }
 
     pub fn len(&self) -> usize {
@@ -97,7 +95,7 @@ impl<const M : usize, const N : usize> Vertices<M, N> {
         self.map.contains_key(v)
     }
 
-    pub fn iter(&self) -> VerticesIter<M, N> {
+    pub const fn iter(&self) -> VerticesIter<M, N> {
         VerticesIter {
             iter: self.map.iter(),
         }
@@ -106,20 +104,20 @@ impl<const M : usize, const N : usize> Vertices<M, N> {
 
 #[test]
 fn iterates_empty() {
-    let vcs : Vertices<4, 4> = Vertices::new();
+    let vcs: Vertices<4, 4> = Vertices::new();
     assert!(vcs.iter().next().is_none());
 }
 
 #[test]
 fn inserts_and_lists() {
-    let mut vcs : Vertices<4, 4> = Vertices::new();
+    let mut vcs: Vertices<4, 4> = Vertices::new();
     vcs.insert(1);
     assert_eq!(1, *vcs.iter().next().unwrap().0);
 }
 
 #[test]
 fn inserts_and_iterates() {
-    let mut vcs : Vertices<4, 4> = Vertices::new();
+    let mut vcs: Vertices<4, 4> = Vertices::new();
     vcs.insert(42);
     vcs.insert(16);
     let mut keys = vec![];
@@ -131,14 +129,14 @@ fn inserts_and_iterates() {
 
 #[test]
 fn inserts_and_gets() {
-    let mut vcs : Vertices<4, 4> = Vertices::new();
+    let mut vcs: Vertices<4, 4> = Vertices::new();
     vcs.insert(42);
     assert!(vcs.get(42).unwrap().edges.into_iter().next().is_none());
 }
 
 #[test]
 fn inserts_and_deletes() {
-    let mut vcs : Vertices<4, 4> = Vertices::new();
+    let mut vcs: Vertices<4, 4> = Vertices::new();
     vcs.insert(42);
     vcs.remove(42);
     assert_eq!(0, vcs.len());

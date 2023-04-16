@@ -20,7 +20,7 @@
 
 use crate::Sodg;
 
-impl<const M : usize, const N : usize> Sodg<M, N> {
+impl<const M: usize, const N: usize> Sodg<M, N> {
     /// Get total number of vertices in the graph.
     #[must_use]
     pub fn len(&self) -> usize {
@@ -62,21 +62,21 @@ use anyhow::Result;
 
 #[test]
 fn checks_for_emptiness() -> Result<()> {
-    let g : Sodg<4, 4> = Sodg::empty();
+    let g: Sodg<4, 4> = Sodg::empty();
     assert!(g.is_empty());
     Ok(())
 }
 
 #[test]
 fn counts_vertices() -> Result<()> {
-    let g : Sodg<4, 4> = Sodg::empty();
+    let g: Sodg<4, 4> = Sodg::empty();
     assert_eq!(0, g.len());
     Ok(())
 }
 
 #[test]
 fn collect_vertices() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
     assert!(g.ids().contains(&1));

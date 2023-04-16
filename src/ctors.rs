@@ -23,7 +23,7 @@ use crate::Vertices;
 #[cfg(feature = "sober")]
 use std::collections::HashSet;
 
-impl<const M : usize, const N : usize> Sodg<M, N> {
+impl<const M: usize, const N: usize> Sodg<M, N> {
     /// Make an empty [`Sodg`], with no vertices and no edges.
     ///
     /// # Panics
@@ -90,7 +90,7 @@ use crate::Label;
 
 #[test]
 fn makes_an_empty_sodg() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     assert_eq!(1, g.vertices.len());
     Ok(())
@@ -98,7 +98,7 @@ fn makes_an_empty_sodg() -> Result<()> {
 
 #[test]
 fn prohibits_loops() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.alerts_off();
     g.add(0)?;
     g.bind(0, 0, Label::Alpha(0))?;

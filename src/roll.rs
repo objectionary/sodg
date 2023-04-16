@@ -18,13 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use std::fmt::Formatter;
-use std::marker::{PhantomData};
-use crate::{Roll, RollIntoIter, RollItem, RollIter};
 use crate::RollItem::{Absent, Present};
+use crate::{Roll, RollIntoIter, RollItem, RollIter};
 use serde::de::{MapAccess, Visitor};
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use serde::ser::SerializeMap;
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt::Formatter;
+use std::marker::PhantomData;
 
 impl<K, V> Default for RollItem<K, V> {
     fn default() -> Self {
@@ -33,17 +33,17 @@ impl<K, V> Default for RollItem<K, V> {
 }
 
 impl<K, V> RollItem<K, V> {
-    fn is_some(&self) -> bool {
+    const fn is_some(&self) -> bool {
         match self {
             Absent => false,
-            Present(_) => true
+            Present(_) => true,
         }
     }
 
     fn unwrap(self) -> (K, V) {
         match self {
             Present(p) => (p.0, p.1),
-            Absent => panic!("Oops")
+            Absent => panic!("Oops"),
         }
     }
 
@@ -103,11 +103,19 @@ impl<'a, K: Copy + PartialEq, V: Clone, const N: usize> IntoIterator for &'a Rol
     }
 }
 
+impl<K: Copy + PartialEq, V: Clone, const N: usize> Default for Roll<K, V, N> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<K: Copy + PartialEq, V: Clone, const N: usize> Roll<K, V, N> {
     /// Make it.
     #[must_use]
     pub fn new() -> Self {
-        Self { items: [(); N].map(|_| RollItem::<K, V>::default()) }
+        Self {
+            items: [(); N].map(|_| RollItem::<K, V>::default()),
+        }
     }
 
     /// Make an iterator over all pairs.
@@ -226,10 +234,12 @@ impl<K: Copy + PartialEq, V: Clone, const N: usize> Roll<K, V, N> {
     }
 }
 
-impl<K : Copy + PartialEq + Serialize, V : Clone + Serialize, const N : usize> Serialize for Roll<K, V, N> {
+impl<K: Copy + PartialEq + Serialize, V: Clone + Serialize, const N: usize> Serialize
+    for Roll<K, V, N>
+{
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-        where
-            S: Serializer,
+    where
+        S: Serializer,
     {
         let mut map = serializer.serialize_map(Some(self.len()))?;
         for (a, v) in self {
@@ -239,10 +249,11 @@ impl<K : Copy + PartialEq + Serialize, V : Clone + Serialize, const N : usize> S
     }
 }
 
+struct Vi<K, V, const N: usize>(PhantomData<K>, PhantomData<V>);
 
-struct Vi<K, V, const N : usize>(PhantomData<K>, PhantomData<V>);
-
-impl<'de, K : Copy + PartialEq + Deserialize<'de>, V : Clone + Deserialize<'de>, const N : usize> Visitor<'de> for Vi<K, V, N> {
+impl<'de, K: Copy + PartialEq + Deserialize<'de>, V: Clone + Deserialize<'de>, const N: usize>
+    Visitor<'de> for Vi<K, V, N>
+{
     type Value = Roll<K, V, N>;
 
     fn expecting(&self, formatter: &mut Formatter) -> std::fmt::Result {
@@ -250,10 +261,10 @@ impl<'de, K : Copy + PartialEq + Deserialize<'de>, V : Clone + Deserialize<'de>,
     }
 
     fn visit_map<M>(self, mut access: M) -> Result<Self::Value, M::Error>
-        where
-            M: MapAccess<'de>,
+    where
+        M: MapAccess<'de>,
     {
-        let mut roll : Self::Value = Roll::new();
+        let mut roll: Self::Value = Roll::new();
         while let Some((key, value)) = access.next_entry()? {
             roll.insert(key, value);
         }
@@ -261,10 +272,12 @@ impl<'de, K : Copy + PartialEq + Deserialize<'de>, V : Clone + Deserialize<'de>,
     }
 }
 
-impl<'de, K : Copy + PartialEq + Deserialize<'de>, V : Clone + Deserialize<'de>, const N : usize> Deserialize<'de> for Roll<K, V, N> {
+impl<'de, K: Copy + PartialEq + Deserialize<'de>, V: Clone + Deserialize<'de>, const N: usize>
+    Deserialize<'de> for Roll<K, V, N>
+{
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: Deserializer<'de>,
+    where
+        D: Deserializer<'de>,
     {
         deserializer.deserialize_map(Vi(PhantomData, PhantomData))
     }
@@ -359,7 +372,7 @@ fn insert_and_gets_mut() -> Result<()> {
 
 #[test]
 fn serialize_and_deserialize() -> Result<()> {
-    let mut before : Roll<u8, u8, 8> = Roll::new();
+    let mut before: Roll<u8, u8, 8> = Roll::new();
     before.insert(1, 42);
     let bytes: Vec<u8> = serialize(&before)?;
     let after: Roll<u8, u8, 8> = deserialize(&bytes)?;
@@ -370,12 +383,12 @@ fn serialize_and_deserialize() -> Result<()> {
 #[cfg(test)]
 #[derive(Clone)]
 struct Foo {
-    v : Vec<u32>
+    v: Vec<u32>,
 }
 
 #[test]
 fn insert_struct() -> Result<()> {
-    let mut roll : Roll<u8, Foo, 8> = Roll::new();
+    let mut roll: Roll<u8, Foo, 8> = Roll::new();
     let foo = Foo { v: vec![1, 2, 100] };
     roll.insert(1, foo);
     assert_eq!(100, roll.into_iter().next().unwrap().1.v[2]);
@@ -385,12 +398,12 @@ fn insert_struct() -> Result<()> {
 #[cfg(test)]
 #[derive(Clone)]
 struct Composite {
-    r : Roll<u8, u8, 1>
+    r: Roll<u8, u8, 1>,
 }
 
 #[test]
 fn insert_composite() -> Result<()> {
-    let mut roll : Roll<u8, Composite, 8> = Roll::new();
+    let mut roll: Roll<u8, Composite, 8> = Roll::new();
     let c = Composite { r: Roll::new() };
     roll.insert(1, c);
     assert_eq!(0, roll.into_iter().next().unwrap().1.r.len());

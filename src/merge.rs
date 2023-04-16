@@ -23,7 +23,7 @@ use anyhow::{anyhow, Result};
 use log::debug;
 use std::collections::{HashMap, HashSet};
 
-impl<const M : usize, const N : usize> Sodg<M, N> {
+impl<const M: usize, const N: usize> Sodg<M, N> {
     /// Merge another graph into the current one.
     ///
     /// It is expected that both graphs are trees! If they are not, the result is unpredictable.
@@ -157,7 +157,7 @@ use std::str::FromStr;
 
 #[test]
 fn merges_two_graphs() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;
@@ -174,7 +174,7 @@ fn merges_two_graphs() -> Result<()> {
 
 #[test]
 fn merges_two_non_trees() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     let mut extra = Sodg::empty();
     extra.add(0)?;
     extra.add(42)?;
@@ -189,7 +189,7 @@ fn merges_two_non_trees() -> Result<()> {
 
 #[test]
 fn merges_a_loop() -> Result<()> {
-    let mut g : Sodg<16, 16> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("a")?)?;
@@ -216,7 +216,7 @@ fn merges_a_loop() -> Result<()> {
 
 #[test]
 fn avoids_simple_duplicates() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(5)?;
     g.bind(0, 5, Label::from_str("foo")?)?;
@@ -235,7 +235,7 @@ fn avoids_simple_duplicates() -> Result<()> {
 
 #[test]
 fn keeps_existing_vertices_intact() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;
@@ -257,7 +257,7 @@ fn keeps_existing_vertices_intact() -> Result<()> {
 
 #[test]
 fn merges_singletons() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(13)?;
     let mut extra = Sodg::empty();
     extra.add(13)?;
@@ -268,7 +268,7 @@ fn merges_singletons() -> Result<()> {
 
 #[test]
 fn merges_simple_loop() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
     g.bind(1, 2, Label::from_str("foo")?)?;
@@ -281,7 +281,7 @@ fn merges_simple_loop() -> Result<()> {
 
 #[test]
 fn merges_large_loop() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
     g.add(3)?;
@@ -301,7 +301,7 @@ use crate::Hex;
 
 #[test]
 fn merges_data() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(1)?;
     let mut extra = Sodg::empty();
     extra.add(1)?;
@@ -313,7 +313,7 @@ fn merges_data() -> Result<()> {
 
 #[test]
 fn understands_same_name_kids() -> Result<()> {
-    let mut g : Sodg<16, 16> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("a")?)?;
@@ -334,7 +334,7 @@ fn understands_same_name_kids() -> Result<()> {
 
 #[test]
 fn merges_into_empty_graph() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(1)?;
     let mut extra = Sodg::empty();
     extra.add(1)?;
@@ -351,7 +351,7 @@ fn merges_into_empty_graph() -> Result<()> {
 
 #[test]
 fn mixed_injection() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(4)?;
     let mut extra = Sodg::empty();
     extra.add(4)?;
@@ -366,7 +366,7 @@ fn mixed_injection() -> Result<()> {
 
 #[test]
 fn zero_to_zero() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("a")?)?;
@@ -385,7 +385,7 @@ fn zero_to_zero() -> Result<()> {
 
 #[test]
 fn finds_siblings() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("a")?)?;
@@ -408,7 +408,7 @@ use crate::Label;
 
 #[test]
 fn two_big_graphs() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     Script::from_str(
         "ADD(0); ADD(1); BIND(0, 1, foo);
         ADD(2); BIND(0, 1, alpha);

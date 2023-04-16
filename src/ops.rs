@@ -24,7 +24,7 @@ use anyhow::{Context, Result};
 #[cfg(debug_assertions)]
 use log::trace;
 
-impl<const M : usize, const N : usize> Sodg<M, N> {
+impl<const M: usize, const N: usize> Sodg<M, N> {
     /// Add a new vertex `v1` to itself.
     ///
     /// For example:
@@ -261,7 +261,7 @@ use std::str::FromStr;
 
 #[test]
 fn adds_simple_vertex() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(1)?;
     assert_eq!(1, g.len());
     Ok(())
@@ -269,7 +269,7 @@ fn adds_simple_vertex() -> Result<()> {
 
 #[test]
 fn binds_simple_vertices() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
     let k = Label::from_str("hello")?;
@@ -280,7 +280,7 @@ fn binds_simple_vertices() -> Result<()> {
 
 #[test]
 fn pre_defined_ids() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
     let k = Label::from_str("a-привет")?;
@@ -291,7 +291,7 @@ fn pre_defined_ids() -> Result<()> {
 
 #[test]
 fn binds_two_names() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
     let first = Label::from_str("first")?;
@@ -305,7 +305,7 @@ fn binds_two_names() -> Result<()> {
 
 #[test]
 fn overwrites_edge() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
     g.bind(1, 2, Label::from_str("foo")?)?;
@@ -317,7 +317,7 @@ fn overwrites_edge() -> Result<()> {
 
 #[test]
 fn binds_to_root() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("x")?)?;
@@ -328,7 +328,7 @@ fn binds_to_root() -> Result<()> {
 
 #[test]
 fn sets_simple_data() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     let data = Hex::from_str_bytes("hello");
     g.add(0)?;
     g.put(0, &data)?;
@@ -339,7 +339,7 @@ fn sets_simple_data() -> Result<()> {
 #[test]
 #[cfg(feature = "gc")]
 fn simple_data_gc() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     let data = Hex::from_str_bytes("hello");
     g.add(0)?;
     g.put(0, data.clone())?;
@@ -350,7 +350,7 @@ fn simple_data_gc() -> Result<()> {
 
 #[test]
 fn finds_all_kids() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("one")?)?;
@@ -367,7 +367,7 @@ fn finds_all_kids() -> Result<()> {
 
 #[test]
 fn builds_list_of_kids() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.alerts_off();
     g.add(0)?;
     g.add(1)?;
@@ -386,7 +386,7 @@ fn builds_list_of_kids() -> Result<()> {
 
 #[test]
 fn gets_data_from_empty_vertex() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     assert!(g.data(0).is_ok());
     assert!(g.data(0).unwrap().is_empty());
@@ -395,7 +395,7 @@ fn gets_data_from_empty_vertex() -> Result<()> {
 
 #[test]
 fn gets_absent_kid() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     assert!(g.kid(0, Label::from_str("hello")?).is_none());
     Ok(())
@@ -403,14 +403,14 @@ fn gets_absent_kid() -> Result<()> {
 
 #[test]
 fn gets_kid_from_absent_vertex() -> Result<()> {
-    let g : Sodg<4, 4> = Sodg::empty();
+    let g: Sodg<4, 4> = Sodg::empty();
     assert!(g.kid(0, Label::from_str("hello")?).is_none());
     Ok(())
 }
 
 #[test]
 fn adds_twice() -> Result<()> {
-    let mut g : Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<4, 4> = Sodg::empty();
     g.add(0)?;
     assert!(g.add(0).is_ok());
     Ok(())

@@ -22,7 +22,7 @@ use crate::{Edges, Vertex};
 #[cfg(feature = "gc")]
 use std::collections::HashSet;
 
-impl<const N : usize> Vertex<N> {
+impl<const N: usize> Vertex<N> {
     /// Make an empty one.
     ///
     /// For example:
@@ -51,7 +51,7 @@ use crate::Label;
 
 #[test]
 fn makes_an_empty_vertex() -> Result<()> {
-    let mut v : Vertex<4> = Vertex::empty();
+    let mut v: Vertex<4> = Vertex::empty();
     v.edges.insert(Label::Alpha(0), 1);
     assert_eq!(1, v.edges.into_iter().next().unwrap().1);
     Ok(())
