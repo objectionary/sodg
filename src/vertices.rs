@@ -89,6 +89,19 @@ impl<const M: usize, const N: usize> Vertices<M, N> {
 
     pub fn remove(&mut self, v: u32) {
         self.map.remove(v);
+        let all: Vec<u32> = self.map.into_iter().map(|(v, _)| v).collect();
+        for v1 in all {
+            let vtx = self.map.get_mut(v1).unwrap();
+            if let Some(a) = vtx
+                .edges
+                .into_iter()
+                .filter(|(_, t)| *t == v)
+                .map(|(a, _)| a)
+                .next()
+            {
+                vtx.edges.remove(a);
+            }
+        }
     }
 
     pub fn contains(&self, v: u32) -> bool {

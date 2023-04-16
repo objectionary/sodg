@@ -36,8 +36,6 @@ impl<const N: usize> Vertex<N> {
         Self {
             edges: Edges::new(),
             data: None,
-            #[cfg(feature = "gc")]
-            parents: HashSet::new(),
             taken: false,
         }
     }

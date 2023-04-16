@@ -49,6 +49,11 @@ impl<const N: usize> Edges<N> {
     pub fn insert(&mut self, a: Label, v: u32) {
         self.map.insert(a, v);
     }
+
+    #[inline]
+    pub fn remove(&mut self, a: Label) {
+        self.map.remove(a);
+    }
 }
 
 #[cfg(test)]

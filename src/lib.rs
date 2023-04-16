@@ -115,9 +115,6 @@ pub(crate) struct Vertex<const N: usize> {
     pub edges: Edges<N>,
     /// This is the data in the vertex (possibly empty).
     pub data: Option<Hex>,
-    /// This is a supplementary list of parent nodes, staying here for caching.
-    #[cfg(feature = "gc")]
-    pub parents: HashSet<u32>,
     /// This is `TRUE` if the data has been already taken by the use of [`Sodg::data`].
     pub taken: bool,
 }

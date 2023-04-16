@@ -410,6 +410,9 @@ fn insert_composite() -> Result<()> {
     Ok(())
 }
 
+#[derive(Clone)]
+struct Bar {}
+
 #[test]
 fn large_roll_in_heap() -> Result<()> {
     let roll: Box<Roll<u64, [u64; 10], 10>> = Box::new(Roll::new());
