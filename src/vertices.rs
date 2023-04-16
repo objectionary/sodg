@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Roll, Vertex, Vertices, VerticesIter};
+use crate::{Vertex, Vertices, VerticesIter};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 
@@ -50,7 +50,9 @@ impl<'a, const M: usize, const N: usize> Iterator for VerticesIter<'a, M, N> {
 
 impl<const M: usize, const N: usize> Vertices<M, N> {
     pub fn new() -> Self {
-        Self { map: Roll::new() }
+        Self {
+            map: micromap::Map::new(),
+        }
     }
 
     pub fn len(&self) -> usize {

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Edges, EdgesIntoIter, Label, Roll};
+use crate::{Edges, EdgesIntoIter, Label};
 
 impl<'a, const N: usize> Iterator for EdgesIntoIter<'a, N> {
     type Item = (Label, u32);
@@ -42,7 +42,9 @@ impl<'a, const N: usize> IntoIterator for &'a Edges<N> {
 impl<const N: usize> Edges<N> {
     #[inline]
     pub fn new() -> Self {
-        Self { map: Roll::new() }
+        Self {
+            map: micromap::Map::new(),
+        }
     }
 
     #[inline]

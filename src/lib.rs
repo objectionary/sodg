@@ -57,7 +57,6 @@ mod merge;
 mod misc;
 mod next;
 mod ops;
-mod roll;
 mod script;
 mod serialization;
 mod slice;
@@ -122,48 +121,23 @@ pub(crate) struct Vertex<const N: usize> {
 /// Internal structure, map of all vertices.
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Vertices<const M: usize, const N: usize> {
-    map: Roll<u32, Vertex<N>, M>,
+    map: micromap::Map<u32, Vertex<N>, M>,
 }
 
 /// Iterator over vertices.
 pub(crate) struct VerticesIter<'a, const M: usize, const N: usize> {
-    iter: RollIter<'a, u32, Vertex<N>, M>,
+    iter: micromap::Iter<'a, u32, Vertex<N>, M>,
 }
 
 /// Internal structure, map of all edges.
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Edges<const N: usize> {
-    map: Roll<Label, u32, N>,
+    map: micromap::Map<Label, u32, N>,
 }
 
 /// Iterator over edges.
 pub(crate) struct EdgesIntoIter<'a, const N: usize> {
-    iter: RollIntoIter<'a, Label, u32, N>,
-}
-
-/// Item in the roll.
-#[derive(Clone)]
-enum RollItem<K, V> {
-    Present((K, V)),
-    Absent,
-}
-
-/// Memory structure for edges.
-#[derive(Clone)]
-pub struct Roll<K: Copy + PartialEq, V: Clone, const N: usize> {
-    items: [RollItem<K, V>; N],
-}
-
-/// Iterator over roll.
-pub struct RollIter<'a, K, V, const N: usize> {
-    pos: usize,
-    items: &'a [RollItem<K, V>; N],
-}
-
-/// Iterator over roll.
-pub struct RollIntoIter<'a, K, V, const N: usize> {
-    pos: usize,
-    items: &'a [RollItem<K, V>; N],
+    iter: micromap::IntoIter<'a, Label, u32, N>,
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.
