@@ -20,6 +20,7 @@
 
 use crate::Sodg;
 use anyhow::Result;
+#[cfg(debug_assertions)]
 use log::trace;
 use std::collections::HashMap;
 use std::fmt;
