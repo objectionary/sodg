@@ -54,7 +54,7 @@ impl<const N: usize> Edges<N> {
 
     #[inline]
     pub fn remove(&mut self, a: Label) {
-        self.map.remove(a);
+        self.map.remove(&a);
     }
 }
 

@@ -23,7 +23,7 @@ use anyhow::{Context, Result};
 use itertools::Itertools;
 use std::collections::HashSet;
 
-impl<const M: usize, const N: usize> Sodg<M, N> {
+impl<const N: usize> Sodg<N> {
     /// Find an object by the provided locator and print its tree
     /// of sub-objects and edges.
     ///
@@ -83,7 +83,7 @@ use crate::Label;
 
 #[test]
 fn inspects_simple_object() -> Result<()> {
-    let mut g: Sodg<16, 16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty();
     g.add(0)?;
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;

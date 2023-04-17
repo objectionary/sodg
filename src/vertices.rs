@@ -19,10 +19,11 @@
 // SOFTWARE.
 
 use crate::{Vertex, Vertices, VerticesIter};
+use std::collections::HashMap;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 
-impl<const M: usize, const N: usize> Debug for Vertices<M, N> {
+impl<const N: usize> Debug for Vertices<N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
         for (i, v) in &self.map {
@@ -40,7 +41,7 @@ impl<const M: usize, const N: usize> Debug for Vertices<M, N> {
     }
 }
 
-impl<'a, const M: usize, const N: usize> Iterator for VerticesIter<'a, M, N> {
+impl<'a, const N: usize> Iterator for VerticesIter<'a, N> {
     type Item = (&'a u32, &'a Vertex<N>);
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -48,10 +49,10 @@ impl<'a, const M: usize, const N: usize> Iterator for VerticesIter<'a, M, N> {
     }
 }
 
-impl<const M: usize, const N: usize> Vertices<M, N> {
+impl<const N: usize> Vertices<N> {
     pub fn new() -> Self {
         Self {
-            map: micromap::Map::new(),
+            map: HashMap::new(),
         }
     }
 
@@ -64,11 +65,11 @@ impl<const M: usize, const N: usize> Vertices<M, N> {
     }
 
     pub fn get(&self, v: u32) -> Option<&Vertex<N>> {
-        self.map.get(v)
+        self.map.get(&v)
     }
 
     pub fn get_mut(&mut self, v: u32) -> Option<&mut Vertex<N>> {
-        self.map.get_mut(v)
+        self.map.get_mut(&v)
     }
 
     pub fn try_id(&self, id: u32) -> u32 {
@@ -90,10 +91,10 @@ impl<const M: usize, const N: usize> Vertices<M, N> {
     }
 
     pub fn remove(&mut self, v: u32) {
-        self.map.remove(v);
-        let all: Vec<u32> = self.map.into_iter().map(|(v, _)| v).collect();
+        self.map.remove(&v);
+        let all: Vec<u32> = self.map.clone().into_keys().collect();
         for v1 in all {
-            let vtx = self.map.get_mut(v1).unwrap();
+            let vtx = self.map.get_mut(&v1).unwrap();
             if let Some(a) = vtx
                 .edges
                 .into_iter()
@@ -107,10 +108,10 @@ impl<const M: usize, const N: usize> Vertices<M, N> {
     }
 
     pub fn contains(&self, v: u32) -> bool {
-        self.map.contains_key(v)
+        self.map.contains_key(&v)
     }
 
-    pub const fn iter(&self) -> VerticesIter<M, N> {
+    pub fn iter(&self) -> VerticesIter<N> {
         VerticesIter {
             iter: self.map.iter(),
         }
@@ -119,20 +120,20 @@ impl<const M: usize, const N: usize> Vertices<M, N> {
 
 #[test]
 fn iterates_empty() {
-    let vcs: Vertices<4, 4> = Vertices::new();
+    let vcs: Vertices<4> = Vertices::new();
     assert!(vcs.iter().next().is_none());
 }
 
 #[test]
 fn inserts_and_lists() {
-    let mut vcs: Vertices<4, 4> = Vertices::new();
+    let mut vcs: Vertices<4> = Vertices::new();
     vcs.insert(1);
     assert_eq!(1, *vcs.iter().next().unwrap().0);
 }
 
 #[test]
 fn inserts_and_iterates() {
-    let mut vcs: Vertices<4, 4> = Vertices::new();
+    let mut vcs: Vertices<4> = Vertices::new();
     vcs.insert(42);
     vcs.insert(16);
     let mut keys = vec![];
@@ -144,14 +145,14 @@ fn inserts_and_iterates() {
 
 #[test]
 fn inserts_and_gets() {
-    let mut vcs: Vertices<4, 4> = Vertices::new();
+    let mut vcs: Vertices<4> = Vertices::new();
     vcs.insert(42);
     assert!(vcs.get(42).unwrap().edges.into_iter().next().is_none());
 }
 
 #[test]
 fn inserts_and_deletes() {
-    let mut vcs: Vertices<4, 4> = Vertices::new();
+    let mut vcs: Vertices<4> = Vertices::new();
     vcs.insert(42);
     vcs.remove(42);
     assert_eq!(0, vcs.len());

@@ -29,7 +29,7 @@ impl<const N: usize> Vertex<N> {
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut sodg : Sodg<16, 16> = Sodg::empty();
+    /// let mut sodg : Sodg<16> = Sodg::empty();
     /// sodg.add(0).unwrap();
     /// ```
     pub fn empty() -> Self {

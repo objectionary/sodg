@@ -47,7 +47,7 @@ impl Book for Discounted {
 
 pub fn on_graph(total: usize) -> i64 {
     let mut sum = 0;
-    let mut g: Sodg<16, 16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty();
     g.add(0).unwrap();
     for _ in 0..total {
         let v1 = g.next_id();

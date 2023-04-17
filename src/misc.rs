@@ -20,7 +20,7 @@
 
 use crate::Sodg;
 
-impl<const M: usize, const N: usize> Sodg<M, N> {
+impl<const N: usize> Sodg<N> {
     /// Get total number of vertices in the graph.
     #[must_use]
     pub fn len(&self) -> usize {
@@ -46,7 +46,7 @@ impl<const M: usize, const N: usize> Sodg<M, N> {
     /// ```
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
-    /// let mut sodg : Sodg<16, 16> = Sodg::empty();
+    /// let mut sodg : Sodg<16> = Sodg::empty();
     /// sodg.add(0).unwrap();
     /// sodg.add(42).unwrap();
     /// sodg.bind(0, 42, Label::from_str("hello").unwrap()).unwrap();
@@ -62,21 +62,21 @@ use anyhow::Result;
 
 #[test]
 fn checks_for_emptiness() -> Result<()> {
-    let g: Sodg<16, 16> = Sodg::empty();
+    let g: Sodg<16> = Sodg::empty();
     assert!(g.is_empty());
     Ok(())
 }
 
 #[test]
 fn counts_vertices() -> Result<()> {
-    let g: Sodg<16, 16> = Sodg::empty();
+    let g: Sodg<16> = Sodg::empty();
     assert_eq!(0, g.len());
     Ok(())
 }
 
 #[test]
 fn collect_vertices() -> Result<()> {
-    let mut g: Sodg<16, 16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty();
     g.add(1)?;
     g.add(2)?;
     assert!(g.ids().contains(&1));

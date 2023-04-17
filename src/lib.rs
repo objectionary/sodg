@@ -31,7 +31,7 @@
 //! ```
 //! use std::str::FromStr;
 //! use sodg::{Label, Sodg};
-//! let mut sodg : Sodg<16, 16> = Sodg::empty();
+//! let mut sodg : Sodg<16> = Sodg::empty();
 //! sodg.add(0).unwrap();
 //! sodg.add(1).unwrap();
 //! sodg.bind(0, 1, Label::from_str("foo").unwrap()).unwrap();
@@ -65,6 +65,7 @@ mod vertices;
 mod xml;
 
 use serde::{Deserialize, Serialize};
+use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 #[cfg(feature = "gc")]
 use std::collections::HashSet;
@@ -73,7 +74,7 @@ use std::collections::HashSet;
 ///
 /// Instances of this type can be used in [`Sodg::alert_on`] method,
 /// in order to ensure runtime consistency of data inside the graph.
-pub type Alert<const M: usize, const N: usize> = fn(g: &Sodg<M, N>, vx: Vec<u32>) -> Vec<String>;
+pub type Alert<const N: usize> = fn(g: &Sodg<N>, vx: Vec<u32>) -> Vec<String>;
 
 /// An object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
@@ -120,13 +121,13 @@ pub(crate) struct Vertex<const N: usize> {
 
 /// Internal structure, map of all vertices.
 #[derive(Serialize, Deserialize, Clone)]
-pub(crate) struct Vertices<const M: usize, const N: usize> {
-    map: micromap::Map<u32, Vertex<N>, M>,
+pub(crate) struct Vertices<const N: usize> {
+    map: HashMap<u32, Vertex<N>>,
 }
 
 /// Iterator over vertices.
-pub(crate) struct VerticesIter<'a, const M: usize, const N: usize> {
-    iter: micromap::Iter<'a, u32, Vertex<N>, M>,
+pub(crate) struct VerticesIter<'a, const N: usize> {
+    iter: Iter<'a, u32, Vertex<N>>,
 }
 
 /// Internal structure, map of all edges.
@@ -168,7 +169,7 @@ pub struct Script {
 ///
 /// ```
 /// use sodg::{Label, Sodg};
-/// let mut sodg : Sodg<16, 16> = Sodg::empty();
+/// let mut sodg : Sodg<16> = Sodg::empty();
 /// sodg.add(0).unwrap();
 /// sodg.add(1).unwrap();
 /// sodg.bind(0, 1, Label::Alpha(0)).unwrap();
@@ -181,15 +182,15 @@ pub struct Script {
 /// This package is used in [reo](https://github.com/objectionary/reo)
 /// project, as a memory model for objects and dependencies between them.
 #[derive(Serialize, Deserialize)]
-pub struct Sodg<const M: usize, const N: usize> {
+pub struct Sodg<const N: usize> {
     /// This is a map of vertices with their unique numbers/IDs.
-    vertices: Vertices<M, N>,
+    vertices: Vertices<N>,
     /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.
     #[serde(skip_serializing, skip_deserializing)]
     next_v: u32,
     /// This is the list of alerts, which is managed by the [`Sodg::alert_on`] function.
     #[serde(skip_serializing, skip_deserializing)]
-    alerts: Vec<Alert<M, N>>,
+    alerts: Vec<Alert<N>>,
     /// This is the flag that either enables or disables alerts, through [`Sodg::alerts_on`]
     /// and [`Sodg::alerts_off`].
     #[serde(skip_serializing, skip_deserializing)]
