@@ -47,7 +47,7 @@ impl Script {
     /// let mut s = Script::from_str(
     ///   "ADD(0); ADD($ν1); BIND(ν0, $ν1, foo);"
     /// );
-    /// let mut g : Sodg<16, 4> = Sodg::empty();
+    /// let mut g : Sodg<16, 16> = Sodg::empty();
     /// let total = s.deploy_to(&mut g).unwrap();
     /// assert_eq!(1, g.kid(0, Label::from_str("foo").unwrap()).unwrap());
     /// ```
@@ -195,7 +195,7 @@ use std::str;
 
 #[test]
 fn simple_command() -> Result<()> {
-    let mut g: Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     let mut s = Script::from_str(
         "
         ADD(0);  ADD($ν1); # adding two vertices

@@ -89,7 +89,7 @@ use std::str::FromStr;
 
 #[test]
 fn saves_and_loads() -> Result<()> {
-    let mut g: Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     g.add(0)?;
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;
@@ -98,7 +98,7 @@ fn saves_and_loads() -> Result<()> {
     let tmp = TempDir::new()?;
     let file = tmp.path().join("foo.sodg");
     g.save(file.as_path())?;
-    let after: Sodg<4, 4> = Sodg::load(file.as_path())?;
+    let after: Sodg<16, 16> = Sodg::load(file.as_path())?;
     assert_eq!(g.inspect(0)?, after.inspect(0)?);
     Ok(())
 }

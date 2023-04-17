@@ -31,7 +31,7 @@
 //! ```
 //! use std::str::FromStr;
 //! use sodg::{Label, Sodg};
-//! let mut sodg : Sodg<16, 4> = Sodg::empty();
+//! let mut sodg : Sodg<16, 16> = Sodg::empty();
 //! sodg.add(0).unwrap();
 //! sodg.add(1).unwrap();
 //! sodg.bind(0, 1, Label::from_str("foo").unwrap()).unwrap();
@@ -168,7 +168,7 @@ pub struct Script {
 ///
 /// ```
 /// use sodg::{Label, Sodg};
-/// let mut sodg : Sodg<16, 4> = Sodg::empty();
+/// let mut sodg : Sodg<16, 16> = Sodg::empty();
 /// sodg.add(0).unwrap();
 /// sodg.add(1).unwrap();
 /// sodg.bind(0, 1, Label::Alpha(0)).unwrap();

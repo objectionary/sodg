@@ -42,7 +42,7 @@ use crate::Label;
 
 #[test]
 fn makes_a_clone() -> Result<()> {
-    let mut g: Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::Alpha(0))?;

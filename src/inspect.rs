@@ -83,7 +83,7 @@ use crate::Label;
 
 #[test]
 fn inspects_simple_object() -> Result<()> {
-    let mut g: Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     g.add(0)?;
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;

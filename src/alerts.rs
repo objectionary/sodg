@@ -31,7 +31,7 @@ impl<const M: usize, const N: usize> Sodg<M, N> {
     /// ```
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
-    /// let mut g : Sodg<16, 4> = Sodg::empty();
+    /// let mut g : Sodg<16, 16> = Sodg::empty();
     /// g.alerts_on().unwrap();
     /// g.alert_on(|g, vx| {
     ///   for v in vx {
@@ -96,7 +96,7 @@ impl<const M: usize, const N: usize> Sodg<M, N> {
 
 #[test]
 fn panic_on_simple_alert() -> Result<()> {
-    let mut g: Sodg<10, 10> = Sodg::empty();
+    let mut g: Sodg<16, 10> = Sodg::empty();
     g.alerts_on()?;
     g.alert_on(|_, _| vec![format!("{}", "oops")]);
     assert!(g.add(0).is_err());
@@ -105,7 +105,7 @@ fn panic_on_simple_alert() -> Result<()> {
 
 #[test]
 fn dont_panic_when_alerts_disabled() -> Result<()> {
-    let mut g: Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     g.alert_on(|_, _| vec!["should never happen".to_string()]);
     g.alerts_off();
     assert!(g.add(0).is_ok());
@@ -114,7 +114,7 @@ fn dont_panic_when_alerts_disabled() -> Result<()> {
 
 #[test]
 fn panic_on_complex_alert() -> Result<()> {
-    let mut g: Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     g.alert_on(|_, vx| {
         let v = 42;
         if vx.contains(&v) {

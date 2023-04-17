@@ -114,7 +114,7 @@ use std::str::FromStr;
 
 #[test]
 fn makes_a_slice() -> Result<()> {
-    let mut g: Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;
@@ -127,7 +127,7 @@ fn makes_a_slice() -> Result<()> {
 
 #[test]
 fn makes_a_partial_slice() -> Result<()> {
-    let mut g: Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;
@@ -140,7 +140,7 @@ fn makes_a_partial_slice() -> Result<()> {
 
 #[test]
 fn skips_some_vertices() -> Result<()> {
-    let mut g: Sodg<4, 4> = Sodg::empty();
+    let mut g: Sodg<16, 16> = Sodg::empty();
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;
