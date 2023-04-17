@@ -67,7 +67,7 @@ pub fn on_graph(total: usize) -> i64 {
         g.kid(v1, Label::Alpha(0)).unwrap();
         let k = g.kid(v2, Label::Greek('Δ')).unwrap();
         sum += g.data(k).unwrap().to_i64().unwrap() / 2;
-        g.collect().unwrap();
+        // g.collect().unwrap();
     }
     std::hint::black_box(sum)
 }

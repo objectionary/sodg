@@ -19,9 +19,11 @@
 // SOFTWARE.
 
 use crate::{Vertex, Vertices, VerticesIter};
+use nohash_hasher::NoHashHasher;
 use std::collections::HashMap;
 use std::fmt;
 use std::fmt::{Debug, Formatter};
+use std::hash::BuildHasherDefault;
 
 impl<const N: usize> Debug for Vertices<N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
@@ -51,9 +53,9 @@ impl<'a, const N: usize> Iterator for VerticesIter<'a, N> {
 
 impl<const N: usize> Vertices<N> {
     pub fn new() -> Self {
-        Self {
-            map: HashMap::new(),
-        }
+        let m: HashMap<u32, Vertex<N>, BuildHasherDefault<NoHashHasher<u32>>> =
+            HashMap::with_capacity_and_hasher(2, BuildHasherDefault::default());
+        Self { map: m }
     }
 
     pub fn len(&self) -> usize {

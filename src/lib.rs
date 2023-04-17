@@ -64,11 +64,13 @@ mod vertex;
 mod vertices;
 mod xml;
 
+use nohash_hasher::NoHashHasher;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::Iter;
 use std::collections::HashMap;
 #[cfg(feature = "gc")]
 use std::collections::HashSet;
+use std::hash::BuildHasherDefault;
 
 /// A function that is called when a problem is found in [`Sodg`].
 ///
@@ -122,7 +124,7 @@ pub(crate) struct Vertex<const N: usize> {
 /// Internal structure, map of all vertices.
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Vertices<const N: usize> {
-    map: HashMap<u32, Vertex<N>>,
+    map: HashMap<u32, Vertex<N>, BuildHasherDefault<NoHashHasher<u32>>>,
 }
 
 /// Iterator over vertices.
