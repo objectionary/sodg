@@ -47,7 +47,7 @@ impl<const N: usize> Sodg<N> {
         if merged != scope {
             let mut must = vec![];
             for (v, _) in g.vertices.iter() {
-                must.push(*v);
+                must.push(v);
             }
             let seen: Vec<u32> = mapped.keys().copied().collect();
             let missed: HashSet<u32> = &HashSet::from_iter(must) - &HashSet::from_iter(seen);
@@ -126,7 +126,7 @@ impl<const N: usize> Sodg<N> {
     fn join(&mut self, left: u32, right: u32) -> Result<()> {
         let mut keys = vec![];
         for (v, _) in self.vertices.iter() {
-            keys.push(*v);
+            keys.push(v);
         }
         for v in keys {
             let mut vtx = self.vertices.get_mut(v).unwrap();

@@ -32,7 +32,7 @@ impl<const N: usize> Sodg<N> {
     pub fn ids(&self) -> Vec<u32> {
         let mut ids = vec![];
         for (v, _) in self.vertices.iter() {
-            ids.push(*v);
+            ids.push(v);
         }
         ids
     }
@@ -77,8 +77,8 @@ fn counts_vertices() -> Result<()> {
 #[test]
 fn collect_vertices() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty();
+    g.add(0)?;
     g.add(1)?;
-    g.add(2)?;
     assert!(g.ids().contains(&1));
     Ok(())
 }

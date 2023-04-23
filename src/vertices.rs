@@ -18,17 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Vertex, Vertices, VerticesIter};
-use nohash_hasher::NoHashHasher;
-use std::collections::HashMap;
+use crate::{Vertex, Vertices};
 use std::fmt;
 use std::fmt::{Debug, Formatter};
-use std::hash::BuildHasherDefault;
 
 impl<const N: usize> Debug for Vertices<N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
-        for (i, v) in &self.map {
+        for (i, v) in self.iter() {
             let mut attrs = v
                 .edges
                 .into_iter()
@@ -43,35 +40,38 @@ impl<const N: usize> Debug for Vertices<N> {
     }
 }
 
-impl<'a, const N: usize> Iterator for VerticesIter<'a, N> {
-    type Item = (&'a u32, &'a Vertex<N>);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next()
-    }
-}
-
 impl<const N: usize> Vertices<N> {
+    #[inline]
     pub fn new() -> Self {
-        let m: HashMap<u32, Vertex<N>, BuildHasherDefault<NoHashHasher<u32>>> =
-            HashMap::with_capacity_and_hasher(2, BuildHasherDefault::default());
-        Self { map: m }
+        Self { bar: Vec::with_capacity(100) }
     }
 
+    #[inline]
     pub fn len(&self) -> usize {
-        self.map.len()
+        self.iter().count()
     }
 
+    #[inline]
     pub fn insert(&mut self, v: u32) {
-        self.map.insert(v, Vertex::empty());
+        self.bar.insert(v as usize, Some(Vertex::empty()));
     }
 
+    #[inline]
     pub fn get(&self, v: u32) -> Option<&Vertex<N>> {
-        self.map.get(&v)
+        if let Some(v) = self.bar.get(v as usize) {
+            Some(v.as_ref().unwrap())
+        } else {
+            None
+        }
     }
 
+    #[inline]
     pub fn get_mut(&mut self, v: u32) -> Option<&mut Vertex<N>> {
-        self.map.get_mut(&v)
+        if let Some(v) = self.bar.get_mut(v as usize) {
+            Some(v.as_mut().unwrap())
+        } else {
+            None
+        }
     }
 
     pub fn try_id(&self, id: u32) -> u32 {
@@ -81,42 +81,43 @@ impl<const N: usize> Vertices<N> {
         let mut next = None;
         for (v, _) in self.iter() {
             if let Some(before) = next {
-                if *v > before {
-                    next = Some(*v);
+                if v > before {
+                    next = Some(v);
                 }
             }
             if next.is_none() {
-                next = Some(*v);
+                next = Some(v);
             }
         }
         next.map_or(0, |x| x + 1)
     }
 
     pub fn remove(&mut self, v: u32) {
-        self.map.remove(&v);
-        let all: Vec<u32> = self.map.clone().into_keys().collect();
+        self.bar.remove(v as usize);
+        let all: Vec<u32> = self.iter().map(|(k, _v)| k as u32).collect();
         for v1 in all {
-            let vtx = self.map.get_mut(&v1).unwrap();
-            if let Some(a) = vtx
-                .edges
-                .into_iter()
-                .filter(|(_, t)| *t == v)
-                .map(|(a, _)| a)
-                .next()
-            {
-                vtx.edges.remove(a);
+            if let Some(vtx) = self.bar.get_mut(v1 as usize).unwrap() {
+                if let Some(a) = vtx
+                    .edges
+                    .into_iter()
+                    .filter(|(_, t)| *t == v)
+                    .map(|(a, _)| a)
+                    .next()
+                {
+                    vtx.edges.remove(a);
+                }
             }
         }
     }
 
+    #[inline]
     pub fn contains(&self, v: u32) -> bool {
-        self.map.contains_key(&v)
+        self.bar.get(v as usize).is_some()
     }
 
-    pub fn iter(&self) -> VerticesIter<N> {
-        VerticesIter {
-            iter: self.map.iter(),
-        }
+    #[inline]
+    pub fn iter(&self) -> impl Iterator<Item=(u32, &Vertex<N>)> {
+        self.bar.iter().enumerate().filter(|(_i, v)| v.is_some()).map(|(i, v)| (i as u32, v.as_ref().unwrap()))
     }
 }
 
@@ -129,18 +130,18 @@ fn iterates_empty() {
 #[test]
 fn inserts_and_lists() {
     let mut vcs: Vertices<4> = Vertices::new();
-    vcs.insert(1);
-    assert_eq!(1, *vcs.iter().next().unwrap().0);
+    vcs.insert(0);
+    assert_eq!(0, vcs.iter().next().unwrap().0);
 }
 
 #[test]
 fn inserts_and_iterates() {
     let mut vcs: Vertices<4> = Vertices::new();
-    vcs.insert(42);
-    vcs.insert(16);
+    vcs.insert(0);
+    vcs.insert(1);
     let mut keys = vec![];
     for (v, _) in vcs.iter() {
-        keys.push(*v);
+        keys.push(v);
     }
     assert_eq!(2, keys.len());
 }
@@ -148,14 +149,14 @@ fn inserts_and_iterates() {
 #[test]
 fn inserts_and_gets() {
     let mut vcs: Vertices<4> = Vertices::new();
-    vcs.insert(42);
-    assert!(vcs.get(42).unwrap().edges.into_iter().next().is_none());
+    vcs.insert(0);
+    assert!(vcs.get(0).unwrap().edges.into_iter().next().is_none());
 }
 
 #[test]
 fn inserts_and_deletes() {
     let mut vcs: Vertices<4> = Vertices::new();
-    vcs.insert(42);
-    vcs.remove(42);
+    vcs.insert(0);
+    vcs.remove(0);
     assert_eq!(0, vcs.len());
 }

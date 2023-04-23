@@ -69,7 +69,7 @@ impl<const N: usize> Sodg<N> {
         self.alerts_active = true;
         let mut keys = vec![];
         for (v, _) in self.vertices.iter() {
-            keys.push(*v);
+            keys.push(v as u32);
         }
         self.validate(keys)
     }

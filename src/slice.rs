@@ -86,8 +86,8 @@ impl<const N: usize> Sodg<N> {
                 }
             }
             nv.edges = ne;
-            new_vertices.insert(*v);
-            let vtx = new_vertices.get_mut(*v).with_context(|| "Can't find?")?;
+            new_vertices.insert(v);
+            let vtx = new_vertices.get_mut(v).with_context(|| "Can't find?")?;
             for e in &nv.edges {
                 vtx.edges.insert(e.0, e.1);
             }

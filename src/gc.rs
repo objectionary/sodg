@@ -92,7 +92,7 @@ impl<const N: usize> Sodg<N> {
     pub fn collect(&mut self) -> Result<()> {
         let mut all = HashMap::new();
         for (v, _) in self.vertices.iter() {
-            all.insert(*v, Status::Abandoned);
+            all.insert(v, Status::Abandoned);
         }
         if all.contains_key(&0) {
             all.insert(0, Status::Connected);
