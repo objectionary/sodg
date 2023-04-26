@@ -44,7 +44,7 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
-    pub fn add(&mut self, v1: u32) -> Result<()> {
+    pub fn add(&mut self, v1: usize) -> Result<()> {
         if self.vertices.contains(v1) {
             return Ok(());
         }
@@ -82,7 +82,7 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
-    pub fn bind(&mut self, v1: u32, v2: u32, a: Label) -> Result<()> {
+    pub fn bind(&mut self, v1: usize, v2: usize, a: Label) -> Result<()> {
         let vtx1 = self
             .vertices
             .get_mut(v1)
@@ -113,7 +113,7 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
-    pub fn put(&mut self, v: u32, d: &Hex) -> Result<()> {
+    pub fn put(&mut self, v: usize, d: &Hex) -> Result<()> {
         let vtx = self
             .vertices
             .get_mut(v)
@@ -155,7 +155,7 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If garbage collection triggers any error, the error will be returned here.
     #[inline]
-    pub fn data(&mut self, v: u32) -> Result<Hex> {
+    pub fn data(&mut self, v: usize) -> Result<Hex> {
         let vtx = self
             .vertices
             .get_mut(v)
@@ -207,7 +207,7 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If vertex `v1` is absent, `Err` will be returned.
     #[inline]
-    pub fn kids(&self, v: u32) -> Result<Vec<(Label, u32)>> {
+    pub fn kids(&self, v: usize) -> Result<Vec<(Label, usize)>> {
         let vtx = self
             .vertices
             .get(v)
@@ -234,7 +234,7 @@ impl<const N: usize> Sodg<N> {
     /// If vertex `v1` is absent, `None` will be returned.
     #[must_use]
     #[inline]
-    pub fn kid(&self, v: u32, a: Label) -> Option<u32> {
+    pub fn kid(&self, v: usize, a: Label) -> Option<usize> {
         self.vertices
             .get(v)
             .and_then(|vtx| vtx.edges.into_iter().find(|e| e.0 == a).map(|e| e.1))

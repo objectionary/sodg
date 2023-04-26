@@ -21,7 +21,7 @@
 use crate::{Edges, EdgesIntoIter, Label};
 
 impl<'a, const N: usize> Iterator for EdgesIntoIter<'a, N> {
-    type Item = (Label, u32);
+    type Item = (Label, usize);
 
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next()
@@ -29,7 +29,7 @@ impl<'a, const N: usize> Iterator for EdgesIntoIter<'a, N> {
 }
 
 impl<'a, const N: usize> IntoIterator for &'a Edges<N> {
-    type Item = (Label, u32);
+    type Item = (Label, usize);
     type IntoIter = EdgesIntoIter<'a, N>;
 
     fn into_iter(self) -> Self::IntoIter {
@@ -48,7 +48,7 @@ impl<const N: usize> Edges<N> {
     }
 
     #[inline]
-    pub fn insert(&mut self, a: Label, v: u32) {
+    pub fn insert(&mut self, a: Label, v: usize) {
         self.map.insert(a, v);
     }
 

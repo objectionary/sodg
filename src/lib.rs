@@ -71,7 +71,7 @@ use std::collections::HashMap;
 ///
 /// Instances of this type can be used in [`Sodg::alert_on`] method,
 /// in order to ensure runtime consistency of data inside the graph.
-pub type Alert<const N: usize> = fn(g: &Sodg<N>, vx: Vec<u32>) -> Vec<String>;
+pub type Alert<const N: usize> = fn(g: &Sodg<N>, vx: Vec<usize>) -> Vec<String>;
 
 /// An object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
@@ -125,12 +125,12 @@ pub(crate) struct Vertices<const N: usize> {
 /// Internal structure, map of all edges.
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Edges<const N: usize> {
-    map: micromap::Map<Label, u32, N>,
+    map: micromap::Map<Label, usize, N>,
 }
 
 /// Iterator over edges.
 pub(crate) struct EdgesIntoIter<'a, const N: usize> {
-    iter: micromap::IntoIter<'a, Label, u32, N>,
+    iter: micromap::IntoIter<'a, Label, usize, N>,
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.
@@ -151,7 +151,7 @@ pub struct Script {
     /// The text of it.
     txt: String,
     /// The vars dynamically discovered.
-    vars: HashMap<String, u32>,
+    vars: HashMap<String, usize>,
 }
 
 /// A struct that represents a Surging Object Di-Graph (SODG).
@@ -179,7 +179,7 @@ pub struct Sodg<const N: usize> {
     vertices: Vertices<N>,
     /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.
     #[serde(skip_serializing, skip_deserializing)]
-    next_v: u32,
+    next_v: usize,
     /// This is the list of alerts, which is managed by the [`Sodg::alert_on`] function.
     #[serde(skip_serializing, skip_deserializing)]
     alerts: Vec<Alert<N>>,

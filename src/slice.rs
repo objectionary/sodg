@@ -31,8 +31,9 @@ impl<const N: usize> Sodg<N> {
     /// # Errors
     ///
     /// If impossible to slice, an error will be returned.
-    pub fn slice(&self, v: u32) -> Result<Self> {
-        let g : Sodg<N> = self.slice_some(v, |_, _, _| true)?;
+    #[allow(clippy::use_self)]
+    pub fn slice(&self, v: usize) -> Result<Self> {
+        let g: Sodg<N> = self.slice_some(v, |_, _, _| true)?;
         trace!(
             "#slice: taken {} vertices out of {} at ν{v}",
             g.vertices.len(),
@@ -49,7 +50,7 @@ impl<const N: usize> Sodg<N> {
     /// # Errors
     ///
     /// If impossible to slice, an error will be returned.
-    pub fn slice_some(&self, v: u32, p: impl Fn(u32, u32, Label) -> bool) -> Result<Self> {
+    pub fn slice_some(&self, v: usize, p: impl Fn(usize, usize, Label) -> bool) -> Result<Self> {
         let mut todo = HashSet::new();
         let mut done = HashSet::new();
         todo.insert(v);
@@ -57,7 +58,7 @@ impl<const N: usize> Sodg<N> {
             if todo.is_empty() {
                 break;
             }
-            let before: Vec<u32> = todo.drain().collect();
+            let before: Vec<usize> = todo.drain().collect();
             for v in before {
                 done.insert(v);
                 let vtx = self
@@ -76,7 +77,7 @@ impl<const N: usize> Sodg<N> {
                 }
             }
         }
-        let mut new_vertices : Vertices<N> = Vertices::with_capacity(self.vertices.capacity());
+        let mut new_vertices: Vertices<N> = Vertices::with_capacity(self.vertices.capacity());
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             let mut nv = vtx.clone();
             let mut ne = Edges::new();

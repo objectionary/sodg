@@ -38,7 +38,7 @@ impl<const N: usize> Sodg<N> {
     /// # Errors
     ///
     /// If it's impossible to merge, an error will be returned.
-    pub fn merge(&mut self, g: &Self, left: u32, right: u32) -> Result<()> {
+    pub fn merge(&mut self, g: &Self, left: usize, right: usize) -> Result<()> {
         let mut mapped = HashMap::new();
         let before = self.vertices.len();
         self.merge_rec(g, left, right, &mut mapped)?;
@@ -49,9 +49,9 @@ impl<const N: usize> Sodg<N> {
             for (v, _) in g.vertices.iter() {
                 must.push(v);
             }
-            let seen: Vec<u32> = mapped.keys().copied().collect();
-            let missed: HashSet<u32> = &HashSet::from_iter(must) - &HashSet::from_iter(seen);
-            let mut ordered: Vec<u32> = missed.into_iter().collect();
+            let seen: Vec<usize> = mapped.keys().copied().collect();
+            let missed: HashSet<usize> = &HashSet::from_iter(must) - &HashSet::from_iter(seen);
+            let mut ordered: Vec<usize> = missed.into_iter().collect();
             ordered.sort_unstable();
             return Err(anyhow!(
                 "Just {merged} vertices merged, out of {scope}; maybe the right graph was not a tree? {} missed: {}",
@@ -80,9 +80,9 @@ impl<const N: usize> Sodg<N> {
     fn merge_rec(
         &mut self,
         g: &Self,
-        left: u32,
-        right: u32,
-        mapped: &mut HashMap<u32, u32>,
+        left: usize,
+        right: usize,
+        mapped: &mut HashMap<usize, usize>,
     ) -> Result<()> {
         if mapped.contains_key(&right) {
             return Ok(());
@@ -123,7 +123,7 @@ impl<const N: usize> Sodg<N> {
         Ok(())
     }
 
-    fn join(&mut self, left: u32, right: u32) -> Result<()> {
+    fn join(&mut self, left: usize, right: usize) -> Result<()> {
         let mut keys = vec![];
         for (v, _) in self.vertices.iter() {
             keys.push(v);

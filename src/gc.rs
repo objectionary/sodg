@@ -99,7 +99,7 @@ impl<const N: usize> Sodg<N> {
         }
         loop {
             let mut modified = false;
-            let vec: Vec<(u32, Status)> = all
+            let vec: Vec<(usize, Status)> = all
                 .clone()
                 .into_iter()
                 .filter(|(_, s)| *s == Status::Connected)
@@ -118,7 +118,7 @@ impl<const N: usize> Sodg<N> {
         }
         loop {
             let mut modified = false;
-            let vec: Vec<(u32, Status)> = all
+            let vec: Vec<(usize, Status)> = all
                 .clone()
                 .into_iter()
                 .filter(|(_, s)| *s != Status::Busy)
@@ -144,7 +144,7 @@ impl<const N: usize> Sodg<N> {
         let mut total = 0;
         loop {
             let mut modified = false;
-            let vec: Vec<(u32, Status)> = all
+            let vec: Vec<(usize, Status)> = all
                 .clone()
                 .into_iter()
                 .filter(|(_, s)| *s == Status::Abandoned)

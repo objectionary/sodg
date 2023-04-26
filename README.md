@@ -42,7 +42,7 @@ assert_eq!(1, id);
 Then, you can find all kids of a vertex:
 
 ```rust
-let kids: Vec<(String, String, u32)> = g.kids(0);
+let kids: Vec<(String, String, usize)> = g.kids(0);
 assert_eq!("foo", kids[0].0);
 assert_eq!("bar", kids[0].1);
 assert_eq!(1, kids[0].2);

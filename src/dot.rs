@@ -63,7 +63,7 @@ digraph {
         for (v, vtx) in self
             .vertices
             .iter()
-            .sorted_by_key(|(v, _)| <u32>::clone(v))
+            .sorted_by_key(|(v, _)| <usize>::clone(v))
         {
             lines.push(format!(
                 "  v{v}[shape=circle,label=\"ν{v}\"{}]; {}",

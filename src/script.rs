@@ -159,7 +159,7 @@ impl Script {
     /// # Errors
     ///
     /// If impossible to parse, an error will be returned.
-    fn parse<const N: usize>(&mut self, s: &str, g: &mut Sodg<N>) -> Result<u32> {
+    fn parse<const N: usize>(&mut self, s: &str, g: &mut Sodg<N>) -> Result<usize> {
         let head = s
             .chars()
             .next()
@@ -169,11 +169,11 @@ impl Script {
             if head == '$' {
                 Ok(*self.vars.entry(tail).or_insert_with(|| g.next_id()))
             } else {
-                Ok(u32::from_str(tail.as_str())
+                Ok(usize::from_str(tail.as_str())
                     .with_context(|| format!("Parsing of '{s}' failed"))?)
             }
         } else {
-            let v = u32::from_str(s).with_context(|| format!("Parsing of '{s}' failed"))?;
+            let v = usize::from_str(s).with_context(|| format!("Parsing of '{s}' failed"))?;
             Ok(v)
         }
     }

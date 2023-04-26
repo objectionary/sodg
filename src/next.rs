@@ -26,7 +26,7 @@ impl<const N: usize> Sodg<N> {
     /// This ID will never be returned by [`Sodg::next_id`] again. Also, this ID will not
     /// be equal to any of the existing IDs of vertices.
     #[inline]
-    pub fn next_id(&mut self) -> u32 {
+    pub fn next_id(&mut self) -> usize {
         let mut id = self.next_v;
         id = self.vertices.try_id(id);
         let next = id + 1;

@@ -54,7 +54,7 @@ impl<const N: usize> Sodg<N> {
     /// # Errors
     ///
     /// If the vertex is absent, an error may be returned.
-    pub fn v_print(&self, v: u32) -> Result<String> {
+    pub fn v_print(&self, v: usize) -> Result<String> {
         let vtx = self
             .vertices
             .get(v)

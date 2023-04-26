@@ -43,7 +43,9 @@ impl<const N: usize> Debug for Vertices<N> {
 impl<const N: usize> Vertices<N> {
     #[inline]
     pub fn with_capacity(cap: usize) -> Self {
-        Self { emap: emap::Map::with_capacity_init(cap) }
+        Self {
+            emap: emap::Map::with_capacity_init(cap),
+        }
     }
 
     #[inline]
@@ -57,33 +59,33 @@ impl<const N: usize> Vertices<N> {
     }
 
     #[inline]
-    pub fn insert(&mut self, v: u32) {
-        self.emap.insert(v as usize, Vertex::empty());
+    pub fn insert(&mut self, v: usize) {
+        self.emap.insert(v, Vertex::empty());
     }
 
     #[inline]
-    pub fn get(&self, v: u32) -> Option<&Vertex<N>> {
-        self.emap.get(v as usize)
+    pub fn get(&self, v: usize) -> Option<&Vertex<N>> {
+        self.emap.get(v)
     }
 
     #[inline]
-    pub fn get_mut(&mut self, v: u32) -> Option<&mut Vertex<N>> {
-        self.emap.get_mut(v as usize)
+    pub fn get_mut(&mut self, v: usize) -> Option<&mut Vertex<N>> {
+        self.emap.get_mut(v)
     }
 
     #[inline]
-    pub fn try_id(&self, id: u32) -> u32 {
+    pub fn try_id(&self, id: usize) -> usize {
         if !self.contains(id) {
             return id;
         }
-        self.emap.next_key_gte(id as usize) as u32
+        self.emap.next_key_gte(id)
     }
 
-    pub fn remove(&mut self, v: u32) {
-        self.emap.remove(v as usize);
-        let all: Vec<u32> = self.iter().map(|(k, _v)| k).collect();
+    pub fn remove(&mut self, v: usize) {
+        self.emap.remove(v);
+        let all: Vec<usize> = self.iter().map(|(k, _v)| k).collect();
         for v1 in all {
-            if let Some(vtx) = self.emap.get_mut(v1 as usize) {
+            if let Some(vtx) = self.emap.get_mut(v1) {
                 if let Some(a) = vtx
                     .edges
                     .into_iter()
@@ -98,13 +100,13 @@ impl<const N: usize> Vertices<N> {
     }
 
     #[inline]
-    pub fn contains(&self, v: u32) -> bool {
-        self.emap.contains_key(v as usize)
+    pub fn contains(&self, v: usize) -> bool {
+        self.emap.contains_key(v)
     }
 
     #[inline]
-    pub fn iter(&self) -> impl Iterator<Item=(u32, &Vertex<N>)> {
-        self.emap.iter().map(|(i, v)| (i as u32, v))
+    pub fn iter(&self) -> impl Iterator<Item = (usize, &Vertex<N>)> {
+        self.emap.iter()
     }
 }
 
@@ -179,4 +181,3 @@ fn can_be_cloned() {
     vcs.insert(7);
     assert_eq!(1, vcs.clone().len());
 }
-

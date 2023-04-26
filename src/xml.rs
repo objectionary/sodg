@@ -69,7 +69,7 @@ impl<const N: usize> Sodg<N> {
         for (v, vtx) in self
             .vertices
             .iter()
-            .sorted_by_key(|(v, _)| <u32>::clone(v))
+            .sorted_by_key(|(v, _)| <usize>::clone(v))
         {
             let mut v_node = XMLElement::new("v");
             v_node.add_attribute("id", v.to_string().as_str());

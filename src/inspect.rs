@@ -32,7 +32,7 @@ impl<const N: usize> Sodg<N> {
     /// # Errors
     ///
     /// If it's impossible to inspect, an error will be returned.
-    pub fn inspect(&self, v: u32) -> Result<String> {
+    pub fn inspect(&self, v: usize) -> Result<String> {
         let mut seen = HashSet::new();
         Ok(format!(
             "ν{}\n{}",
@@ -41,7 +41,7 @@ impl<const N: usize> Sodg<N> {
         ))
     }
 
-    fn inspect_v(&self, v: u32, seen: &mut HashSet<u32>) -> Result<Vec<String>> {
+    fn inspect_v(&self, v: usize, seen: &mut HashSet<usize>) -> Result<Vec<String>> {
         seen.insert(v);
         let mut lines = vec![];
         self.vertices

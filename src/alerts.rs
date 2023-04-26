@@ -81,7 +81,7 @@ impl<const N: usize> Sodg<N> {
     /// If any of them have any issues, `Err` is returned.
     #[allow(clippy::needless_pass_by_value)]
     #[inline]
-    pub fn validate(&self, vx: Vec<u32>) -> Result<()> {
+    pub fn validate(&self, vx: Vec<usize>) -> Result<()> {
         if self.alerts_active {
             for a in &self.alerts {
                 let msgs = a(self, vx.clone());

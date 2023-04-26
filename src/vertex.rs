@@ -30,7 +30,7 @@ impl<const N: usize> Vertex<N> {
     /// let mut sodg : Sodg<16> = Sodg::empty(256);
     /// sodg.add(0).unwrap();
     /// ```
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self {
             edges: Edges::new(),
             data: None,

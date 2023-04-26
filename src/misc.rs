@@ -29,7 +29,7 @@ impl<const N: usize> Sodg<N> {
 
     /// Get all IDs of vertices, in a vector.
     #[must_use]
-    pub fn ids(&self) -> Vec<u32> {
+    pub fn ids(&self) -> Vec<usize> {
         let mut ids = vec![];
         for (v, _) in self.vertices.iter() {
             ids.push(v);
