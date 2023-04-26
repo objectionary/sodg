@@ -32,8 +32,8 @@
 //! use std::str::FromStr;
 //! use sodg::{Label, Sodg};
 //! let mut sodg : Sodg<16> = Sodg::empty(256);
-//! sodg.add(0).unwrap();
-//! sodg.add(1).unwrap();
+//! sodg.add(0);
+//! sodg.add(1);
 //! sodg.bind(0, 1, Label::from_str("foo").unwrap()).unwrap();
 //! ```
 
@@ -162,10 +162,10 @@ pub struct Script {
 /// ```
 /// use sodg::{Label, Sodg};
 /// let mut sodg : Sodg<16> = Sodg::empty(256);
-/// sodg.add(0).unwrap();
-/// sodg.add(1).unwrap();
+/// sodg.add(0);
+/// sodg.add(1);
 /// sodg.bind(0, 1, Label::Alpha(0)).unwrap();
-/// sodg.add(2).unwrap();
+/// sodg.add(2);
 /// sodg.bind(1, 2, Label::Alpha(1)).unwrap();
 /// assert_eq!(1, sodg.kids(0).unwrap().len());
 /// assert_eq!(1, sodg.kids(1).unwrap().len());
@@ -187,8 +187,6 @@ pub struct Sodg<const N: usize> {
     /// and [`Sodg::alerts_off`].
     #[serde(skip_serializing, skip_deserializing)]
     alerts_active: bool,
-    #[cfg(feature = "sober")]
-    finds: HashSet<String>,
 }
 
 #[cfg(test)]

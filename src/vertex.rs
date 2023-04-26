@@ -28,7 +28,7 @@ impl<const N: usize> Vertex<N> {
     /// ```
     /// use sodg::Sodg;
     /// let mut sodg : Sodg<16> = Sodg::empty(256);
-    /// sodg.add(0).unwrap();
+    /// sodg.add(0);
     /// ```
     pub const fn empty() -> Self {
         Self {

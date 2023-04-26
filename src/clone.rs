@@ -43,8 +43,8 @@ use crate::Label;
 #[test]
 fn makes_a_clone() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1)?;
-    g.add(42)?;
+    g.add(1);
+    g.add(42);
     g.bind(1, 42, Label::Alpha(0))?;
     let c = g.clone();
     assert_eq!(2, c.vertices.len());

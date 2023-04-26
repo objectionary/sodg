@@ -47,8 +47,8 @@ impl<const N: usize> Sodg<N> {
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
     /// let mut sodg : Sodg<16> = Sodg::empty(256);
-    /// sodg.add(0).unwrap();
-    /// sodg.add(42).unwrap();
+    /// sodg.add(0);
+    /// sodg.add(42);
     /// sodg.bind(0, 42, Label::from_str("hello").unwrap()).unwrap();
     /// ```
     #[must_use]
@@ -77,8 +77,8 @@ fn counts_vertices() -> Result<()> {
 #[test]
 fn collect_vertices() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
-    g.add(1)?;
+    g.add(0);
+    g.add(1);
     assert!(g.ids().contains(&1));
     Ok(())
 }

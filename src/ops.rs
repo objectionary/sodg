@@ -33,27 +33,26 @@ impl<const N: usize> Sodg<N> {
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
-    /// g.add(0).unwrap();
-    /// g.add(42).unwrap();
+    /// g.add(0);
+    /// g.add(42);
     /// g.bind(0, 42, Label::from_str("hello").unwrap()).unwrap();
     /// ```
     ///
     /// If vertex `v1` already exists in the graph, `Ok` will be returned.
     ///
-    /// # Errors
+    /// # Panics
     ///
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
-    pub fn add(&mut self, v1: usize) -> Result<()> {
+    pub fn add(&mut self, v1: usize) {
         if self.vertices.contains(v1) {
-            return Ok(());
+            return;
         }
         self.vertices.insert(v1);
         #[cfg(debug_assertions)]
-        self.validate(vec![v1])?;
+        self.validate(vec![v1]).unwrap();
         #[cfg(debug_assertions)]
         trace!("#add: vertex ν{v1} added");
-        Ok(())
     }
 
     /// Make an edge `e1` from vertex `v1` to vertex `v2` and put `a` label on it.
@@ -64,8 +63,8 @@ impl<const N: usize> Sodg<N> {
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
-    /// g.add(0).unwrap();
-    /// g.add(42).unwrap();
+    /// g.add(0);
+    /// g.add(42);
     /// g.bind(0, 42, Label::from_str("forward").unwrap()).unwrap();
     /// g.bind(42, 0, Label::from_str("backward").unwrap()).unwrap();
     /// ```
@@ -103,7 +102,7 @@ impl<const N: usize> Sodg<N> {
     /// use sodg::Hex;
     /// use sodg::Sodg;
     /// let mut g : Sodg<16> = Sodg::empty(256);
-    /// g.add(42).unwrap();
+    /// g.add(42);
     /// g.put(42, &Hex::from_str_bytes("hello, world!")).unwrap();
     /// ```
     ///
@@ -134,7 +133,7 @@ impl<const N: usize> Sodg<N> {
     /// use sodg::Hex;
     /// use sodg::Sodg;
     /// let mut g : Sodg<16> = Sodg::empty(256);
-    /// g.add(42).unwrap();
+    /// g.add(42);
     /// let data = Hex::from_str_bytes("hello, world!");
     /// g.put(42, &data).unwrap();
     /// assert_eq!(data, g.data(42).unwrap());
@@ -145,7 +144,7 @@ impl<const N: usize> Sodg<N> {
     /// ```
     /// use sodg::Sodg;
     /// let mut g : Sodg<16> = Sodg::empty(256);
-    /// g.add(42).unwrap();
+    /// g.add(42);
     /// assert!(g.data(42).unwrap().is_empty());
     /// ```
     ///
@@ -178,8 +177,8 @@ impl<const N: usize> Sodg<N> {
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
-    /// g.add(0).unwrap();
-    /// g.add(42).unwrap();
+    /// g.add(0);
+    /// g.add(42);
     /// g.bind(0, 42, Label::from_str("k").unwrap()).unwrap();
     /// let (a, to) = g.kids(0).unwrap().first().unwrap().clone();
     /// assert_eq!("k", a.to_string());
@@ -193,8 +192,8 @@ impl<const N: usize> Sodg<N> {
     /// use itertools::Itertools;
     /// use sodg::{Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
-    /// g.add(0).unwrap();
-    /// g.add(42).unwrap();
+    /// g.add(0);
+    /// g.add(42);
     /// g.bind(0, 42, Label::from_str("a").unwrap()).unwrap();
     /// g.bind(0, 42, Label::from_str("b").unwrap()).unwrap();
     /// g.bind(0, 42, Label::from_str("c").unwrap()).unwrap();
@@ -224,8 +223,8 @@ impl<const N: usize> Sodg<N> {
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
-    /// g.add(0).unwrap();
-    /// g.add(42).unwrap();
+    /// g.add(0);
+    /// g.add(42);
     /// let k = Label::from_str("k").unwrap();
     /// g.bind(0, 42, k).unwrap();
     /// assert_eq!(42, g.kid(0, k).unwrap());
@@ -247,7 +246,7 @@ use std::str::FromStr;
 #[test]
 fn adds_simple_vertex() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1)?;
+    g.add(1);
     assert_eq!(1, g.len());
     Ok(())
 }
@@ -255,8 +254,8 @@ fn adds_simple_vertex() -> Result<()> {
 #[test]
 fn adds_two_simple_vertices() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1)?;
-    g.add(42)?;
+    g.add(1);
+    g.add(42);
     assert_eq!(2, g.len());
     Ok(())
 }
@@ -264,8 +263,8 @@ fn adds_two_simple_vertices() -> Result<()> {
 #[test]
 fn binds_simple_vertices() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1)?;
-    g.add(2)?;
+    g.add(1);
+    g.add(2);
     let k = Label::from_str("hello")?;
     g.bind(1, 2, k)?;
     assert_eq!(2, g.kid(1, k).unwrap());
@@ -275,8 +274,8 @@ fn binds_simple_vertices() -> Result<()> {
 #[test]
 fn pre_defined_ids() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1)?;
-    g.add(2)?;
+    g.add(1);
+    g.add(2);
     let k = Label::from_str("a-привет")?;
     g.bind(1, 2, k)?;
     assert_eq!(2, g.kid(1, k).unwrap());
@@ -286,8 +285,8 @@ fn pre_defined_ids() -> Result<()> {
 #[test]
 fn binds_two_names() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1)?;
-    g.add(2)?;
+    g.add(1);
+    g.add(2);
     let first = Label::from_str("first")?;
     g.bind(1, 2, first)?;
     let second = Label::from_str("second")?;
@@ -300,10 +299,10 @@ fn binds_two_names() -> Result<()> {
 #[test]
 fn overwrites_edge() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1)?;
-    g.add(2)?;
+    g.add(1);
+    g.add(2);
     g.bind(1, 2, Label::from_str("foo")?)?;
-    g.add(3)?;
+    g.add(3);
     g.bind(1, 3, Label::from_str("foo")?)?;
     assert_eq!(3, g.kid(1, Label::from_str("foo")?).unwrap());
     Ok(())
@@ -312,8 +311,8 @@ fn overwrites_edge() -> Result<()> {
 #[test]
 fn binds_to_root() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
-    g.add(1)?;
+    g.add(0);
+    g.add(1);
     g.bind(0, 1, Label::from_str("x")?)?;
     assert!(g.kid(0, Label::from_str("ρ")?).is_none());
     assert!(g.kid(0, Label::from_str("σ")?).is_none());
@@ -324,7 +323,7 @@ fn binds_to_root() -> Result<()> {
 fn sets_simple_data() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     let data = Hex::from_str_bytes("hello");
-    g.add(0)?;
+    g.add(0);
     g.put(0, &data)?;
     assert_eq!(data, g.data(0)?);
     Ok(())
@@ -333,8 +332,8 @@ fn sets_simple_data() -> Result<()> {
 #[test]
 fn finds_all_kids() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
-    g.add(1)?;
+    g.add(0);
+    g.add(1);
     g.bind(0, 1, Label::from_str("one")?)?;
     g.bind(0, 1, Label::from_str("two")?)?;
     assert_eq!(2, g.kids(0)?.len());
@@ -351,8 +350,8 @@ fn finds_all_kids() -> Result<()> {
 fn builds_list_of_kids() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.alerts_off();
-    g.add(0)?;
-    g.add(1)?;
+    g.add(0);
+    g.add(1);
     g.bind(0, 1, Label::from_str("one")?)?;
     g.bind(0, 1, Label::from_str("two")?)?;
     g.bind(0, 1, Label::from_str("three")?)?;
@@ -369,7 +368,7 @@ fn builds_list_of_kids() -> Result<()> {
 #[test]
 fn gets_data_from_empty_vertex() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
+    g.add(0);
     assert!(g.data(0).is_ok());
     assert!(g.data(0).unwrap().is_empty());
     Ok(())
@@ -378,7 +377,7 @@ fn gets_data_from_empty_vertex() -> Result<()> {
 #[test]
 fn gets_absent_kid() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
+    g.add(0);
     assert!(g.kid(0, Label::from_str("hello")?).is_none());
     Ok(())
 }
@@ -393,7 +392,7 @@ fn gets_kid_from_absent_vertex() -> Result<()> {
 #[test]
 fn adds_twice() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
-    assert!(g.add(0).is_ok());
+    g.add(0);
+    g.add(0);
     Ok(())
 }

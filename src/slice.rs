@@ -98,8 +98,6 @@ impl<const N: usize> Sodg<N> {
             next_v: self.next_v,
             alerts: self.alerts.clone(),
             alerts_active: self.alerts_active,
-            #[cfg(feature = "sober")]
-            finds: HashSet::new(),
         };
         trace!(
             "#slice_some: taken {} vertices out of {} at ν{v}",
@@ -116,10 +114,10 @@ use std::str::FromStr;
 #[test]
 fn makes_a_slice() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
-    g.add(1)?;
+    g.add(0);
+    g.add(1);
     g.bind(0, 1, Label::from_str("foo")?)?;
-    g.add(2)?;
+    g.add(2);
     g.bind(0, 2, Label::from_str("bar")?)?;
     assert_eq!(1, g.slice(1)?.vertices.len());
     assert_eq!(1, g.slice(2)?.vertices.len());
@@ -129,10 +127,10 @@ fn makes_a_slice() -> Result<()> {
 #[test]
 fn makes_a_partial_slice() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
-    g.add(1)?;
+    g.add(0);
+    g.add(1);
     g.bind(0, 1, Label::from_str("foo")?)?;
-    g.add(2)?;
+    g.add(2);
     g.bind(1, 2, Label::from_str("bar")?)?;
     let slice = g.slice_some(1, |_v, _to, _a| false)?;
     assert_eq!(1, slice.vertices.len());
@@ -142,10 +140,10 @@ fn makes_a_partial_slice() -> Result<()> {
 #[test]
 fn skips_some_vertices() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
-    g.add(1)?;
+    g.add(0);
+    g.add(1);
     g.bind(0, 1, Label::from_str("foo")?)?;
-    g.add(2)?;
+    g.add(2);
     g.bind(0, 2, Label::from_str("+bar")?)?;
     let slice = g.slice_some(0, |_, _, a| !a.to_string().starts_with('+'))?;
     assert_eq!(2, slice.vertices.len());

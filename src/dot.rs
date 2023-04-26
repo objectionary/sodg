@@ -31,9 +31,9 @@ impl<const N: usize> Sodg<N> {
     /// use sodg::{Hex, Label};
     /// use sodg::Sodg;
     /// let mut g : Sodg<16> = Sodg::empty(256);
-    /// g.add(0).unwrap();
+    /// g.add(0);
     /// g.put(0, &Hex::from_str_bytes("hello")).unwrap();
-    /// g.add(1).unwrap();
+    /// g.add(1);
     /// g.bind(0, 1, Label::from_str("foo").unwrap()).unwrap();
     /// g.bind(0, 1, Label::from_str("bar").unwrap()).unwrap();
     /// let dot = g.to_dot();
@@ -122,9 +122,9 @@ use anyhow::Result;
 #[test]
 fn simple_graph_to_dot() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
+    g.add(0);
     g.put(0, &Hex::from_str_bytes("hello"))?;
-    g.add(1)?;
+    g.add(1);
     g.bind(0, 1, Label::Alpha(0))?;
     let dot = g.to_dot();
     assert!(dot.contains("shape=circle,label=\"ν0\""));

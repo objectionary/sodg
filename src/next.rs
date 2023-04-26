@@ -52,8 +52,8 @@ fn simple_next_id() -> Result<()> {
 #[test]
 fn calculates_next_id() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
-    g.add(42)?;
+    g.add(0);
+    g.add(42);
     assert_eq!(1, g.next_id());
     assert_eq!(2, g.next_id());
     Ok(())
@@ -62,7 +62,7 @@ fn calculates_next_id() -> Result<()> {
 #[test]
 fn next_id_after_inject() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1)?;
+    g.add(1);
     assert_eq!(0, g.next_id());
     assert_eq!(2, g.next_id());
     Ok(())
@@ -71,8 +71,8 @@ fn next_id_after_inject() -> Result<()> {
 #[test]
 fn next_id_after_sequence() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
-    g.add(1)?;
+    g.add(0);
+    g.add(1);
     assert_eq!(2, g.next_id());
     assert_eq!(3, g.next_id());
     Ok(())
@@ -81,7 +81,7 @@ fn next_id_after_sequence() -> Result<()> {
 #[test]
 fn next_id_after_zero() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0)?;
+    g.add(0);
     assert_eq!(1, g.next_id());
     assert_eq!(2, g.next_id());
     Ok(())

@@ -112,7 +112,8 @@ impl Script {
         match &cap[1] {
             "ADD" => {
                 let v = self.parse(args.get(0).with_context(|| "V is expected")?, g)?;
-                g.add(v).with_context(|| format!("Failed to ADD({v})"))
+                g.add(v);
+                Ok(())
             }
             "BIND" => {
                 let v1 = self.parse(args.get(0).with_context(|| "V1 is expected")?, g)?;

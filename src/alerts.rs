@@ -41,9 +41,9 @@ impl<const N: usize> Sodg<N> {
     ///   }
     ///   return vec![];
     /// });
-    /// g.add(0).unwrap();
-    /// g.add(1).unwrap();
-    /// g.add(2).unwrap();
+    /// g.add(0);
+    /// g.add(1);
+    /// g.add(2);
     /// g.bind(0, 1, Label::from_str("first").unwrap()).unwrap();
     /// assert!(g.bind(0, 2, Label::from_str("second").unwrap()).is_err());
     /// ```
@@ -96,12 +96,12 @@ impl<const N: usize> Sodg<N> {
 
 #[test]
 #[cfg(debug_assertions)]
-fn panic_on_simple_alert() -> Result<()> {
+#[should_panic]
+fn panic_on_simple_alert() {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.alerts_on()?;
+    g.alerts_on().unwrap();
     g.alert_on(|_, _| vec![format!("{}", "oops")]);
-    assert!(g.add(0).is_err());
-    Ok(())
+    g.add(0);
 }
 
 #[test]
@@ -110,13 +110,14 @@ fn dont_panic_when_alerts_disabled() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.alert_on(|_, _| vec!["should never happen".to_string()]);
     g.alerts_off();
-    assert!(g.add(0).is_ok());
+    g.add(0);
     Ok(())
 }
 
 #[test]
 #[cfg(debug_assertions)]
-fn panic_on_complex_alert() -> Result<()> {
+#[should_panic]
+fn panic_on_complex_alert() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.alert_on(|_, vx| {
         let v = 42;
@@ -126,7 +127,6 @@ fn panic_on_complex_alert() -> Result<()> {
             vec![]
         }
     });
-    g.alerts_on()?;
-    assert!(g.add(42).is_err());
-    Ok(())
+    g.alerts_on().unwrap();
+    g.add(42);
 }
