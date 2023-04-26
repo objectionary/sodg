@@ -116,9 +116,9 @@ fn makes_a_slice() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?)?;
+    g.bind(0, 1, Label::from_str("foo")?);
     g.add(2);
-    g.bind(0, 2, Label::from_str("bar")?)?;
+    g.bind(0, 2, Label::from_str("bar")?);
     assert_eq!(1, g.slice(1)?.vertices.len());
     assert_eq!(1, g.slice(2)?.vertices.len());
     Ok(())
@@ -129,9 +129,9 @@ fn makes_a_partial_slice() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?)?;
+    g.bind(0, 1, Label::from_str("foo")?);
     g.add(2);
-    g.bind(1, 2, Label::from_str("bar")?)?;
+    g.bind(1, 2, Label::from_str("bar")?);
     let slice = g.slice_some(1, |_v, _to, _a| false)?;
     assert_eq!(1, slice.vertices.len());
     Ok(())
@@ -142,9 +142,9 @@ fn skips_some_vertices() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?)?;
+    g.bind(0, 1, Label::from_str("foo")?);
     g.add(2);
-    g.bind(0, 2, Label::from_str("+bar")?)?;
+    g.bind(0, 2, Label::from_str("+bar")?);
     let slice = g.slice_some(0, |_, _, a| !a.to_string().starts_with('+'))?;
     assert_eq!(2, slice.vertices.len());
     assert_eq!(1, slice.kids(0)?.len());

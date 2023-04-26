@@ -54,14 +54,14 @@ pub fn on_graph(total: usize) -> i64 {
         g.add(v1);
         let v2 = v1 + 1;
         g.add(v2);
-        g.bind(v1, v2, Label::Alpha(0)).unwrap();
+        g.bind(v1, v2, Label::Alpha(0));
         let v3 = v2 + 1;
         g.add(v3);
-        g.bind(v2, v3, Label::Greek('Δ')).unwrap();
+        g.bind(v2, v3, Label::Greek('Δ'));
         g.put(v3, &Hex::from(42)).unwrap();
         let v4 = v3 + 1;
         g.add(v4);
-        g.bind(v4, v1, Label::Greek('φ')).unwrap();
+        g.bind(v4, v1, Label::Greek('φ'));
         assert!(g.kid(v4, Label::Alpha(0)).is_none());
         g.kid(v4, Label::Greek('φ')).unwrap();
         g.kid(v1, Label::Alpha(0)).unwrap();

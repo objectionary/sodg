@@ -77,6 +77,7 @@ impl<const N: usize> Sodg<N> {
     /// # Errors
     ///
     /// If it's impossible to merge, an error will be returned.
+    #[allow(clippy::option_if_let_else)]
     fn merge_rec(
         &mut self,
         g: &Self,
@@ -101,12 +102,12 @@ impl<const N: usize> Sodg<N> {
             let matched = if let Some(t) = self.kid(left, a) {
                 t
             } else if let Some(t) = mapped.get(&to) {
-                self.bind(left, *t, a)?;
+                self.bind(left, *t, a);
                 *t
             } else {
                 let id = self.next_id();
                 self.add(id);
-                self.bind(left, id, a)?;
+                self.bind(left, id, a);
                 id
             };
             self.merge_rec(g, matched, to, mapped)?;
@@ -145,7 +146,7 @@ impl<const N: usize> Sodg<N> {
                     e.0
                 ));
             }
-            self.bind(left, e.1, e.0)?;
+            self.bind(left, e.1, e.0);
         }
         self.vertices.remove(right);
         Ok(())
@@ -160,11 +161,11 @@ fn merges_two_graphs() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?)?;
+    g.bind(0, 1, Label::from_str("foo")?);
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(1);
-    extra.bind(0, 1, Label::from_str("bar")?)?;
+    extra.bind(0, 1, Label::from_str("bar")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(3, g.vertices.len());
     assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
@@ -192,18 +193,18 @@ fn merges_a_loop() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("a")?)?;
+    g.bind(0, 1, Label::from_str("a")?);
     g.add(2);
-    g.bind(1, 2, Label::from_str("b")?)?;
+    g.bind(1, 2, Label::from_str("b")?);
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(4);
-    extra.bind(0, 4, Label::from_str("c")?)?;
+    extra.bind(0, 4, Label::from_str("c")?);
     extra.add(3);
-    extra.bind(0, 3, Label::from_str("a")?)?;
-    extra.bind(4, 3, Label::from_str("d")?)?;
+    extra.bind(0, 3, Label::from_str("a")?);
+    extra.bind(4, 3, Label::from_str("d")?);
     extra.add(5);
-    extra.bind(3, 5, Label::from_str("e")?)?;
+    extra.bind(3, 5, Label::from_str("e")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(5, g.vertices.len());
     assert_eq!(1, g.kid(0, Label::from_str("a")?).unwrap());
@@ -219,13 +220,13 @@ fn avoids_simple_duplicates() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(5);
-    g.bind(0, 5, Label::from_str("foo")?)?;
+    g.bind(0, 5, Label::from_str("foo")?);
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(1);
-    extra.bind(0, 1, Label::from_str("foo")?)?;
+    extra.bind(0, 1, Label::from_str("foo")?);
     extra.add(2);
-    extra.bind(1, 2, Label::from_str("bar")?)?;
+    extra.bind(1, 2, Label::from_str("bar")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(3, g.vertices.len());
     assert_eq!(5, g.kid(0, Label::from_str("foo")?).unwrap());
@@ -238,15 +239,15 @@ fn keeps_existing_vertices_intact() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?)?;
+    g.bind(0, 1, Label::from_str("foo")?);
     g.add(2);
-    g.bind(1, 2, Label::from_str("bar")?)?;
+    g.bind(1, 2, Label::from_str("bar")?);
     g.add(3);
-    g.bind(2, 3, Label::from_str("zzz")?)?;
+    g.bind(2, 3, Label::from_str("zzz")?);
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(5);
-    extra.bind(0, 5, Label::from_str("foo")?)?;
+    extra.bind(0, 5, Label::from_str("foo")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(4, g.vertices.len());
     assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
@@ -271,8 +272,8 @@ fn merges_simple_loop() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     g.add(2);
-    g.bind(1, 2, Label::from_str("foo")?)?;
-    g.bind(2, 1, Label::from_str("bar")?)?;
+    g.bind(1, 2, Label::from_str("foo")?);
+    g.bind(2, 1, Label::from_str("bar")?);
     let extra = g.clone();
     g.merge(&extra, 1, 1)?;
     assert_eq!(extra.vertices.len(), g.vertices.len());
@@ -286,10 +287,10 @@ fn merges_large_loop() -> Result<()> {
     g.add(2);
     g.add(3);
     g.add(4);
-    g.bind(1, 2, Label::from_str("a")?)?;
-    g.bind(2, 3, Label::from_str("b")?)?;
-    g.bind(3, 4, Label::from_str("c")?)?;
-    g.bind(4, 1, Label::from_str("d")?)?;
+    g.bind(1, 2, Label::from_str("a")?);
+    g.bind(2, 3, Label::from_str("b")?);
+    g.bind(3, 4, Label::from_str("c")?);
+    g.bind(4, 1, Label::from_str("d")?);
     let extra = g.clone();
     g.merge(&extra, 1, 1)?;
     assert_eq!(extra.vertices.len(), g.vertices.len());
@@ -316,15 +317,15 @@ fn understands_same_name_kids() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("a")?)?;
+    g.bind(0, 1, Label::from_str("a")?);
     g.add(2);
-    g.bind(1, 2, Label::from_str("x")?)?;
+    g.bind(1, 2, Label::from_str("x")?);
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(1);
-    extra.bind(0, 1, Label::from_str("b")?)?;
+    extra.bind(0, 1, Label::from_str("b")?);
     extra.add(2);
-    extra.bind(1, 2, Label::from_str("x")?)?;
+    extra.bind(1, 2, Label::from_str("x")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(5, g.vertices.len());
     assert_eq!(1, g.kid(0, Label::from_str("a")?).unwrap());
@@ -340,9 +341,9 @@ fn merges_into_empty_graph() -> Result<()> {
     extra.add(1);
     extra.add(2);
     extra.add(3);
-    extra.bind(1, 2, Label::from_str("a")?)?;
-    extra.bind(2, 3, Label::from_str("b")?)?;
-    extra.bind(3, 1, Label::from_str("c")?)?;
+    extra.bind(1, 2, Label::from_str("a")?);
+    extra.bind(2, 3, Label::from_str("b")?);
+    extra.bind(3, 1, Label::from_str("c")?);
     g.merge(&extra, 1, 1)?;
     assert_eq!(3, g.vertices.len());
     assert_eq!(0, g.kid(1, Label::from_str("a")?).unwrap());
@@ -358,7 +359,7 @@ fn mixed_injection() -> Result<()> {
     extra.put(4, &Hex::from(4))?;
     extra.add(5);
     extra.put(5, &Hex::from(5))?;
-    extra.bind(4, 5, Label::from_str("b")?)?;
+    extra.bind(4, 5, Label::from_str("b")?);
     g.merge(&extra, 4, 4)?;
     assert_eq!(2, g.vertices.len());
     Ok(())
@@ -369,15 +370,15 @@ fn zero_to_zero() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("a")?)?;
-    g.bind(1, 0, Label::from_str("back")?)?;
+    g.bind(0, 1, Label::from_str("a")?);
+    g.bind(1, 0, Label::from_str("back")?);
     g.add(2);
-    g.bind(0, 2, Label::from_str("b")?)?;
+    g.bind(0, 2, Label::from_str("b")?);
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(1);
-    extra.bind(0, 1, Label::from_str("c")?)?;
-    extra.bind(1, 0, Label::from_str("back")?)?;
+    extra.bind(0, 1, Label::from_str("c")?);
+    extra.bind(1, 0, Label::from_str("back")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(4, g.vertices.len());
     Ok(())
@@ -388,13 +389,13 @@ fn finds_siblings() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("a")?)?;
+    g.bind(0, 1, Label::from_str("a")?);
     g.add(2);
-    g.bind(0, 2, Label::from_str("b")?)?;
+    g.bind(0, 2, Label::from_str("b")?);
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(1);
-    extra.bind(0, 1, Label::from_str("b")?)?;
+    extra.bind(0, 1, Label::from_str("b")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(3, g.vertices.len());
     Ok(())

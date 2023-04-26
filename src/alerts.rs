@@ -44,8 +44,8 @@ impl<const N: usize> Sodg<N> {
     /// g.add(0);
     /// g.add(1);
     /// g.add(2);
-    /// g.bind(0, 1, Label::from_str("first").unwrap()).unwrap();
-    /// assert!(g.bind(0, 2, Label::from_str("second").unwrap()).is_err());
+    /// g.bind(0, 1, Label::from_str("first").unwrap());
+    /// g.bind(0, 2, Label::from_str("second").unwrap());
     /// ```
     pub fn alert_on(&mut self, a: Alert<N>) {
         self.alerts.push(a);

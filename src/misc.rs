@@ -49,7 +49,7 @@ impl<const N: usize> Sodg<N> {
     /// let mut sodg : Sodg<16> = Sodg::empty(256);
     /// sodg.add(0);
     /// sodg.add(42);
-    /// sodg.bind(0, 42, Label::from_str("hello").unwrap()).unwrap();
+    /// sodg.bind(0, 42, Label::from_str("hello").unwrap());
     /// ```
     #[must_use]
     pub fn is_empty(&self) -> bool {

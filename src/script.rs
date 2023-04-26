@@ -120,8 +120,8 @@ impl Script {
                 let v2 = self.parse(args.get(1).with_context(|| "V2 is expected")?, g)?;
                 let a =
                     Label::from_str(args.get(2).with_context(|| "Label is expected")?.as_str())?;
-                g.bind(v1, v2, a)
-                    .with_context(|| format!("Failed to BIND({v1}, {v2}, {a})"))
+                g.bind(v1, v2, a);
+                Ok(())
             }
             "PUT" => {
                 let v = self.parse(args.get(0).with_context(|| "V is expected")?, g)?;

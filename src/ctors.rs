@@ -101,7 +101,7 @@ fn prohibits_loops() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.alerts_off();
     g.add(0);
-    g.bind(0, 0, Label::Alpha(0))?;
+    g.bind(0, 0, Label::Alpha(0));
     assert!(g.alerts_on().is_err());
     Ok(())
 }

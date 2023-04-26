@@ -57,7 +57,7 @@ impl<const N: usize> Sodg<N> {
     /// g.put(1, &Hex::from(0)).unwrap();
     /// g.add(2);
     /// g.put(2, &Hex::from(0)).unwrap();
-    /// g.bind(1, 2, Label::from_str("x").unwrap()).unwrap();
+    /// g.bind(1, 2, Label::from_str("x").unwrap());
     /// g.data(2).unwrap();
     /// g.collect().unwrap(); // Both vertices are removed
     /// assert!(g.data(2).is_err());
@@ -183,7 +183,7 @@ fn does_not_collect_owned() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("x")?)?;
+    g.bind(0, 1, Label::from_str("x")?);
     g.collect()?;
     assert!(g.vertices.get(1).is_some());
     Ok(())
@@ -196,9 +196,9 @@ fn collects_simple_graph() -> Result<()> {
     g.add(2);
     g.add(3);
     g.add(4);
-    g.bind(1, 2, Label::from_str("x")?)?;
-    g.bind(1, 3, Label::from_str("y")?)?;
-    g.bind(2, 4, Label::from_str("z")?)?;
+    g.bind(1, 2, Label::from_str("x")?);
+    g.bind(1, 3, Label::from_str("y")?);
+    g.bind(2, 4, Label::from_str("z")?);
     g.data(4)?;
     g.data(2)?;
     g.data(1)?;
@@ -214,11 +214,11 @@ fn collects_complicated_graph() -> Result<()> {
     for i in 1..=5 {
         g.add(i);
     }
-    g.bind(1, 2, Label::from_str("x")?)?;
-    g.bind(1, 3, Label::from_str("y")?)?;
-    g.bind(2, 4, Label::from_str("z")?)?;
-    g.bind(3, 5, Label::from_str("a")?)?;
-    g.bind(4, 3, Label::from_str("b")?)?;
+    g.bind(1, 2, Label::from_str("x")?);
+    g.bind(1, 3, Label::from_str("y")?);
+    g.bind(2, 4, Label::from_str("z")?);
+    g.bind(3, 5, Label::from_str("a")?);
+    g.bind(4, 3, Label::from_str("b")?);
     for i in 1..=5 {
         g.data(i)?;
     }

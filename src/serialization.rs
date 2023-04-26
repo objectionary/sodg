@@ -93,8 +93,8 @@ fn saves_and_loads() -> Result<()> {
     g.add(0);
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?)?;
-    g.put(1, &Hex::from_str_bytes("foo"))?;
+    g.bind(0, 1, Label::from_str("foo")?);
+    g.put(1, &Hex::from_str_bytes("foo")).unwrap();
     let tmp = TempDir::new()?;
     let file = tmp.path().join("foo.sodg");
     g.save(file.as_path())?;
