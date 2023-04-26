@@ -41,7 +41,7 @@ impl<'a, const N: usize> IntoIterator for &'a Edges<N> {
 
 impl<const N: usize> Edges<N> {
     #[inline]
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {
             map: micromap::Map::new(),
         }

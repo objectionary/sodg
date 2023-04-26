@@ -28,10 +28,10 @@ impl<const N: usize> Sodg<N> {
     /// For example, you don't want
     /// more than one edge to depart from any vertex:
     ///
-    /// ```
+    /// ```no_run
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
-    /// let mut g : Sodg<16> = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.alerts_on().unwrap();
     /// g.alert_on(|g, vx| {
     ///   for v in vx {
@@ -69,7 +69,7 @@ impl<const N: usize> Sodg<N> {
         self.alerts_active = true;
         let mut keys = vec![];
         for (v, _) in self.vertices.iter() {
-            keys.push(v as u32);
+            keys.push(v);
         }
         self.validate(keys)
     }
@@ -95,8 +95,9 @@ impl<const N: usize> Sodg<N> {
 }
 
 #[test]
+#[cfg(debug_assertions)]
 fn panic_on_simple_alert() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.alerts_on()?;
     g.alert_on(|_, _| vec![format!("{}", "oops")]);
     assert!(g.add(0).is_err());
@@ -104,8 +105,9 @@ fn panic_on_simple_alert() -> Result<()> {
 }
 
 #[test]
+#[cfg(debug_assertions)]
 fn dont_panic_when_alerts_disabled() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.alert_on(|_, _| vec!["should never happen".to_string()]);
     g.alerts_off();
     assert!(g.add(0).is_ok());
@@ -113,8 +115,9 @@ fn dont_panic_when_alerts_disabled() -> Result<()> {
 }
 
 #[test]
+#[cfg(debug_assertions)]
 fn panic_on_complex_alert() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.alert_on(|_, vx| {
         let v = 42;
         if vx.contains(&v) {

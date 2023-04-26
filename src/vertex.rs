@@ -19,8 +19,6 @@
 // SOFTWARE.
 
 use crate::{Edges, Vertex};
-#[cfg(feature = "gc")]
-use std::collections::HashSet;
 
 impl<const N: usize> Vertex<N> {
     /// Make an empty one.
@@ -29,7 +27,7 @@ impl<const N: usize> Vertex<N> {
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut sodg : Sodg<16> = Sodg::empty();
+    /// let mut sodg : Sodg<16> = Sodg::empty(256);
     /// sodg.add(0).unwrap();
     /// ```
     pub fn empty() -> Self {

@@ -32,7 +32,7 @@ impl<const N: usize> Sodg<N> {
     /// ```
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
-    /// let mut g : Sodg<16> = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// g.bind(0, 42, Label::from_str("hello").unwrap()).unwrap();
@@ -49,10 +49,6 @@ impl<const N: usize> Sodg<N> {
             return Ok(());
         }
         self.vertices.insert(v1);
-        #[cfg(not(debug_assertions))]
-        {
-            self.next_v = v1 + 1;
-        }
         #[cfg(debug_assertions)]
         self.validate(vec![v1])?;
         #[cfg(debug_assertions)]
@@ -67,7 +63,7 @@ impl<const N: usize> Sodg<N> {
     /// ```
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
-    /// let mut g : Sodg<16> = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// g.bind(0, 42, Label::from_str("forward").unwrap()).unwrap();
@@ -92,13 +88,6 @@ impl<const N: usize> Sodg<N> {
             .get_mut(v1)
             .with_context(|| format!("Can't depart from ν{v1}, it's absent"))?;
         vtx1.edges.insert(a, v2);
-        #[cfg(feature = "gc")]
-        let vtx2 = self
-            .vertices
-            .get_mut(v2)
-            .with_context(|| format!("Can't arrive at ν{v2}, it's absent"))?;
-        #[cfg(feature = "gc")]
-        vtx2.parents.insert(v1);
         #[cfg(debug_assertions)]
         self.validate(vec![v1, v2])?;
         #[cfg(debug_assertions)]
@@ -113,7 +102,7 @@ impl<const N: usize> Sodg<N> {
     /// ```
     /// use sodg::Hex;
     /// use sodg::Sodg;
-    /// let mut g : Sodg<16> = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(42).unwrap();
     /// g.put(42, &Hex::from_str_bytes("hello, world!")).unwrap();
     /// ```
@@ -144,20 +133,18 @@ impl<const N: usize> Sodg<N> {
     /// ```
     /// use sodg::Hex;
     /// use sodg::Sodg;
-    /// let mut g : Sodg<16> = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(42).unwrap();
     /// let data = Hex::from_str_bytes("hello, world!");
     /// g.put(42, &data).unwrap();
     /// assert_eq!(data, g.data(42).unwrap());
-    /// #[cfg(feature = "gc")]
-    /// assert!(g.is_empty());
     /// ```
     ///
     /// If there is no data, an empty `Hex` will be returned, for example:
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut g : Sodg<16> = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(42).unwrap();
     /// assert!(g.data(42).unwrap().is_empty());
     /// ```
@@ -175,8 +162,6 @@ impl<const N: usize> Sodg<N> {
             .with_context(|| format!("Can't find ν{v} in data()"))?;
         if let Some(d) = vtx.data.clone() {
             vtx.taken = true;
-            #[cfg(feature = "gc")]
-            self.collect(v)?;
             #[cfg(debug_assertions)]
             trace!("#data: data of ν{v} retrieved");
             Ok(d)
@@ -192,7 +177,7 @@ impl<const N: usize> Sodg<N> {
     /// ```
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
-    /// let mut g : Sodg<16> = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// g.bind(0, 42, Label::from_str("k").unwrap()).unwrap();
@@ -207,7 +192,7 @@ impl<const N: usize> Sodg<N> {
     /// use std::str::FromStr;
     /// use itertools::Itertools;
     /// use sodg::{Label, Sodg};
-    /// let mut g : Sodg<16> = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// g.bind(0, 42, Label::from_str("a").unwrap()).unwrap();
@@ -238,7 +223,7 @@ impl<const N: usize> Sodg<N> {
     /// ```
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
-    /// let mut g : Sodg<16> = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0).unwrap();
     /// g.add(42).unwrap();
     /// let k = Label::from_str("k").unwrap();
@@ -261,15 +246,24 @@ use std::str::FromStr;
 
 #[test]
 fn adds_simple_vertex() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1)?;
     assert_eq!(1, g.len());
     Ok(())
 }
 
 #[test]
+fn adds_two_simple_vertices() -> Result<()> {
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(1)?;
+    g.add(42)?;
+    assert_eq!(2, g.len());
+    Ok(())
+}
+
+#[test]
 fn binds_simple_vertices() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1)?;
     g.add(2)?;
     let k = Label::from_str("hello")?;
@@ -280,7 +274,7 @@ fn binds_simple_vertices() -> Result<()> {
 
 #[test]
 fn pre_defined_ids() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1)?;
     g.add(2)?;
     let k = Label::from_str("a-привет")?;
@@ -291,7 +285,7 @@ fn pre_defined_ids() -> Result<()> {
 
 #[test]
 fn binds_two_names() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1)?;
     g.add(2)?;
     let first = Label::from_str("first")?;
@@ -305,7 +299,7 @@ fn binds_two_names() -> Result<()> {
 
 #[test]
 fn overwrites_edge() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1)?;
     g.add(2)?;
     g.bind(1, 2, Label::from_str("foo")?)?;
@@ -317,7 +311,7 @@ fn overwrites_edge() -> Result<()> {
 
 #[test]
 fn binds_to_root() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("x")?)?;
@@ -328,7 +322,7 @@ fn binds_to_root() -> Result<()> {
 
 #[test]
 fn sets_simple_data() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     let data = Hex::from_str_bytes("hello");
     g.add(0)?;
     g.put(0, &data)?;
@@ -337,20 +331,8 @@ fn sets_simple_data() -> Result<()> {
 }
 
 #[test]
-#[cfg(feature = "gc")]
-fn simple_data_gc() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
-    let data = Hex::from_str_bytes("hello");
-    g.add(0)?;
-    g.put(0, data.clone())?;
-    assert_eq!(data, g.data(0)?);
-    assert!(g.is_empty());
-    Ok(())
-}
-
-#[test]
 fn finds_all_kids() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("one")?)?;
@@ -367,7 +349,7 @@ fn finds_all_kids() -> Result<()> {
 
 #[test]
 fn builds_list_of_kids() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.alerts_off();
     g.add(0)?;
     g.add(1)?;
@@ -386,7 +368,7 @@ fn builds_list_of_kids() -> Result<()> {
 
 #[test]
 fn gets_data_from_empty_vertex() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     assert!(g.data(0).is_ok());
     assert!(g.data(0).unwrap().is_empty());
@@ -395,7 +377,7 @@ fn gets_data_from_empty_vertex() -> Result<()> {
 
 #[test]
 fn gets_absent_kid() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     assert!(g.kid(0, Label::from_str("hello")?).is_none());
     Ok(())
@@ -403,14 +385,14 @@ fn gets_absent_kid() -> Result<()> {
 
 #[test]
 fn gets_kid_from_absent_vertex() -> Result<()> {
-    let g: Sodg<16> = Sodg::empty();
+    let g: Sodg<16> = Sodg::empty(256);
     assert!(g.kid(0, Label::from_str("hello")?).is_none());
     Ok(())
 }
 
 #[test]
 fn adds_twice() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     assert!(g.add(0).is_ok());
     Ok(())

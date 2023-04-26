@@ -30,9 +30,9 @@ impl<const N: usize> Sodg<N> {
     ///
     /// May panic if vertices provided to alerts are absent (should never happen, though).
     #[must_use]
-    pub fn empty() -> Self {
+    pub fn empty(cap: usize) -> Self {
         let mut g = Self {
-            vertices: Vertices::new(),
+            vertices: Vertices::with_capacity(cap),
             next_v: 0,
             alerts: vec![],
             alerts_active: true,
@@ -90,7 +90,7 @@ use crate::Label;
 
 #[test]
 fn makes_an_empty_sodg() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     assert_eq!(1, g.vertices.len());
     Ok(())
@@ -98,20 +98,10 @@ fn makes_an_empty_sodg() -> Result<()> {
 
 #[test]
 fn prohibits_loops() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.alerts_off();
     g.add(0)?;
     g.bind(0, 0, Label::Alpha(0))?;
     assert!(g.alerts_on().is_err());
-    Ok(())
-}
-
-#[test]
-#[cfg(feature = "gc")]
-fn prohibits_orphan_edges() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.alerts_off();
-    g.add(0)?;
-    assert!(g.bind(0, 1, Label::Alpha(0)).is_err());
     Ok(())
 }

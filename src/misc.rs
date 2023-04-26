@@ -46,7 +46,7 @@ impl<const N: usize> Sodg<N> {
     /// ```
     /// use std::str::FromStr;
     /// use sodg::{Label, Sodg};
-    /// let mut sodg : Sodg<16> = Sodg::empty();
+    /// let mut sodg : Sodg<16> = Sodg::empty(256);
     /// sodg.add(0).unwrap();
     /// sodg.add(42).unwrap();
     /// sodg.bind(0, 42, Label::from_str("hello").unwrap()).unwrap();
@@ -62,21 +62,21 @@ use anyhow::Result;
 
 #[test]
 fn checks_for_emptiness() -> Result<()> {
-    let g: Sodg<16> = Sodg::empty();
+    let g: Sodg<16> = Sodg::empty(256);
     assert!(g.is_empty());
     Ok(())
 }
 
 #[test]
 fn counts_vertices() -> Result<()> {
-    let g: Sodg<16> = Sodg::empty();
+    let g: Sodg<16> = Sodg::empty(256);
     assert_eq!(0, g.len());
     Ok(())
 }
 
 #[test]
 fn collect_vertices() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     g.add(1)?;
     assert!(g.ids().contains(&1));

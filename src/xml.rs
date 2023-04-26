@@ -32,7 +32,7 @@ impl<const N: usize> Sodg<N> {
     /// use std::str::FromStr;
     /// use sodg::{Hex, Label};
     /// use sodg::Sodg;
-    /// let mut g : Sodg<16> = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0).unwrap();
     /// g.put(0, &Hex::from_str_bytes("hello")).unwrap();
     /// g.add(1).unwrap();
@@ -107,7 +107,7 @@ use std::str::FromStr;
 
 #[test]
 fn prints_simple_graph() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     g.put(0, &Hex::from_str_bytes("hello"))?;
     g.add(1)?;

@@ -42,61 +42,48 @@ impl<const N: usize> Debug for Vertices<N> {
 
 impl<const N: usize> Vertices<N> {
     #[inline]
-    pub fn new() -> Self {
-        Self { bar: Vec::with_capacity(100) }
+    pub fn with_capacity(cap: usize) -> Self {
+        Self { emap: emap::Map::with_capacity_init(cap) }
+    }
+
+    #[inline]
+    pub const fn capacity(&self) -> usize {
+        self.emap.capacity()
     }
 
     #[inline]
     pub fn len(&self) -> usize {
-        self.iter().count()
+        self.emap.len()
     }
 
     #[inline]
     pub fn insert(&mut self, v: u32) {
-        self.bar.insert(v as usize, Some(Vertex::empty()));
+        self.emap.insert(v as usize, Vertex::empty());
     }
 
     #[inline]
     pub fn get(&self, v: u32) -> Option<&Vertex<N>> {
-        if let Some(v) = self.bar.get(v as usize) {
-            Some(v.as_ref().unwrap())
-        } else {
-            None
-        }
+        self.emap.get(v as usize)
     }
 
     #[inline]
     pub fn get_mut(&mut self, v: u32) -> Option<&mut Vertex<N>> {
-        if let Some(v) = self.bar.get_mut(v as usize) {
-            Some(v.as_mut().unwrap())
-        } else {
-            None
-        }
+        self.emap.get_mut(v as usize)
     }
 
+    #[inline]
     pub fn try_id(&self, id: u32) -> u32 {
         if !self.contains(id) {
             return id;
         }
-        let mut next = None;
-        for (v, _) in self.iter() {
-            if let Some(before) = next {
-                if v > before {
-                    next = Some(v);
-                }
-            }
-            if next.is_none() {
-                next = Some(v);
-            }
-        }
-        next.map_or(0, |x| x + 1)
+        self.emap.next_key_gte(id as usize) as u32
     }
 
     pub fn remove(&mut self, v: u32) {
-        self.bar.remove(v as usize);
-        let all: Vec<u32> = self.iter().map(|(k, _v)| k as u32).collect();
+        self.emap.remove(v as usize);
+        let all: Vec<u32> = self.iter().map(|(k, _v)| k).collect();
         for v1 in all {
-            if let Some(vtx) = self.bar.get_mut(v1 as usize).unwrap() {
+            if let Some(vtx) = self.emap.get_mut(v1 as usize) {
                 if let Some(a) = vtx
                     .edges
                     .into_iter()
@@ -112,31 +99,49 @@ impl<const N: usize> Vertices<N> {
 
     #[inline]
     pub fn contains(&self, v: u32) -> bool {
-        self.bar.get(v as usize).is_some()
+        self.emap.contains_key(v as usize)
     }
 
     #[inline]
     pub fn iter(&self) -> impl Iterator<Item=(u32, &Vertex<N>)> {
-        self.bar.iter().enumerate().filter(|(_i, v)| v.is_some()).map(|(i, v)| (i as u32, v.as_ref().unwrap()))
+        self.emap.iter().map(|(i, v)| (i as u32, v))
     }
 }
 
 #[test]
 fn iterates_empty() {
-    let vcs: Vertices<4> = Vertices::new();
+    let vcs: Vertices<16> = Vertices::with_capacity(256);
     assert!(vcs.iter().next().is_none());
 }
 
 #[test]
 fn inserts_and_lists() {
-    let mut vcs: Vertices<4> = Vertices::new();
+    let mut vcs: Vertices<16> = Vertices::with_capacity(256);
     vcs.insert(0);
     assert_eq!(0, vcs.iter().next().unwrap().0);
 }
 
 #[test]
+fn inserts_and_checks() {
+    let mut vcs: Vertices<16> = Vertices::with_capacity(256);
+    vcs.insert(0);
+    assert!(vcs.contains(0));
+    vcs.insert(8);
+    assert!(vcs.contains(8));
+    assert!(!vcs.contains(5));
+}
+
+#[test]
+fn evaluates_length() {
+    let mut vcs: Vertices<16> = Vertices::with_capacity(256);
+    vcs.insert(1);
+    vcs.insert(5);
+    assert_eq!(2, vcs.len());
+}
+
+#[test]
 fn inserts_and_iterates() {
-    let mut vcs: Vertices<4> = Vertices::new();
+    let mut vcs: Vertices<16> = Vertices::with_capacity(256);
     vcs.insert(0);
     vcs.insert(1);
     let mut keys = vec![];
@@ -148,15 +153,30 @@ fn inserts_and_iterates() {
 
 #[test]
 fn inserts_and_gets() {
-    let mut vcs: Vertices<4> = Vertices::new();
+    let mut vcs: Vertices<16> = Vertices::with_capacity(256);
     vcs.insert(0);
     assert!(vcs.get(0).unwrap().edges.into_iter().next().is_none());
 }
 
 #[test]
 fn inserts_and_deletes() {
-    let mut vcs: Vertices<4> = Vertices::new();
+    let mut vcs: Vertices<16> = Vertices::with_capacity(256);
     vcs.insert(0);
     vcs.remove(0);
     assert_eq!(0, vcs.len());
 }
+
+#[test]
+fn try_id_many_times() {
+    let vcs: Vertices<16> = Vertices::with_capacity(256);
+    assert_eq!(0, vcs.try_id(0));
+    assert_eq!(1, vcs.try_id(1));
+}
+
+#[test]
+fn can_be_cloned() {
+    let mut vcs: Vertices<16> = Vertices::with_capacity(256);
+    vcs.insert(7);
+    assert_eq!(1, vcs.clone().len());
+}
+

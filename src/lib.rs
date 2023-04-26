@@ -31,7 +31,7 @@
 //! ```
 //! use std::str::FromStr;
 //! use sodg::{Label, Sodg};
-//! let mut sodg : Sodg<16> = Sodg::empty();
+//! let mut sodg : Sodg<16> = Sodg::empty(256);
 //! sodg.add(0).unwrap();
 //! sodg.add(1).unwrap();
 //! sodg.bind(0, 1, Label::from_str("foo").unwrap()).unwrap();
@@ -66,8 +66,6 @@ mod xml;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-#[cfg(feature = "gc")]
-use std::collections::HashSet;
 
 /// A function that is called when a problem is found in [`Sodg`].
 ///
@@ -121,7 +119,7 @@ pub(crate) struct Vertex<const N: usize> {
 /// Internal structure, map of all vertices.
 #[derive(Serialize, Deserialize, Clone)]
 pub(crate) struct Vertices<const N: usize> {
-    bar: Vec<Option<Vertex<N>>>,
+    emap: emap::Map<Vertex<N>>,
 }
 
 /// Internal structure, map of all edges.
@@ -163,7 +161,7 @@ pub struct Script {
 ///
 /// ```
 /// use sodg::{Label, Sodg};
-/// let mut sodg : Sodg<16> = Sodg::empty();
+/// let mut sodg : Sodg<16> = Sodg::empty(256);
 /// sodg.add(0).unwrap();
 /// sodg.add(1).unwrap();
 /// sodg.bind(0, 1, Label::Alpha(0)).unwrap();

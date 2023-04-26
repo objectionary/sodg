@@ -24,12 +24,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7de8ce5e0f9f8d88245311066a578d72b7af3e7088f32783804676302df237e4"
 
 [[package]]
-name = "arrayvec"
-version = "0.7.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8da52d66c7071e2e3fa2a1e5c6d088fec47b593032b254f5e980de8ea54454d6"
-
-[[package]]
 name = "atty"
 version = "0.2.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -105,6 +99,15 @@ name = "either"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90e5c1c8368803113bf0c9584fc495a58b86dc8a29edbf8fe877d21d9507e797"
+
+[[package]]
+name = "emap"
+version = "0.0.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "137c0ff10493728bb687654588349795f4c37a342454b87f215435ad14d8788a"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "env_logger"
@@ -356,9 +359,9 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
 name = "micromap"
-version = "0.0.4"
+version = "0.0.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "051f9f0cc2cdffe0624e84b14aefde23386a19e5a141e9c04e6ddc051c2e7010"
+checksum = "41fdc1caeb366b5e7162efa3a8c5f9d9a1fa931ba00100535a2e50751869a16a"
 dependencies = [
  "serde",
 ]
@@ -590,9 +593,9 @@ name = "sodg"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "arrayvec",
  "bincode",
  "ctor",
+ "emap",
  "fsutils",
  "hex",
  "itertools",

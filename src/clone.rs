@@ -42,11 +42,19 @@ use crate::Label;
 
 #[test]
 fn makes_a_clone() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
-    g.add(0)?;
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1)?;
-    g.bind(0, 1, Label::Alpha(0))?;
+    g.add(42)?;
+    g.bind(1, 42, Label::Alpha(0))?;
     let c = g.clone();
     assert_eq!(2, c.vertices.len());
+    Ok(())
+}
+
+#[test]
+fn makes_an_empty_clone() -> Result<()> {
+    let g: Sodg<16> = Sodg::empty(256);
+    let c = g.clone();
+    assert_eq!(0, c.vertices.len());
     Ok(())
 }

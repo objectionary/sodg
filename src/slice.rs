@@ -32,7 +32,7 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If impossible to slice, an error will be returned.
     pub fn slice(&self, v: u32) -> Result<Self> {
-        let g = self.slice_some(v, |_, _, _| true)?;
+        let g : Sodg<N> = self.slice_some(v, |_, _, _| true)?;
         trace!(
             "#slice: taken {} vertices out of {} at ν{v}",
             g.vertices.len(),
@@ -76,7 +76,7 @@ impl<const N: usize> Sodg<N> {
                 }
             }
         }
-        let mut new_vertices = Vertices::new();
+        let mut new_vertices : Vertices<N> = Vertices::with_capacity(self.vertices.capacity());
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             let mut nv = vtx.clone();
             let mut ne = Edges::new();
@@ -114,7 +114,7 @@ use std::str::FromStr;
 
 #[test]
 fn makes_a_slice() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;
@@ -127,7 +127,7 @@ fn makes_a_slice() -> Result<()> {
 
 #[test]
 fn makes_a_partial_slice() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;
@@ -140,7 +140,7 @@ fn makes_a_partial_slice() -> Result<()> {
 
 #[test]
 fn skips_some_vertices() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     g.add(1)?;
     g.bind(0, 1, Label::from_str("foo")?)?;

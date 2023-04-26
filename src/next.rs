@@ -25,10 +25,14 @@ impl<const N: usize> Sodg<N> {
     ///
     /// This ID will never be returned by [`Sodg::next_id`] again. Also, this ID will not
     /// be equal to any of the existing IDs of vertices.
+    #[inline]
     pub fn next_id(&mut self) -> u32 {
         let mut id = self.next_v;
         id = self.vertices.try_id(id);
-        self.next_v = id + 1;
+        let next = id + 1;
+        if next > self.next_v {
+            self.next_v = next;
+        }
         id
     }
 }
@@ -38,7 +42,7 @@ use anyhow::Result;
 
 #[test]
 fn simple_next_id() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     assert_eq!(0, g.next_id());
     assert_eq!(1, g.next_id());
     assert_eq!(2, g.next_id());
@@ -47,17 +51,17 @@ fn simple_next_id() -> Result<()> {
 
 #[test]
 fn calculates_next_id() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     g.add(42)?;
-    assert_eq!(43, g.next_id());
-    assert_eq!(44, g.next_id());
+    assert_eq!(1, g.next_id());
+    assert_eq!(2, g.next_id());
     Ok(())
 }
 
 #[test]
 fn next_id_after_inject() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1)?;
     assert_eq!(0, g.next_id());
     assert_eq!(2, g.next_id());
@@ -66,7 +70,7 @@ fn next_id_after_inject() -> Result<()> {
 
 #[test]
 fn next_id_after_sequence() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     g.add(1)?;
     assert_eq!(2, g.next_id());
@@ -76,7 +80,7 @@ fn next_id_after_sequence() -> Result<()> {
 
 #[test]
 fn next_id_after_zero() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0)?;
     assert_eq!(1, g.next_id());
     assert_eq!(2, g.next_id());
