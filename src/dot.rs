@@ -32,7 +32,7 @@ impl<const N: usize> Sodg<N> {
     /// use sodg::Sodg;
     /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0);
-    /// g.put(0, &Hex::from_str_bytes("hello")).unwrap();
+    /// g.put(0, &Hex::from_str_bytes("hello"));
     /// g.add(1);
     /// g.bind(0, 1, Label::from_str("foo").unwrap());
     /// g.bind(0, 1, Label::from_str("bar").unwrap());
@@ -123,7 +123,7 @@ use anyhow::Result;
 fn simple_graph_to_dot() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
-    g.put(0, &Hex::from_str_bytes("hello"))?;
+    g.put(0, &Hex::from_str_bytes("hello"));
     g.add(1);
     g.bind(0, 1, Label::Alpha(0));
     let dot = g.to_dot();

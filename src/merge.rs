@@ -95,8 +95,8 @@ impl<const N: usize> Sodg<N> {
             .ok_or_else(|| anyhow!("Can't find ν{right} in the right graph"))?
             .data
             .clone();
-        if d.is_some() {
-            self.put(left, &d.unwrap())?;
+        if let Some(hex) = d {
+            self.put(left, &hex);
         }
         for (a, to) in g.kids(right)? {
             let matched = if let Some(t) = self.kid(left, a) {
@@ -306,7 +306,7 @@ fn merges_data() -> Result<()> {
     g.add(1);
     let mut extra = Sodg::empty(256);
     extra.add(1);
-    extra.put(1, &Hex::from(42))?;
+    extra.put(1, &Hex::from(42));
     g.merge(&extra, 1, 1)?;
     assert_eq!(42, g.data(1)?.to_i64()?);
     Ok(())
@@ -356,9 +356,9 @@ fn mixed_injection() -> Result<()> {
     g.add(4);
     let mut extra = Sodg::empty(256);
     extra.add(4);
-    extra.put(4, &Hex::from(4))?;
+    extra.put(4, &Hex::from(4));
     extra.add(5);
-    extra.put(5, &Hex::from(5))?;
+    extra.put(5, &Hex::from(5));
     extra.bind(4, 5, Label::from_str("b")?);
     g.merge(&extra, 4, 4)?;
     assert_eq!(2, g.vertices.len());

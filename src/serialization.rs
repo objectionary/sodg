@@ -91,10 +91,10 @@ use std::str::FromStr;
 fn saves_and_loads() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
-    g.put(0, &Hex::from_str_bytes("hello"))?;
+    g.put(0, &Hex::from_str_bytes("hello"));
     g.add(1);
     g.bind(0, 1, Label::from_str("foo")?);
-    g.put(1, &Hex::from_str_bytes("foo")).unwrap();
+    g.put(1, &Hex::from_str_bytes("foo"));
     let tmp = TempDir::new()?;
     let file = tmp.path().join("foo.sodg");
     g.save(file.as_path())?;

@@ -54,9 +54,9 @@ impl<const N: usize> Sodg<N> {
     /// use sodg::{Hex, Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(1);
-    /// g.put(1, &Hex::from(0)).unwrap();
+    /// g.put(1, &Hex::from(0));
     /// g.add(2);
-    /// g.put(2, &Hex::from(0)).unwrap();
+    /// g.put(2, &Hex::from(0));
     /// g.bind(1, 2, Label::from_str("x").unwrap());
     /// g.data(2).unwrap();
     /// g.collect().unwrap(); // Both vertices are removed

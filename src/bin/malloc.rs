@@ -58,7 +58,7 @@ pub fn on_graph(total: usize) -> i64 {
         let v3 = v2 + 1;
         g.add(v3);
         g.bind(v2, v3, Label::Greek('Δ'));
-        g.put(v3, &Hex::from(42)).unwrap();
+        g.put(v3, &Hex::from(42));
         let v4 = v3 + 1;
         g.add(v4);
         g.bind(v4, v1, Label::Greek('φ'));

@@ -103,26 +103,26 @@ impl<const N: usize> Sodg<N> {
     /// use sodg::Sodg;
     /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(42);
-    /// g.put(42, &Hex::from_str_bytes("hello, world!")).unwrap();
+    /// g.put(42, &Hex::from_str_bytes("hello, world!"));
     /// ```
     ///
-    /// # Errors
+    /// # Panics
     ///
     /// If vertex `v1` is absent, an `Err` will be returned.
     ///
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
-    pub fn put(&mut self, v: usize, d: &Hex) -> Result<()> {
+    pub fn put(&mut self, v: usize, d: &Hex) {
         let vtx = self
             .vertices
             .get_mut(v)
-            .with_context(|| format!("Can't find ν{v} in put()"))?;
+            .with_context(|| format!("Can't find ν{v} in put()"))
+            .unwrap();
         vtx.data = Some(d.clone());
         #[cfg(debug_assertions)]
-        self.validate(vec![v])?;
+        self.validate(vec![v]).unwrap();
         #[cfg(debug_assertions)]
         trace!("#data: data of ν{v} set to {d}");
-        Ok(())
     }
 
     /// Read vertex data, and then submit the vertex to garbage collection.
@@ -135,7 +135,7 @@ impl<const N: usize> Sodg<N> {
     /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(42);
     /// let data = Hex::from_str_bytes("hello, world!");
-    /// g.put(42, &data).unwrap();
+    /// g.put(42, &data);
     /// assert_eq!(data, g.data(42).unwrap());
     /// ```
     ///
@@ -324,7 +324,7 @@ fn sets_simple_data() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     let data = Hex::from_str_bytes("hello");
     g.add(0);
-    g.put(0, &data)?;
+    g.put(0, &data);
     assert_eq!(data, g.data(0)?);
     Ok(())
 }

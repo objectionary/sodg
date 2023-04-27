@@ -113,7 +113,6 @@ impl Script {
             "ADD" => {
                 let v = self.parse(args.get(0).with_context(|| "V is expected")?, g)?;
                 g.add(v);
-                Ok(())
             }
             "BIND" => {
                 let v1 = self.parse(args.get(0).with_context(|| "V1 is expected")?, g)?;
@@ -121,16 +120,17 @@ impl Script {
                 let a =
                     Label::from_str(args.get(2).with_context(|| "Label is expected")?.as_str())?;
                 g.bind(v1, v2, a);
-                Ok(())
             }
             "PUT" => {
                 let v = self.parse(args.get(0).with_context(|| "V is expected")?, g)?;
                 let d = Self::parse_data(args.get(1).with_context(|| "Data is expected")?)?;
-                g.put(v, &d)
-                    .with_context(|| format!("Failed to PUT({v}, {d})"))
+                g.put(v, &d);
             }
-            cmd => Err(anyhow!("Unknown command: {cmd}")),
+            cmd => {
+                return Err(anyhow!("Unknown command: {cmd}"));
+            }
         }
+        Ok(())
     }
 
     /// Parse data.
