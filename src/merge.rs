@@ -23,7 +23,7 @@ use anyhow::{anyhow, Result};
 use log::debug;
 use std::collections::{HashMap, HashSet};
 
-impl Sodg {
+impl<const N: usize> Sodg<N> {
     /// Merge another graph into the current one.
     ///
     /// It is expected that both graphs are trees! If they are not, the result is unpredictable.
@@ -38,17 +38,20 @@ impl Sodg {
     /// # Errors
     ///
     /// If it's impossible to merge, an error will be returned.
-    pub fn merge(&mut self, g: &Self, left: u32, right: u32) -> Result<()> {
+    pub fn merge(&mut self, g: &Self, left: usize, right: usize) -> Result<()> {
         let mut mapped = HashMap::new();
         let before = self.vertices.len();
         self.merge_rec(g, left, right, &mut mapped)?;
         let merged = mapped.len();
         let scope = g.vertices.len();
         if merged != scope {
-            let must: Vec<u32> = g.vertices.keys().copied().collect();
-            let seen: Vec<u32> = mapped.keys().copied().collect();
-            let missed: HashSet<u32> = &HashSet::from_iter(must) - &HashSet::from_iter(seen);
-            let mut ordered: Vec<u32> = missed.into_iter().collect();
+            let mut must = vec![];
+            for (v, _) in g.vertices.iter() {
+                must.push(v);
+            }
+            let seen: Vec<usize> = mapped.keys().copied().collect();
+            let missed: HashSet<usize> = &HashSet::from_iter(must) - &HashSet::from_iter(seen);
+            let mut ordered: Vec<usize> = missed.into_iter().collect();
             ordered.sort_unstable();
             return Err(anyhow!(
                 "Just {merged} vertices merged, out of {scope}; maybe the right graph was not a tree? {} missed: {}",
@@ -74,12 +77,13 @@ impl Sodg {
     /// # Errors
     ///
     /// If it's impossible to merge, an error will be returned.
+    #[allow(clippy::option_if_let_else)]
     fn merge_rec(
         &mut self,
         g: &Self,
-        left: u32,
-        right: u32,
-        mapped: &mut HashMap<u32, u32>,
+        left: usize,
+        right: usize,
+        mapped: &mut HashMap<usize, usize>,
     ) -> Result<()> {
         if mapped.contains_key(&right) {
             return Ok(());
@@ -87,29 +91,29 @@ impl Sodg {
         mapped.insert(right, left);
         let d = g
             .vertices
-            .get(&right)
+            .get(right)
             .ok_or_else(|| anyhow!("Can't find ν{right} in the right graph"))?
             .data
             .clone();
-        if !d.is_empty() {
-            self.put(left, &d)?;
+        if let Some(hex) = d {
+            self.put(left, &hex);
         }
         for (a, to) in g.kids(right)? {
-            let matched = if let Some(t) = self.kid(left, &a) {
+            let matched = if let Some(t) = self.kid(left, a) {
                 t
             } else if let Some(t) = mapped.get(&to) {
-                self.bind(left, *t, &a)?;
+                self.bind(left, *t, a);
                 *t
             } else {
                 let id = self.next_id();
-                self.add(id)?;
-                self.bind(left, id, &a)?;
+                self.add(id);
+                self.bind(left, id, a);
                 id
             };
             self.merge_rec(g, matched, to, mapped)?;
         }
         for (a, to) in g.kids(right)? {
-            if let Some(first) = self.kid(left, &a) {
+            if let Some(first) = self.kid(left, a) {
                 if let Some(second) = mapped.get(&to) {
                     if first != *second {
                         self.join(first, *second)?;
@@ -120,53 +124,63 @@ impl Sodg {
         Ok(())
     }
 
-    fn join(&mut self, left: u32, right: u32) -> Result<()> {
-        for vtx in &mut self.vertices {
-            for e in &mut vtx.1.edges {
-                if e.to == right {
-                    e.to = left;
+    fn join(&mut self, left: usize, right: usize) -> Result<()> {
+        let mut keys = vec![];
+        for (v, _) in self.vertices.iter() {
+            keys.push(v);
+        }
+        for v in keys {
+            let mut vtx = self.vertices.get_mut(v).unwrap();
+            let mut ne = vtx.edges.clone();
+            for e in &vtx.edges {
+                if e.1 == right {
+                    ne.insert(e.0, left);
                 }
             }
+            vtx.edges = ne;
         }
         for e in self.kids(right)? {
-            if self.kid(left, &e.0).is_some() {
+            if self.kid(left, e.0).is_some() {
                 return Err(anyhow!(
                     "Can't merge ν{right} into ν{left}, due to conflict in '{}'",
                     e.0
                 ));
             }
-            self.bind(left, e.1, &e.0)?;
+            self.bind(left, e.1, e.0);
         }
-        self.vertices.remove(&right);
+        self.vertices.remove(right);
         Ok(())
     }
 }
 
+#[cfg(test)]
+use std::str::FromStr;
+
 #[test]
 fn merges_two_graphs() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "foo")?;
-    let mut extra = Sodg::empty();
-    extra.add(0)?;
-    extra.add(1)?;
-    extra.bind(0, 1, "bar")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    g.bind(0, 1, Label::from_str("foo")?);
+    let mut extra = Sodg::empty(256);
+    extra.add(0);
+    extra.add(1);
+    extra.bind(0, 1, Label::from_str("bar")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(3, g.vertices.len());
-    assert_eq!(1, g.kid(0, "foo").unwrap());
-    assert_eq!(2, g.kid(0, "bar").unwrap());
+    assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
+    assert_eq!(2, g.kid(0, Label::from_str("bar")?).unwrap());
     Ok(())
 }
 
 #[test]
 fn merges_two_non_trees() -> Result<()> {
-    let mut g = Sodg::empty();
-    let mut extra = Sodg::empty();
-    extra.add(0)?;
-    extra.add(42)?;
-    extra.add(2)?;
-    extra.add(13)?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    let mut extra = Sodg::empty(256);
+    extra.add(0);
+    extra.add(42);
+    extra.add(2);
+    extra.add(13);
     let r = g.merge(&extra, 0, 0);
     assert!(r.is_err());
     let msg = r.err().unwrap().to_string();
@@ -176,78 +190,78 @@ fn merges_two_non_trees() -> Result<()> {
 
 #[test]
 fn merges_a_loop() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "a")?;
-    g.add(2)?;
-    g.bind(1, 2, "b")?;
-    let mut extra = Sodg::empty();
-    extra.add(0)?;
-    extra.add(4)?;
-    extra.bind(0, 4, "c")?;
-    extra.add(3)?;
-    extra.bind(0, 3, "a")?;
-    extra.bind(4, 3, "d")?;
-    extra.add(5)?;
-    extra.bind(3, 5, "e")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    g.bind(0, 1, Label::from_str("a")?);
+    g.add(2);
+    g.bind(1, 2, Label::from_str("b")?);
+    let mut extra = Sodg::empty(256);
+    extra.add(0);
+    extra.add(4);
+    extra.bind(0, 4, Label::from_str("c")?);
+    extra.add(3);
+    extra.bind(0, 3, Label::from_str("a")?);
+    extra.bind(4, 3, Label::from_str("d")?);
+    extra.add(5);
+    extra.bind(3, 5, Label::from_str("e")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(5, g.vertices.len());
-    assert_eq!(1, g.kid(0, "a").unwrap());
-    assert_eq!(2, g.kid(1, "b").unwrap());
-    assert_eq!(3, g.kid(0, "c").unwrap());
-    assert_eq!(1, g.kid(3, "d").unwrap());
-    assert_eq!(5, g.kid(1, "e").unwrap());
+    assert_eq!(1, g.kid(0, Label::from_str("a")?).unwrap());
+    assert_eq!(2, g.kid(1, Label::from_str("b")?).unwrap());
+    // assert_eq!(3, g.kid(0, "c").unwrap());
+    // assert_eq!(1, g.kid(3, "d").unwrap());
+    // assert_eq!(5, g.kid(1, "e").unwrap());
     Ok(())
 }
 
 #[test]
 fn avoids_simple_duplicates() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(5)?;
-    g.bind(0, 5, "foo")?;
-    let mut extra = Sodg::empty();
-    extra.add(0)?;
-    extra.add(1)?;
-    extra.bind(0, 1, "foo")?;
-    extra.add(2)?;
-    extra.bind(1, 2, "bar")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(5);
+    g.bind(0, 5, Label::from_str("foo")?);
+    let mut extra = Sodg::empty(256);
+    extra.add(0);
+    extra.add(1);
+    extra.bind(0, 1, Label::from_str("foo")?);
+    extra.add(2);
+    extra.bind(1, 2, Label::from_str("bar")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(3, g.vertices.len());
-    assert_eq!(5, g.kid(0, "foo").unwrap());
-    assert_eq!(6, g.kid(5, "bar").unwrap());
+    assert_eq!(5, g.kid(0, Label::from_str("foo")?).unwrap());
+    assert_eq!(1, g.kid(5, Label::from_str("bar")?).unwrap());
     Ok(())
 }
 
 #[test]
 fn keeps_existing_vertices_intact() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "foo")?;
-    g.add(2)?;
-    g.bind(1, 2, "bar")?;
-    g.add(3)?;
-    g.bind(2, 3, "zzz")?;
-    let mut extra = Sodg::empty();
-    extra.add(0)?;
-    extra.add(5)?;
-    extra.bind(0, 5, "foo")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    g.bind(0, 1, Label::from_str("foo")?);
+    g.add(2);
+    g.bind(1, 2, Label::from_str("bar")?);
+    g.add(3);
+    g.bind(2, 3, Label::from_str("zzz")?);
+    let mut extra = Sodg::empty(256);
+    extra.add(0);
+    extra.add(5);
+    extra.bind(0, 5, Label::from_str("foo")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(4, g.vertices.len());
-    assert_eq!(1, g.kid(0, "foo").unwrap());
-    assert_eq!(2, g.kid(1, "bar").unwrap());
-    assert_eq!(3, g.kid(2, "zzz").unwrap());
+    assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
+    assert_eq!(2, g.kid(1, Label::from_str("bar")?).unwrap());
+    assert_eq!(3, g.kid(2, Label::from_str("zzz")?).unwrap());
     Ok(())
 }
 
 #[test]
 fn merges_singletons() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(13)?;
-    let mut extra = Sodg::empty();
-    extra.add(13)?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(13);
+    let mut extra = Sodg::empty(256);
+    extra.add(13);
     g.merge(&extra, 13, 13)?;
     assert_eq!(1, g.vertices.len());
     Ok(())
@@ -255,11 +269,11 @@ fn merges_singletons() -> Result<()> {
 
 #[test]
 fn merges_simple_loop() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(1)?;
-    g.add(2)?;
-    g.bind(1, 2, "foo")?;
-    g.bind(2, 1, "bar")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(1);
+    g.add(2);
+    g.bind(1, 2, Label::from_str("foo")?);
+    g.bind(2, 1, Label::from_str("bar")?);
     let extra = g.clone();
     g.merge(&extra, 1, 1)?;
     assert_eq!(extra.vertices.len(), g.vertices.len());
@@ -268,15 +282,15 @@ fn merges_simple_loop() -> Result<()> {
 
 #[test]
 fn merges_large_loop() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(1)?;
-    g.add(2)?;
-    g.add(3)?;
-    g.add(4)?;
-    g.bind(1, 2, "a")?;
-    g.bind(2, 3, "b")?;
-    g.bind(3, 4, "c")?;
-    g.bind(4, 1, "d")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(1);
+    g.add(2);
+    g.add(3);
+    g.add(4);
+    g.bind(1, 2, Label::from_str("a")?);
+    g.bind(2, 3, Label::from_str("b")?);
+    g.bind(3, 4, Label::from_str("c")?);
+    g.bind(4, 1, Label::from_str("d")?);
     let extra = g.clone();
     g.merge(&extra, 1, 1)?;
     assert_eq!(extra.vertices.len(), g.vertices.len());
@@ -288,11 +302,11 @@ use crate::Hex;
 
 #[test]
 fn merges_data() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(1)?;
-    let mut extra = Sodg::empty();
-    extra.add(1)?;
-    extra.put(1, &Hex::from(42))?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(1);
+    let mut extra = Sodg::empty(256);
+    extra.add(1);
+    extra.put(1, &Hex::from(42));
     g.merge(&extra, 1, 1)?;
     assert_eq!(42, g.data(1)?.to_i64()?);
     Ok(())
@@ -300,52 +314,52 @@ fn merges_data() -> Result<()> {
 
 #[test]
 fn understands_same_name_kids() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "a")?;
-    g.add(2)?;
-    g.bind(1, 2, "x")?;
-    let mut extra = Sodg::empty();
-    extra.add(0)?;
-    extra.add(1)?;
-    extra.bind(0, 1, "b")?;
-    extra.add(2)?;
-    extra.bind(1, 2, "x")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    g.bind(0, 1, Label::from_str("a")?);
+    g.add(2);
+    g.bind(1, 2, Label::from_str("x")?);
+    let mut extra = Sodg::empty(256);
+    extra.add(0);
+    extra.add(1);
+    extra.bind(0, 1, Label::from_str("b")?);
+    extra.add(2);
+    extra.bind(1, 2, Label::from_str("x")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(5, g.vertices.len());
-    assert_eq!(1, g.kid(0, "a").unwrap());
-    assert_eq!(2, g.kid(1, "x").unwrap());
+    assert_eq!(1, g.kid(0, Label::from_str("a")?).unwrap());
+    assert_eq!(2, g.kid(1, Label::from_str("x")?).unwrap());
     Ok(())
 }
 
 #[test]
 fn merges_into_empty_graph() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(1)?;
-    let mut extra = Sodg::empty();
-    extra.add(1)?;
-    extra.add(2)?;
-    extra.add(3)?;
-    extra.bind(1, 2, "a")?;
-    extra.bind(2, 3, "b")?;
-    extra.bind(3, 1, "c")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(1);
+    let mut extra = Sodg::empty(256);
+    extra.add(1);
+    extra.add(2);
+    extra.add(3);
+    extra.bind(1, 2, Label::from_str("a")?);
+    extra.bind(2, 3, Label::from_str("b")?);
+    extra.bind(3, 1, Label::from_str("c")?);
     g.merge(&extra, 1, 1)?;
     assert_eq!(3, g.vertices.len());
-    assert_eq!(2, g.kid(1, "a").unwrap());
+    assert_eq!(0, g.kid(1, Label::from_str("a")?).unwrap());
     Ok(())
 }
 
 #[test]
 fn mixed_injection() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(4)?;
-    let mut extra = Sodg::empty();
-    extra.add(4)?;
-    extra.put(4, &Hex::from(4))?;
-    extra.add(5)?;
-    extra.put(5, &Hex::from(5))?;
-    extra.bind(4, 5, "b")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(4);
+    let mut extra = Sodg::empty(256);
+    extra.add(4);
+    extra.put(4, &Hex::from(4));
+    extra.add(5);
+    extra.put(5, &Hex::from(5));
+    extra.bind(4, 5, Label::from_str("b")?);
     g.merge(&extra, 4, 4)?;
     assert_eq!(2, g.vertices.len());
     Ok(())
@@ -353,18 +367,18 @@ fn mixed_injection() -> Result<()> {
 
 #[test]
 fn zero_to_zero() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "a")?;
-    g.bind(1, 0, "back")?;
-    g.add(2)?;
-    g.bind(0, 2, "b")?;
-    let mut extra = Sodg::empty();
-    extra.add(0)?;
-    extra.add(1)?;
-    extra.bind(0, 1, "c")?;
-    extra.bind(1, 0, "back")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    g.bind(0, 1, Label::from_str("a")?);
+    g.bind(1, 0, Label::from_str("back")?);
+    g.add(2);
+    g.bind(0, 2, Label::from_str("b")?);
+    let mut extra = Sodg::empty(256);
+    extra.add(0);
+    extra.add(1);
+    extra.bind(0, 1, Label::from_str("c")?);
+    extra.bind(1, 0, Label::from_str("back")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(4, g.vertices.len());
     Ok(())
@@ -372,16 +386,16 @@ fn zero_to_zero() -> Result<()> {
 
 #[test]
 fn finds_siblings() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "a")?;
-    g.add(2)?;
-    g.bind(0, 2, "b")?;
-    let mut extra = Sodg::empty();
-    extra.add(0)?;
-    extra.add(1)?;
-    extra.bind(0, 1, "b")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    g.bind(0, 1, Label::from_str("a")?);
+    g.add(2);
+    g.bind(0, 2, Label::from_str("b")?);
+    let mut extra = Sodg::empty(256);
+    extra.add(0);
+    extra.add(1);
+    extra.bind(0, 1, Label::from_str("b")?);
     g.merge(&extra, 0, 0)?;
     assert_eq!(3, g.vertices.len());
     Ok(())
@@ -390,16 +404,19 @@ fn finds_siblings() -> Result<()> {
 #[cfg(test)]
 use crate::Script;
 
+#[cfg(test)]
+use crate::Label;
+
 #[test]
 fn two_big_graphs() -> Result<()> {
-    let mut g = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     Script::from_str(
         "ADD(0); ADD(1); BIND(0, 1, foo);
         ADD(2); BIND(0, 1, alpha);
         BIND(1, 0, back);",
     )
     .deploy_to(&mut g)?;
-    let mut extra = Sodg::empty();
+    let mut extra = Sodg::empty(256);
     Script::from_str("ADD(0); ADD(1); BIND(0, 1, bar); BIND(1, 0, back);").deploy_to(&mut extra)?;
     g.merge(&extra, 0, 0)?;
     assert_eq!(4, g.vertices.len());

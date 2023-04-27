@@ -18,23 +18,58 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Edge;
+use crate::{Edges, EdgesIntoIter, Label};
 
-impl Edge {
-    pub fn new(to: u32, a: &str) -> Self {
-        Self {
-            to,
-            a: a.to_string(),
+impl<'a, const N: usize> Iterator for EdgesIntoIter<'a, N> {
+    type Item = (Label, usize);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+}
+
+impl<'a, const N: usize> IntoIterator for &'a Edges<N> {
+    type Item = (Label, usize);
+    type IntoIter = EdgesIntoIter<'a, N>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        EdgesIntoIter {
+            iter: self.map.into_iter(),
         }
+    }
+}
+
+impl<const N: usize> Edges<N> {
+    #[inline]
+    pub const fn new() -> Self {
+        Self {
+            map: micromap::Map::new(),
+        }
+    }
+
+    #[inline]
+    pub fn insert(&mut self, a: Label, v: usize) {
+        self.map.insert(a, v);
+    }
+
+    #[inline]
+    pub fn remove(&mut self, a: Label) {
+        self.map.remove(&a);
     }
 }
 
 #[cfg(test)]
 use anyhow::Result;
 
+#[cfg(test)]
+use bincode::{deserialize, serialize};
+
 #[test]
-fn makes_an_empty_edge() -> Result<()> {
-    let edge = Edge::new(42, "hello");
-    assert_eq!(42, edge.to);
+fn serialize_and_deserialize() -> Result<()> {
+    let mut before: Edges<4> = Edges::new();
+    before.insert(Label::Alpha(0), 42);
+    let bytes: Vec<u8> = serialize(&before)?;
+    let after: Edges<4> = deserialize(&bytes)?;
+    assert_eq!(42, after.into_iter().next().unwrap().1);
     Ok(())
 }

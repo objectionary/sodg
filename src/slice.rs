@@ -18,26 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::DeadRelay;
-use crate::Sodg;
-use anyhow::{anyhow, Result};
+use crate::{Edges, Vertices};
+use crate::{Label, Sodg};
+use anyhow::{anyhow, Context, Result};
 use log::trace;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
-impl Sodg {
+impl<const N: usize> Sodg<N> {
     /// Take a slice of the graph, keeping only the vertex specified
     /// by the locator and its kids, recursively found in the entire graph.
     ///
     /// # Errors
     ///
     /// If impossible to slice, an error will be returned.
-    pub fn slice(&self, loc: &str) -> Result<Self> {
-        let g = self.slice_some(loc, |_, _, _| true)?;
+    #[allow(clippy::use_self)]
+    pub fn slice(&self, v: usize) -> Result<Self> {
+        let g: Sodg<N> = self.slice_some(v, |_, _, _| true)?;
         trace!(
-            "#slice: taken {} vertices out of {} by '{}' locator",
+            "#slice: taken {} vertices out of {} at ν{v}",
             g.vertices.len(),
-            self.vertices.len(),
-            loc
+            self.vertices.len()
         );
         Ok(g)
     }
@@ -50,92 +50,102 @@ impl Sodg {
     /// # Errors
     ///
     /// If impossible to slice, an error will be returned.
-    pub fn slice_some(&self, loc: &str, p: impl Fn(u32, u32, String) -> bool) -> Result<Self> {
+    pub fn slice_some(&self, v: usize, p: impl Fn(usize, usize, Label) -> bool) -> Result<Self> {
         let mut todo = HashSet::new();
         let mut done = HashSet::new();
-        todo.insert(self.find(0, loc, &DeadRelay::default())?);
+        todo.insert(v);
         loop {
             if todo.is_empty() {
                 break;
             }
-            let before: Vec<u32> = todo.drain().collect();
+            let before: Vec<usize> = todo.drain().collect();
             for v in before {
                 done.insert(v);
                 let vtx = self
                     .vertices
-                    .get(&v)
+                    .get(v)
                     .ok_or_else(|| anyhow!("Can't find ν{v}"))?;
                 for e in &vtx.edges {
-                    if done.contains(&e.to) {
+                    if done.contains(&e.1) {
                         continue;
                     }
-                    if !p(v, e.to, e.a.clone()) {
+                    if !p(v, e.1, e.0) {
                         continue;
                     }
-                    done.insert(e.to);
-                    todo.insert(e.to);
+                    done.insert(e.1);
+                    todo.insert(e.1);
                 }
             }
         }
-        let mut new_vertices = HashMap::new();
+        let mut new_vertices: Vertices<N> = Vertices::with_capacity(self.vertices.capacity());
         for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             let mut nv = vtx.clone();
-            nv.edges.retain(|e| done.contains(&e.to));
-            new_vertices.insert(*v, nv);
+            let mut ne = Edges::new();
+            for (k, v) in &nv.edges {
+                if done.contains(&v) {
+                    ne.insert(k, v);
+                }
+            }
+            nv.edges = ne;
+            new_vertices.insert(v);
+            let vtx = new_vertices.get_mut(v).with_context(|| "Can't find?")?;
+            for e in &nv.edges {
+                vtx.edges.insert(e.0, e.1);
+            }
         }
         let g = Self {
             vertices: new_vertices,
             next_v: self.next_v,
             alerts: self.alerts.clone(),
             alerts_active: self.alerts_active,
-            #[cfg(feature = "sober")]
-            finds: HashSet::new(),
         };
         trace!(
-            "#slice_some: taken {} vertices out of {} by '{}' locator",
+            "#slice_some: taken {} vertices out of {} at ν{v}",
             g.vertices.len(),
-            self.vertices.len(),
-            loc
+            self.vertices.len()
         );
         Ok(g)
     }
 }
 
+#[cfg(test)]
+use std::str::FromStr;
+
 #[test]
 fn makes_a_slice() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "foo")?;
-    g.add(2)?;
-    g.bind(0, 2, "bar")?;
-    assert_eq!(1, g.slice("foo")?.vertices.len());
-    assert_eq!(1, g.slice("bar")?.vertices.len());
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    g.bind(0, 1, Label::from_str("foo")?);
+    g.add(2);
+    g.bind(0, 2, Label::from_str("bar")?);
+    assert_eq!(1, g.slice(1)?.vertices.len());
+    assert_eq!(1, g.slice(2)?.vertices.len());
     Ok(())
 }
 
 #[test]
 fn makes_a_partial_slice() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "foo")?;
-    g.add(2)?;
-    g.bind(1, 2, "bar")?;
-    let slice = g.slice_some("foo", |_v, _to, _a| false)?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    g.bind(0, 1, Label::from_str("foo")?);
+    g.add(2);
+    g.bind(1, 2, Label::from_str("bar")?);
+    let slice = g.slice_some(1, |_v, _to, _a| false)?;
     assert_eq!(1, slice.vertices.len());
     Ok(())
 }
 
 #[test]
 fn skips_some_vertices() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    g.bind(0, 1, "foo")?;
-    g.add(2)?;
-    g.bind(0, 2, "+bar")?;
-    let slice = g.slice_some("ν0", |_, _, a| !a.starts_with('+'))?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    g.bind(0, 1, Label::from_str("foo")?);
+    g.add(2);
+    g.bind(0, 2, Label::from_str("+bar")?);
+    let slice = g.slice_some(0, |_, _, a| !a.to_string().starts_with('+'))?;
     assert_eq!(2, slice.vertices.len());
     assert_eq!(1, slice.kids(0)?.len());
     Ok(())

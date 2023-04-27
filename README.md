@@ -25,7 +25,7 @@ Here is how you can create a di-graph:
 ```rust
 use sodg::Sodg;
 use sodg::Hex;
-let mut g = Sodg::empty();
+let mut g = Sodg::empty(256);
 g.add(0)?; // add a vertex no.0
 g.add(1)?; // add a vertex no.1
 g.bind(0, 1, "foo")?; // connect v0 to v1 with label "foo"
@@ -42,7 +42,7 @@ assert_eq!(1, id);
 Then, you can find all kids of a vertex:
 
 ```rust
-let kids: Vec<(String, String, u32)> = g.kids(0);
+let kids: Vec<(String, String, usize)> = g.kids(0);
 assert_eq!("foo", kids[0].0);
 assert_eq!("bar", kids[0].1);
 assert_eq!(1, kids[0].2);

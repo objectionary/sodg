@@ -26,7 +26,7 @@ use std::fs;
 use std::path::Path;
 use std::time::Instant;
 
-impl Sodg {
+impl<const N: usize> Sodg<N> {
     /// Save the entire [`Sodg`] into a binary file.
     ///
     /// The entire [`Sodg`] can be restored from the file.
@@ -38,9 +38,9 @@ impl Sodg {
     /// If impossible to save, an error will be returned.
     pub fn save(&self, path: &Path) -> Result<usize> {
         let start = Instant::now();
-        let bytes: Vec<u8> = serialize(self).context("Failed to serialize")?;
+        let bytes: Vec<u8> = serialize(self).with_context(|| "Failed to serialize")?;
         let size = bytes.len();
-        fs::write(path, bytes).context(format!("Can't write to {}", path.display()))?;
+        fs::write(path, bytes).with_context(|| format!("Can't write to {}", path.display()))?;
         trace!(
             "Serialized {} vertices ({} bytes) to {} in {:?}",
             self.vertices.len(),
@@ -59,10 +59,11 @@ impl Sodg {
     /// If impossible to load, an error will be returned.
     pub fn load(path: &Path) -> Result<Self> {
         let start = Instant::now();
-        let bytes = fs::read(path).context(format!("Can't read from {}", path.display()))?;
+        let bytes =
+            fs::read(path).with_context(|| format!("Can't read from {}", path.display()))?;
         let size = bytes.len();
-        let sodg: Self =
-            deserialize(&bytes).context(format!("Can't deserialize from {}", path.display()))?;
+        let sodg: Self = deserialize(&bytes)
+            .with_context(|| format!("Can't deserialize from {}", path.display()))?;
         trace!(
             "Deserialized {} vertices ({} bytes) from {} in {:?}",
             sodg.vertices.len(),
@@ -80,18 +81,24 @@ use tempfile::TempDir;
 #[cfg(test)]
 use crate::Hex;
 
+#[cfg(test)]
+use crate::Label;
+
+#[cfg(test)]
+use std::str::FromStr;
+
 #[test]
 fn saves_and_loads() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.put(0, &Hex::from_str_bytes("hello"))?;
-    g.add(1)?;
-    g.bind(0, 1, "foo")?;
-    g.put(1, &Hex::from_str_bytes("foo"))?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.put(0, &Hex::from_str_bytes("hello"));
+    g.add(1);
+    g.bind(0, 1, Label::from_str("foo")?);
+    g.put(1, &Hex::from_str_bytes("foo"));
     let tmp = TempDir::new()?;
     let file = tmp.path().join("foo.sodg");
     g.save(file.as_path())?;
-    let after = Sodg::load(file.as_path())?;
-    assert_eq!(g.inspect("")?, after.inspect("")?);
+    let after: Sodg<16> = Sodg::load(file.as_path())?;
+    assert_eq!(g.inspect(0)?, after.inspect(0)?);
     Ok(())
 }

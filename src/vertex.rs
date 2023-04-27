@@ -18,24 +18,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Hex, Vertex};
-use std::collections::HashSet;
+use crate::{Edges, Vertex};
 
-impl Vertex {
+impl<const N: usize> Vertex<N> {
     /// Make an empty one.
     ///
     /// For example:
     ///
     /// ```
     /// use sodg::Sodg;
-    /// let mut sodg = Sodg::empty();
-    /// sodg.add(0).unwrap();
+    /// let mut sodg : Sodg<16> = Sodg::empty(256);
+    /// sodg.add(0);
     /// ```
-    pub fn empty() -> Self {
+    pub const fn empty() -> Self {
         Self {
-            edges: vec![],
-            data: Hex::empty(),
-            parents: HashSet::new(),
+            edges: Edges::new(),
+            data: None,
             taken: false,
         }
     }
@@ -44,9 +42,13 @@ impl Vertex {
 #[cfg(test)]
 use anyhow::Result;
 
+#[cfg(test)]
+use crate::Label;
+
 #[test]
 fn makes_an_empty_vertex() -> Result<()> {
-    let vtx = Vertex::empty();
-    assert_eq!(0, vtx.edges.len());
+    let mut v: Vertex<4> = Vertex::empty();
+    v.edges.insert(Label::Alpha(0), 1);
+    assert_eq!(1, v.edges.into_iter().next().unwrap().1);
     Ok(())
 }

@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
 use crate::{Hex, Script};
+use crate::{Label, Sodg};
 use anyhow::{anyhow, Context, Result};
 use lazy_static::lazy_static;
 use log::trace;
@@ -41,14 +41,15 @@ impl Script {
     /// For example:
     ///
     /// ```
-    /// use sodg::Script;
+    /// use std::str::FromStr;
+    /// use sodg::{Label, Script};
     /// use sodg::Sodg;
     /// let mut s = Script::from_str(
     ///   "ADD(0); ADD($ν1); BIND(ν0, $ν1, foo);"
     /// );
-    /// let mut g = Sodg::empty();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// let total = s.deploy_to(&mut g).unwrap();
-    /// assert_eq!(1, g.kid(0, "foo").unwrap());
+    /// assert_eq!(1, g.kid(0, Label::from_str("foo").unwrap()).unwrap());
     /// ```
     #[allow(clippy::should_implement_trait)]
     #[must_use]
@@ -64,12 +65,12 @@ impl Script {
     /// # Errors
     ///
     /// If impossible to deploy, an error will be returned.
-    pub fn deploy_to(&mut self, g: &mut Sodg) -> Result<usize> {
+    pub fn deploy_to<const N: usize>(&mut self, g: &mut Sodg<N>) -> Result<usize> {
         let mut pos = 0;
         for cmd in &self.commands() {
             trace!("#deploy_to: deploying command no.{} '{}'...", pos + 1, cmd);
             self.deploy_one(cmd, g)
-                .context(format!("Failure at the command no.{pos}: '{cmd}'"))?;
+                .with_context(|| format!("Failure at the command no.{pos}: '{cmd}'"))?;
             pos += 1;
         }
         Ok(pos)
@@ -95,11 +96,13 @@ impl Script {
     /// # Errors
     ///
     /// If impossible to deploy, an error will be returned.
-    fn deploy_one(&mut self, cmd: &str, g: &mut Sodg) -> Result<()> {
+    fn deploy_one<const N: usize>(&mut self, cmd: &str, g: &mut Sodg<N>) -> Result<()> {
         lazy_static! {
             static ref LINE: Regex = Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap();
         }
-        let cap = LINE.captures(cmd).context(format!("Can't parse '{cmd}'"))?;
+        let cap = LINE
+            .captures(cmd)
+            .with_context(|| format!("Can't parse '{cmd}'"))?;
         let args: Vec<String> = cap[2]
             .split(',')
             .map(str::trim)
@@ -108,23 +111,26 @@ impl Script {
             .collect();
         match &cap[1] {
             "ADD" => {
-                let v = self.parse(args.get(0).context("V is expected")?, g)?;
-                g.add(v).context(format!("Failed to ADD({v})"))
+                let v = self.parse(args.get(0).with_context(|| "V is expected")?, g)?;
+                g.add(v);
             }
             "BIND" => {
-                let v1 = self.parse(args.get(0).context("V1 is expected")?, g)?;
-                let v2 = self.parse(args.get(1).context("V2 is expected")?, g)?;
-                let a = args.get(2).context("Label is expected")?;
-                g.bind(v1, v2, a)
-                    .context(format!("Failed to BIND({v1}, {v2}, {a})"))
+                let v1 = self.parse(args.get(0).with_context(|| "V1 is expected")?, g)?;
+                let v2 = self.parse(args.get(1).with_context(|| "V2 is expected")?, g)?;
+                let a =
+                    Label::from_str(args.get(2).with_context(|| "Label is expected")?.as_str())?;
+                g.bind(v1, v2, a);
             }
             "PUT" => {
-                let v = self.parse(args.get(0).context("V is expected")?, g)?;
-                let d = Self::parse_data(args.get(1).context("Data is expected")?)?;
-                g.put(v, &d).context(format!("Failed to PUT({v}, {d})"))
+                let v = self.parse(args.get(0).with_context(|| "V is expected")?, g)?;
+                let d = Self::parse_data(args.get(1).with_context(|| "Data is expected")?)?;
+                g.put(v, &d);
             }
-            cmd => Err(anyhow!("Unknown command: {cmd}")),
+            cmd => {
+                return Err(anyhow!("Unknown command: {cmd}"));
+            }
         }
+        Ok(())
     }
 
     /// Parse data.
@@ -154,17 +160,21 @@ impl Script {
     /// # Errors
     ///
     /// If impossible to parse, an error will be returned.
-    fn parse(&mut self, s: &str, g: &mut Sodg) -> Result<u32> {
-        let head = s.chars().next().context("Empty identifier".to_string())?;
+    fn parse<const N: usize>(&mut self, s: &str, g: &mut Sodg<N>) -> Result<usize> {
+        let head = s
+            .chars()
+            .next()
+            .with_context(|| "Empty identifier".to_string())?;
         if head == '$' || head == 'ν' {
             let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
             if head == '$' {
                 Ok(*self.vars.entry(tail).or_insert_with(|| g.next_id()))
             } else {
-                Ok(u32::from_str(tail.as_str()).context(format!("Parsing of '{s}' failed"))?)
+                Ok(usize::from_str(tail.as_str())
+                    .with_context(|| format!("Parsing of '{s}' failed"))?)
             }
         } else {
-            let v = u32::from_str(s).context(format!("Parsing of '{s}' failed"))?;
+            let v = usize::from_str(s).with_context(|| format!("Parsing of '{s}' failed"))?;
             Ok(v)
         }
     }
@@ -175,7 +185,7 @@ use std::str;
 
 #[test]
 fn simple_command() -> Result<()> {
-    let mut g = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     let mut s = Script::from_str(
         "
         ADD(0);  ADD($ν1); # adding two vertices
@@ -186,6 +196,6 @@ fn simple_command() -> Result<()> {
     let total = s.deploy_to(&mut g)?;
     assert_eq!(4, total);
     assert_eq!("привет", g.data(1)?.to_utf8()?);
-    assert_eq!(1, g.kid(0, "foo").unwrap());
+    assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
     Ok(())
 }

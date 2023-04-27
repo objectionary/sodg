@@ -20,19 +20,19 @@
 
 use crate::Sodg;
 
-impl Sodg {
+impl<const N: usize> Sodg<N> {
     /// Get next unique ID of a vertex.
     ///
     /// This ID will never be returned by [`Sodg::next_id`] again. Also, this ID will not
     /// be equal to any of the existing IDs of vertices.
-    pub fn next_id(&mut self) -> u32 {
+    #[inline]
+    pub fn next_id(&mut self) -> usize {
         let mut id = self.next_v;
-        for v in self.vertices.keys() {
-            if *v >= id {
-                id = *v + 1;
-            }
+        id = self.vertices.try_id(id);
+        let next = id + 1;
+        if next > self.next_v {
+            self.next_v = next;
         }
-        self.next_v = id + 1;
         id
     }
 }
@@ -42,18 +42,47 @@ use anyhow::Result;
 
 #[test]
 fn simple_next_id() -> Result<()> {
-    let mut g = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     assert_eq!(0, g.next_id());
     assert_eq!(1, g.next_id());
+    assert_eq!(2, g.next_id());
     Ok(())
 }
 
 #[test]
 fn calculates_next_id() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(42)?;
-    assert_eq!(43, g.next_id());
-    assert_eq!(44, g.next_id());
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(42);
+    assert_eq!(1, g.next_id());
+    assert_eq!(2, g.next_id());
+    Ok(())
+}
+
+#[test]
+fn next_id_after_inject() -> Result<()> {
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(1);
+    assert_eq!(0, g.next_id());
+    assert_eq!(2, g.next_id());
+    Ok(())
+}
+
+#[test]
+fn next_id_after_sequence() -> Result<()> {
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    assert_eq!(2, g.next_id());
+    assert_eq!(3, g.next_id());
+    Ok(())
+}
+
+#[test]
+fn next_id_after_zero() -> Result<()> {
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    assert_eq!(1, g.next_id());
+    assert_eq!(2, g.next_id());
     Ok(())
 }

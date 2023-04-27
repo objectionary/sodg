@@ -22,15 +22,16 @@ use crate::{Alert, Sodg};
 use anyhow::anyhow;
 use anyhow::Result;
 
-impl Sodg {
+impl<const N: usize> Sodg<N> {
     /// Attach a new alert to this graph.
     ///
     /// For example, you don't want
     /// more than one edge to depart from any vertex:
     ///
-    /// ```
-    /// use sodg::Sodg;
-    /// let mut g = Sodg::empty();
+    /// ```no_run
+    /// use std::str::FromStr;
+    /// use sodg::{Label, Sodg};
+    /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.alerts_on().unwrap();
     /// g.alert_on(|g, vx| {
     ///   for v in vx {
@@ -40,13 +41,13 @@ impl Sodg {
     ///   }
     ///   return vec![];
     /// });
-    /// g.add(0).unwrap();
-    /// g.add(1).unwrap();
-    /// g.add(2).unwrap();
-    /// g.bind(0, 1, "first").unwrap();
-    /// assert!(g.bind(0, 2, "second").is_err());
+    /// g.add(0);
+    /// g.add(1);
+    /// g.add(2);
+    /// g.bind(0, 1, Label::from_str("first").unwrap());
+    /// g.bind(0, 2, Label::from_str("second").unwrap());
     /// ```
-    pub fn alert_on(&mut self, a: Alert) {
+    pub fn alert_on(&mut self, a: Alert<N>) {
         self.alerts.push(a);
     }
 
@@ -66,7 +67,11 @@ impl Sodg {
     /// An error may be returned if validation fails, after the alerts are turned ON.
     pub fn alerts_on(&mut self) -> Result<()> {
         self.alerts_active = true;
-        self.validate(self.vertices.keys().copied().collect())
+        let mut keys = vec![];
+        for (v, _) in self.vertices.iter() {
+            keys.push(v);
+        }
+        self.validate(keys)
     }
 
     /// Check all alerts for the given list of vertices.
@@ -75,7 +80,8 @@ impl Sodg {
     ///
     /// If any of them have any issues, `Err` is returned.
     #[allow(clippy::needless_pass_by_value)]
-    pub fn validate(&self, vx: Vec<u32>) -> Result<()> {
+    #[inline]
+    pub fn validate(&self, vx: Vec<usize>) -> Result<()> {
         if self.alerts_active {
             for a in &self.alerts {
                 let msgs = a(self, vx.clone());
@@ -89,26 +95,30 @@ impl Sodg {
 }
 
 #[test]
-fn panic_on_simple_alert() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.alerts_on()?;
+#[cfg(debug_assertions)]
+#[should_panic]
+fn panic_on_simple_alert() {
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.alerts_on().unwrap();
     g.alert_on(|_, _| vec![format!("{}", "oops")]);
-    assert!(g.add(0).is_err());
-    Ok(())
+    g.add(0);
 }
 
 #[test]
+#[cfg(debug_assertions)]
 fn dont_panic_when_alerts_disabled() -> Result<()> {
-    let mut g = Sodg::empty();
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.alert_on(|_, _| vec!["should never happen".to_string()]);
     g.alerts_off();
-    assert!(g.add(0).is_ok());
+    g.add(0);
     Ok(())
 }
 
 #[test]
-fn panic_on_complex_alert() -> Result<()> {
-    let mut g = Sodg::empty();
+#[cfg(debug_assertions)]
+#[should_panic]
+fn panic_on_complex_alert() {
+    let mut g: Sodg<16> = Sodg::empty(256);
     g.alert_on(|_, vx| {
         let v = 42;
         if vx.contains(&v) {
@@ -117,7 +127,6 @@ fn panic_on_complex_alert() -> Result<()> {
             vec![]
         }
     });
-    g.alerts_on()?;
-    assert!(g.add(42).is_err());
-    Ok(())
+    g.alerts_on().unwrap();
+    g.add(42);
 }

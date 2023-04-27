@@ -18,13 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::DeadRelay;
 use crate::Sodg;
 use anyhow::{Context, Result};
 use itertools::Itertools;
 use std::collections::HashSet;
 
-impl Sodg {
+impl<const N: usize> Sodg<N> {
     /// Find an object by the provided locator and print its tree
     /// of sub-objects and edges.
     ///
@@ -33,34 +32,30 @@ impl Sodg {
     /// # Errors
     ///
     /// If it's impossible to inspect, an error will be returned.
-    pub fn inspect(&self, loc: &str) -> Result<String> {
-        let v = self
-            .find(0, loc, &DeadRelay::default())
-            .context(format!("Can't locate '{loc}'"))?;
+    pub fn inspect(&self, v: usize) -> Result<String> {
         let mut seen = HashSet::new();
         Ok(format!(
-            "{}/ν{}\n{}",
-            loc,
+            "ν{}\n{}",
             v,
             self.inspect_v(v, &mut seen)?.join("\n")
         ))
     }
 
-    fn inspect_v(&self, v: u32, seen: &mut HashSet<u32>) -> Result<Vec<String>> {
+    fn inspect_v(&self, v: usize, seen: &mut HashSet<usize>) -> Result<Vec<String>> {
         seen.insert(v);
         let mut lines = vec![];
         self.vertices
-            .get(&v)
-            .context(format!("Can't find ν{v}"))?
+            .get(v)
+            .with_context(|| format!("Can't find ν{v}"))?
             .edges
-            .iter()
+            .into_iter()
             .sorted()
             .for_each(|e| {
-                let skip = seen.contains(&e.to);
+                let skip = seen.contains(&e.1);
                 let line = format!(
                     "  .{} ➞ ν{}{}",
-                    e.a,
-                    e.to,
+                    e.0,
+                    e.1,
                     if skip {
                         "…".to_string()
                     } else {
@@ -69,8 +64,8 @@ impl Sodg {
                 );
                 lines.push(line);
                 if !skip {
-                    seen.insert(e.to);
-                    self.inspect_v(e.to, seen)
+                    seen.insert(e.1);
+                    self.inspect_v(e.1, seen)
                         .unwrap()
                         .iter()
                         .for_each(|t| lines.push(format!("  {t}")));
@@ -83,15 +78,18 @@ impl Sodg {
 #[cfg(test)]
 use crate::Hex;
 
+#[cfg(test)]
+use crate::Label;
+
 #[test]
 fn inspects_simple_object() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.put(0, &Hex::from_str_bytes("hello"))?;
-    g.add(1)?;
-    g.bind(0, 1, "foo")?;
-    let txt = g.inspect("")?;
-    println!("{}", txt);
-    assert_ne!("".to_string(), txt);
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.put(0, &Hex::from_str_bytes("hello"));
+    g.add(1);
+    let txt = g.inspect(0)?;
+    g.bind(0, 1, Label::Alpha(0));
+    println!("{txt}");
+    assert_ne!(String::new(), txt);
     Ok(())
 }

@@ -18,23 +18,24 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
+use crate::{Label, Sodg};
 use itertools::Itertools;
 
-impl Sodg {
+impl<const N: usize> Sodg<N> {
     /// Print SODG as a DOT graph.
     ///
     /// For example, for this code:
     ///
     /// ```
-    /// use sodg::Hex;
+    /// use std::str::FromStr;
+    /// use sodg::{Hex, Label};
     /// use sodg::Sodg;
-    /// let mut g = Sodg::empty();
-    /// g.add(0).unwrap();
-    /// g.put(0, &Hex::from_str_bytes("hello")).unwrap();
-    /// g.add(1).unwrap();
-    /// g.bind(0, 1, "foo").unwrap();
-    /// g.bind(0, 1, "bar").unwrap();
+    /// let mut g : Sodg<16> = Sodg::empty(256);
+    /// g.add(0);
+    /// g.put(0, &Hex::from_str_bytes("hello"));
+    /// g.add(1);
+    /// g.bind(0, 1, Label::from_str("foo").unwrap());
+    /// g.bind(0, 1, Label::from_str("bar").unwrap());
     /// let dot = g.to_dot();
     /// println!("{}", dot);
     /// ```
@@ -62,35 +63,47 @@ digraph {
         for (v, vtx) in self
             .vertices
             .iter()
-            .sorted_by_key(|(v, _)| <&u32>::clone(v))
+            .sorted_by_key(|(v, _)| <usize>::clone(v))
         {
             lines.push(format!(
                 "  v{v}[shape=circle,label=\"ν{v}\"{}]; {}",
-                if vtx.data.is_empty() {
+                if vtx.data.is_none() {
                     ""
                 } else {
                     ",color=\"#f96900\""
                 },
-                if vtx.data.is_empty() {
-                    String::new()
-                } else {
-                    format!("/* {} */", vtx.data)
-                }
+                vtx.data
+                    .as_ref()
+                    .map_or_else(String::new, |d| format!("/* {d} */"))
             ));
-            for e in vtx.edges.iter().sorted_by_key(|e| e.a.clone()) {
+            for e in vtx.edges.into_iter().sorted_by_key(|e| e.0) {
                 lines.push(format!(
                     "  v{v} -> v{} [label=\"{}\"{}{}];",
-                    e.to,
-                    e.a,
-                    if e.a.starts_with('ρ') || e.a.starts_with('σ') {
-                        ",color=gray,fontcolor=gray"
-                    } else {
-                        ""
+                    e.1,
+                    e.0,
+                    match e.0 {
+                        Label::Greek(g) => {
+                            if g == 'ρ' || g == 'σ' {
+                                ",color=gray,fontcolor=gray"
+                            } else {
+                                ""
+                            }
+                        }
+                        _ => {
+                            ""
+                        }
                     },
-                    if e.a.starts_with('π') {
-                        ",style=dashed"
-                    } else {
-                        ""
+                    match e.0 {
+                        Label::Greek(g) => {
+                            if g == 'π' {
+                                ",style=dashed"
+                            } else {
+                                ""
+                            }
+                        }
+                        _ => {
+                            ""
+                        }
                     }
                 ));
             }
@@ -108,11 +121,11 @@ use anyhow::Result;
 
 #[test]
 fn simple_graph_to_dot() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.put(0, &Hex::from_str_bytes("hello"))?;
-    g.add(1)?;
-    g.bind(0, 1, "foo")?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.put(0, &Hex::from_str_bytes("hello"));
+    g.add(1);
+    g.bind(0, 1, Label::Alpha(0));
     let dot = g.to_dot();
     assert!(dot.contains("shape=circle,label=\"ν0\""));
     Ok(())

@@ -23,23 +23,23 @@ use anyhow::{Context, Result};
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 
-impl Display for Sodg {
+impl<const N: usize> Display for Sodg<N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         <&Self as Debug>::fmt(&self, f)
     }
 }
 
-impl Debug for Sodg {
+impl<const N: usize> Debug for Sodg<N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
-        for (i, v) in &self.vertices {
+        for (i, v) in self.vertices.iter() {
             let mut attrs = v
                 .edges
-                .iter()
-                .map(|e| format!("\n\t{} ➞ ν{}", e.a, e.to))
+                .into_iter()
+                .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
-            if !&v.data.is_empty() {
-                attrs.push(format!("{}", v.data));
+            if let Some(d) = v.data.clone() {
+                attrs.push(format!("{d}"));
             }
             lines.push(format!("ν{i} -> ⟦{}⟧", attrs.join(", ")));
         }
@@ -47,19 +47,26 @@ impl Debug for Sodg {
     }
 }
 
-impl Sodg {
+impl<const N: usize> Sodg<N> {
     /// Print a single vertex to a string, which can be used for
     /// logging and debugging.
     ///
     /// # Errors
     ///
     /// If the vertex is absent, an error may be returned.
-    pub fn v_print(&self, v: u32) -> Result<String> {
-        let vtx = self.vertices.get(&v).context(format!("Can't find ν{v}"))?;
-        let list: Vec<String> = vtx.edges.iter().map(|e| e.a.clone()).collect();
+    pub fn v_print(&self, v: usize) -> Result<String> {
+        let vtx = self
+            .vertices
+            .get(v)
+            .with_context(|| format!("Can't find ν{v}"))?;
+        let list: Vec<String> = vtx
+            .edges
+            .into_iter()
+            .map(|e| format!("{}", e.0.clone()))
+            .collect();
         Ok(format!(
             "ν{v}⟦{}{}⟧",
-            if vtx.data.is_empty() { "" } else { "Δ, " },
+            if vtx.data.is_none() { "" } else { "Δ, " },
             list.join(", ")
         ))
     }
@@ -67,18 +74,18 @@ impl Sodg {
 
 #[test]
 fn prints_itself() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
-    assert_ne!("", format!("{:?}", g));
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    assert_ne!("", format!("{g:?}"));
     Ok(())
 }
 
 #[test]
 fn displays_itself() -> Result<()> {
-    let mut g = Sodg::empty();
-    g.add(0)?;
-    g.add(1)?;
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
     assert_ne!("", format!("{g}"));
     Ok(())
 }
