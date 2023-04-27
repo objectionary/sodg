@@ -359,9 +359,9 @@ checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
 name = "micromap"
-version = "0.0.11"
+version = "0.0.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "41fdc1caeb366b5e7162efa3a8c5f9d9a1fa931ba00100535a2e50751869a16a"
+checksum = "6f6cc1a2fd3deb32afafa3b002742c2c9f6afdfdddaeb684a3c21a1e3d8157c9"
 dependencies = [
  "serde",
 ]
