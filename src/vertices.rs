@@ -64,6 +64,14 @@ impl<const N: usize> Vertices<N> {
     }
 
     #[inline]
+    pub fn insert_if_absent(&mut self, v: usize) {
+        if self.contains(v) {
+            return;
+        }
+        self.emap.insert(v, Vertex::empty());
+    }
+
+    #[inline]
     pub fn get(&self, v: usize) -> Option<&Vertex<N>> {
         self.emap.get(v)
     }

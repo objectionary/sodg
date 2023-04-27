@@ -45,10 +45,7 @@ impl<const N: usize> Sodg<N> {
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn add(&mut self, v1: usize) {
-        if self.vertices.contains(v1) {
-            return;
-        }
-        self.vertices.insert(v1);
+        self.vertices.insert_if_absent(v1);
         #[cfg(debug_assertions)]
         self.validate(vec![v1]).unwrap();
         #[cfg(debug_assertions)]

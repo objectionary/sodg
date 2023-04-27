@@ -62,7 +62,7 @@ pub fn on_graph(total: usize) -> i64 {
         let v4 = v3 + 1;
         g.add(v4);
         g.bind(v4, v1, Label::Greek('φ'));
-        // assert!(g.kid(v4, Label::Alpha(0)).is_none());
+        assert!(g.kid(v4, Label::Alpha(0)).is_none());
         g.kid(v4, Label::Greek('φ')).unwrap();
         g.kid(v1, Label::Alpha(0)).unwrap();
         let k = g.kid(v2, Label::Greek('Δ')).unwrap();
@@ -74,16 +74,16 @@ pub fn on_graph(total: usize) -> i64 {
 pub fn on_heap(total: usize) -> i64 {
     let mut sum = 0;
     for _ in 0..total {
-        let prime = std::hint::black_box(Box::new(Prime { usd: 42 }));
-        let discounted = std::hint::black_box(Box::new(Discounted { book: prime }));
-        let price = std::hint::black_box(discounted.price());
-        sum += price;
+        let prime = Box::new(Prime { usd: 42 });
+        let discounted = Box::new(Discounted { book: prime });
+        let price = discounted.price();
+        sum += std::hint::black_box(price);
     }
     std::hint::black_box(sum)
 }
 
 fn main() {
-    let total = 1000000;
+    let total = 10000000;
     let start1 = Instant::now();
     let s1 = on_graph(total);
     let e1 = start1.elapsed();
