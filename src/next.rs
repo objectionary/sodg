@@ -28,7 +28,7 @@ impl<const N: usize> Sodg<N> {
     #[inline]
     pub fn next_id(&mut self) -> usize {
         let mut id = self.next_v;
-        id = self.vertices.try_id(id);
+        id = self.alive.next_key_gte(id);
         let next = id + 1;
         if next > self.next_v {
             self.next_v = next;

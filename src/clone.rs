@@ -24,12 +24,11 @@ impl<const N: usize> Clone for Sodg<N> {
     /// Make a clone of the graph.
     fn clone(&self) -> Self {
         Self {
-            vertices: self.vertices.clone(),
+            alive: self.alive.clone(),
+            edges: self.edges.clone(),
+            data: self.data.clone(),
+            taken: self.taken.clone(),
             next_v: self.next_v,
-            alerts: vec![],
-            alerts_active: false,
-            #[cfg(feature = "sober")]
-            finds: self.finds.clone(),
         }
     }
 }
@@ -47,7 +46,7 @@ fn makes_a_clone() -> Result<()> {
     g.add(42);
     g.bind(1, 42, Label::Alpha(0));
     let c = g.clone();
-    assert_eq!(2, c.vertices.len());
+    assert_eq!(2, c.len());
     Ok(())
 }
 
@@ -55,6 +54,6 @@ fn makes_a_clone() -> Result<()> {
 fn makes_an_empty_clone() -> Result<()> {
     let g: Sodg<16> = Sodg::empty(256);
     let c = g.clone();
-    assert_eq!(0, c.vertices.len());
+    assert_eq!(0, c.len());
     Ok(())
 }

@@ -66,20 +66,20 @@ impl<const N: usize> Sodg<N> {
             .encoding("UTF-8".into())
             .build();
         let mut root = XMLElement::new("sodg");
-        for (v, vtx) in self
-            .vertices
+        for (v, edges) in self
+            .edges
             .iter()
             .sorted_by_key(|(v, _)| <usize>::clone(v))
         {
             let mut v_node = XMLElement::new("v");
             v_node.add_attribute("id", v.to_string().as_str());
-            for e in vtx.edges.into_iter().sorted_by_key(|e| e.0) {
+            for e in edges.into_iter().sorted_by_key(|e| e.0) {
                 let mut e_node = XMLElement::new("e");
                 e_node.add_attribute("a", e.0.to_string().as_str());
                 e_node.add_attribute("to", e.1.to_string().as_str());
                 v_node.add_child(e_node)?;
             }
-            if let Some(d) = &vtx.data {
+            if let Some(d) = &self.data.get(v) {
                 let mut data_node = XMLElement::new("data");
                 data_node.add_text(d.print().replace('-', " "))?;
                 v_node.add_child(data_node)?;

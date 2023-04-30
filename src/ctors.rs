@@ -19,9 +19,6 @@
 // SOFTWARE.
 
 use crate::Sodg;
-use crate::Vertices;
-#[cfg(feature = "sober")]
-use std::collections::HashSet;
 
 impl<const N: usize> Sodg<N> {
     /// Make an empty [`Sodg`], with no vertices and no edges.
@@ -31,77 +28,24 @@ impl<const N: usize> Sodg<N> {
     /// May panic if vertices provided to alerts are absent (should never happen, though).
     #[must_use]
     pub fn empty(cap: usize) -> Self {
-        let mut g = Self {
-            vertices: Vertices::with_capacity(cap),
+        Self {
+            alive: Map::with_capacity_none(cap),
+            edges: Map::with_capacity_some(cap, micromap::Map::new()),
+            data: Map::with_capacity_none(cap),
+            taken: Map::with_capacity_none(cap),
             next_v: 0,
-            alerts: vec![],
-            alerts_active: true,
-            #[cfg(feature = "sober")]
-            finds: HashSet::new(),
-        };
-        g.alert_on(|g, vx| {
-            let mut errors = Vec::new();
-            for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
-                    if !g.vertices.contains(e.1) {
-                        errors.push(format!("Edge ν{v}.{} arrives to lost ν{}", e.0, e.1));
-                    }
-                }
-            }
-            errors
-        });
-        g.alert_on(|g, vx| {
-            let mut errors = Vec::new();
-            for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
-                    if e.1 == *v {
-                        errors.push(format!("Edge ν{v}.{} arrives to ν{} (loop)", e.0, e.1));
-                    }
-                }
-            }
-            errors
-        });
-        g.alert_on(|g, vx| {
-            let mut errors = Vec::new();
-            for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
-                    if !g.vertices.contains(e.1) {
-                        errors.push(format!(
-                            "Edge ν{v}.{} points to ν{}, which doesn't exist",
-                            e.0, e.1
-                        ));
-                    }
-                }
-            }
-            errors
-        });
-        g.alerts_off();
-        #[cfg(feature = "sober")]
-        g.alerts_on().unwrap();
-        g
+        }
     }
 }
 
 #[cfg(test)]
 use anyhow::Result;
-
-#[cfg(test)]
-use crate::Label;
+use emap::Map;
 
 #[test]
 fn makes_an_empty_sodg() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
-    assert_eq!(1, g.vertices.len());
-    Ok(())
-}
-
-#[test]
-fn prohibits_loops() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty(256);
-    g.alerts_off();
-    g.add(0);
-    g.bind(0, 0, Label::Alpha(0));
-    assert!(g.alerts_on().is_err());
+    assert_eq!(1, g.len());
     Ok(())
 }

@@ -60,23 +60,23 @@ digraph {
   edge [fontname=\"Arial\"];"
                 .to_string(),
         );
-        for (v, vtx) in self
-            .vertices
+        for (v, edges) in self
+            .edges
             .iter()
             .sorted_by_key(|(v, _)| <usize>::clone(v))
         {
             lines.push(format!(
                 "  v{v}[shape=circle,label=\"ν{v}\"{}]; {}",
-                if vtx.data.is_none() {
+                if self.data.contains_key(v) {
                     ""
                 } else {
                     ",color=\"#f96900\""
                 },
-                vtx.data
+                self.data.get(v)
                     .as_ref()
                     .map_or_else(String::new, |d| format!("/* {d} */"))
             ));
-            for e in vtx.edges.into_iter().sorted_by_key(|e| e.0) {
+            for e in edges.into_iter().sorted_by_key(|e| e.0) {
                 lines.push(format!(
                     "  v{v} -> v{} [label=\"{}\"{}{}];",
                     e.1,

@@ -45,9 +45,9 @@ impl<const N: usize> Sodg<N> {
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn add(&mut self, v1: usize) {
-        self.vertices.insert_if_absent(v1);
-        #[cfg(debug_assertions)]
-        self.validate(vec![v1]).unwrap();
+        self.alive.insert(v1, true);
+        self.edges.get_mut(v1).unwrap().clear();
+        self.data.remove(v1);
         #[cfg(debug_assertions)]
         trace!("#add: vertex ν{v1} added");
     }
@@ -79,14 +79,11 @@ impl<const N: usize> Sodg<N> {
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn bind(&mut self, v1: usize, v2: usize, a: Label) {
-        let vtx1 = self
-            .vertices
+        self
+            .edges
             .get_mut(v1)
-            .with_context(|| format!("Can't depart from ν{v1}, it's absent"))
-            .unwrap();
-        vtx1.edges.insert(a, v2);
-        #[cfg(debug_assertions)]
-        self.validate(vec![v1, v2]).unwrap();
+            .unwrap()
+            .insert(a, v2);
         #[cfg(debug_assertions)]
         trace!("#bind: edge added ν{}.{} → ν{}", v1, a, v2);
     }
@@ -110,14 +107,7 @@ impl<const N: usize> Sodg<N> {
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn put(&mut self, v: usize, d: &Hex) {
-        let vtx = self
-            .vertices
-            .get_mut(v)
-            .with_context(|| format!("Can't find ν{v} in put()"))
-            .unwrap();
-        vtx.data = Some(d.clone());
-        #[cfg(debug_assertions)]
-        self.validate(vec![v]).unwrap();
+        self.data.insert(v, d.clone());
         #[cfg(debug_assertions)]
         trace!("#data: data of ν{v} set to {d}");
     }
@@ -136,13 +126,13 @@ impl<const N: usize> Sodg<N> {
     /// assert_eq!(data, g.data(42).unwrap());
     /// ```
     ///
-    /// If there is no data, an empty `Hex` will be returned, for example:
+    /// If there is no data, `None` will be returned, for example:
     ///
     /// ```
     /// use sodg::Sodg;
     /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(42);
-    /// assert!(g.data(42).unwrap().is_empty());
+    /// assert!(g.data(42).is_none());
     /// ```
     ///
     /// # Errors
@@ -151,18 +141,15 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If garbage collection triggers any error, the error will be returned here.
     #[inline]
-    pub fn data(&mut self, v: usize) -> Result<Hex> {
-        let vtx = self
-            .vertices
-            .get_mut(v)
-            .with_context(|| format!("Can't find ν{v} in data()"))?;
-        if let Some(d) = vtx.data.clone() {
-            vtx.taken = true;
-            #[cfg(debug_assertions)]
-            trace!("#data: data of ν{v} retrieved");
-            Ok(d)
-        } else {
-            Ok(Hex::empty())
+    pub fn data(&mut self, v: usize) -> Option<Hex> {
+        match self.data.get(v) {
+            Some(d) => {
+                self.taken.insert(v, true);
+                #[cfg(debug_assertions)]
+                trace!("#data: data of ν{v} retrieved");
+                Some(d.clone())
+            },
+            None => None
         }
     }
 
@@ -203,13 +190,14 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If vertex `v1` is absent, `Err` will be returned.
     #[inline]
-    pub fn kids(&self, v: usize) -> Result<Vec<(Label, usize)>> {
-        let vtx = self
-            .vertices
+    pub fn kids(&self, v: usize) -> Vec<(Label, usize)> {
+        self
+            .edges
             .get(v)
-            .with_context(|| format!("Can't find ν{v} in kids()"))?;
-        let kids = vtx.edges.into_iter().map(|(a, to)| (a, to)).collect();
-        Ok(kids)
+            .with_context(|| format!("Can't find ν{v} in kids()"))
+            .unwrap()
+            .into_iter().map(|(a, to)| (a, to))
+            .collect()
     }
 
     /// Find a kid of a vertex, by its edge name, and return the ID of the vertex found.
@@ -231,9 +219,21 @@ impl<const N: usize> Sodg<N> {
     #[must_use]
     #[inline]
     pub fn kid(&self, v: usize, a: Label) -> Option<usize> {
-        self.vertices
+        self.edges
             .get(v)
-            .and_then(|vtx| vtx.edges.into_iter().find(|e| e.0 == a).map(|e| e.1))
+            .and_then(|edges| edges.into_iter().find(|e| e.0 == a).map(|e| e.1))
+    }
+
+    /// Remove a vertex from the graph.
+    ///
+    /// All vertices that pointed to this one will lose the pointing edges.
+    #[inline]
+    pub fn remove(&mut self, v: usize) {
+        self.alive.remove(v);
+        self.edges.get_mut(v).unwrap().clear();
+        for (_, edges) in self.edges.iter_mut() {
+            edges.retain(|_, v1| *v1 != v)
+        }
     }
 }
 
@@ -244,36 +244,18 @@ use std::str::FromStr;
 fn adds_simple_vertex() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
-    assert_eq!(1, g.len());
-    Ok(())
-}
-
-#[test]
-fn adds_two_simple_vertices() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1);
-    g.add(42);
+    g.add(2);
+    g.bind(1, 2, Label::Alpha(0));
     assert_eq!(2, g.len());
     Ok(())
 }
 
 #[test]
-fn binds_simple_vertices() -> Result<()> {
+fn fetches_kid() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     g.add(2);
     let k = Label::from_str("hello")?;
-    g.bind(1, 2, k);
-    assert_eq!(2, g.kid(1, k).unwrap());
-    Ok(())
-}
-
-#[test]
-fn pre_defined_ids() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1);
-    g.add(2);
-    let k = Label::from_str("a-привет")?;
     g.bind(1, 2, k);
     assert_eq!(2, g.kid(1, k).unwrap());
     Ok(())
@@ -322,7 +304,7 @@ fn sets_simple_data() -> Result<()> {
     let data = Hex::from_str_bytes("hello");
     g.add(0);
     g.put(0, &data);
-    assert_eq!(data, g.data(0)?);
+    assert_eq!(data, g.data(0).unwrap());
     Ok(())
 }
 
@@ -333,9 +315,9 @@ fn finds_all_kids() -> Result<()> {
     g.add(1);
     g.bind(0, 1, Label::from_str("one")?);
     g.bind(0, 1, Label::from_str("two")?);
-    assert_eq!(2, g.kids(0)?.len());
+    assert_eq!(2, g.kids(0).len());
     let mut names = vec![];
-    for (a, to) in g.kids(0)? {
+    for (a, to) in g.kids(0) {
         names.push(format!("{a}/{to}"));
     }
     names.sort();
@@ -346,14 +328,13 @@ fn finds_all_kids() -> Result<()> {
 #[test]
 fn builds_list_of_kids() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
-    g.alerts_off();
     g.add(0);
     g.add(1);
     g.bind(0, 1, Label::from_str("one")?);
     g.bind(0, 1, Label::from_str("two")?);
     g.bind(0, 1, Label::from_str("three")?);
     let mut names: Vec<String> = g
-        .kids(0)?
+        .kids(0)
         .into_iter()
         .map(|(a, _)| format!("{a}"))
         .collect();
@@ -366,8 +347,7 @@ fn builds_list_of_kids() -> Result<()> {
 fn gets_data_from_empty_vertex() -> Result<()> {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
-    assert!(g.data(0).is_ok());
-    assert!(g.data(0).unwrap().is_empty());
+    assert!(g.data(0).is_none());
     Ok(())
 }
 

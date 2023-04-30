@@ -24,48 +24,12 @@ impl<const N: usize> Sodg<N> {
     /// Get total number of vertices in the graph.
     #[must_use]
     pub fn len(&self) -> usize {
-        self.vertices.len()
-    }
-
-    /// Get all IDs of vertices, in a vector.
-    #[must_use]
-    pub fn ids(&self) -> Vec<usize> {
-        let mut ids = vec![];
-        for (v, _) in self.vertices.iter() {
-            ids.push(v);
-        }
-        ids
-    }
-
-    /// Is it empty?
-    ///
-    /// Emptiness means that not a single vertex is in the graph.
-    ///
-    /// For example:
-    ///
-    /// ```
-    /// use std::str::FromStr;
-    /// use sodg::{Label, Sodg};
-    /// let mut sodg : Sodg<16> = Sodg::empty(256);
-    /// sodg.add(0);
-    /// sodg.add(42);
-    /// sodg.bind(0, 42, Label::from_str("hello").unwrap());
-    /// ```
-    #[must_use]
-    pub fn is_empty(&self) -> bool {
-        self.vertices.len() == 0
+        self.alive.len()
     }
 }
 
 #[cfg(test)]
 use anyhow::Result;
-
-#[test]
-fn checks_for_emptiness() -> Result<()> {
-    let g: Sodg<16> = Sodg::empty(256);
-    assert!(g.is_empty());
-    Ok(())
-}
 
 #[test]
 fn counts_vertices() -> Result<()> {
@@ -74,11 +38,3 @@ fn counts_vertices() -> Result<()> {
     Ok(())
 }
 
-#[test]
-fn collect_vertices() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0);
-    g.add(1);
-    assert!(g.ids().contains(&1));
-    Ok(())
-}

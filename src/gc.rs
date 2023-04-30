@@ -91,7 +91,7 @@ impl<const N: usize> Sodg<N> {
     /// May panic!
     pub fn collect(&mut self) -> Result<()> {
         let mut all = HashMap::new();
-        for (v, _) in self.vertices.iter() {
+        for (v, _) in self.edges.iter() {
             all.insert(v, Status::Abandoned);
         }
         if all.contains_key(&0) {
@@ -105,7 +105,7 @@ impl<const N: usize> Sodg<N> {
                 .filter(|(_, s)| *s == Status::Connected)
                 .collect();
             for (v, _) in &vec {
-                for (_, to) in &self.vertices.get(*v).unwrap().edges {
+                for (_, to) in self.edges.get(*v).unwrap() {
                     if *all.get(&to).unwrap() == Status::Abandoned {
                         all.insert(to, Status::Connected);
                         modified = true;
@@ -124,12 +124,12 @@ impl<const N: usize> Sodg<N> {
                 .filter(|(_, s)| *s != Status::Busy)
                 .collect();
             for (v, _) in vec {
-                let vtx = self.vertices.get(v).unwrap();
-                if vtx.data.is_some() && !vtx.taken {
+                let edges = self.edges.get(v).unwrap();
+                if self.data.contains_key(v) && !self.taken.contains_key(v) {
                     all.insert(v, Status::Busy);
                     modified = true;
                 }
-                for (_, to) in &vtx.edges {
+                for (_, to) in edges {
                     if *all.get(&to).unwrap() == Status::Busy {
                         all.insert(v, Status::Busy);
                         modified = true;
@@ -150,9 +150,9 @@ impl<const N: usize> Sodg<N> {
                 .filter(|(_, s)| *s == Status::Abandoned)
                 .collect();
             for (v, _) in vec {
-                let vtx = self.vertices.get(v).unwrap();
-                if vtx.edges.into_iter().next().is_none() {
-                    self.vertices.remove(v);
+                let edges = self.edges.get(v).unwrap();
+                if edges.into_iter().next().is_none() {
+                    // self.remove(v); DO SOMETHING ABOUT THIS!
                     all.remove(&v);
                     modified = true;
                     #[cfg(debug_assertions)]
@@ -185,7 +185,7 @@ fn does_not_collect_owned() -> Result<()> {
     g.add(1);
     g.bind(0, 1, Label::from_str("x")?);
     g.collect()?;
-    assert!(g.vertices.get(1).is_some());
+    assert!(g.edges.get(1).is_some());
     Ok(())
 }
 
@@ -199,12 +199,12 @@ fn collects_simple_graph() -> Result<()> {
     g.bind(1, 2, Label::from_str("x")?);
     g.bind(1, 3, Label::from_str("y")?);
     g.bind(2, 4, Label::from_str("z")?);
-    g.data(4)?;
-    g.data(2)?;
-    g.data(1)?;
-    g.data(3)?;
+    g.data(4).unwrap();
+    g.data(2).unwrap();
+    g.data(1).unwrap();
+    g.data(3).unwrap();
     g.collect()?;
-    assert!(g.is_empty());
+    assert_eq!(0, g.len());
     Ok(())
 }
 
@@ -220,9 +220,9 @@ fn collects_complicated_graph() -> Result<()> {
     g.bind(3, 5, Label::from_str("a")?);
     g.bind(4, 3, Label::from_str("b")?);
     for i in 1..=5 {
-        g.data(i)?;
+        g.data(i).unwrap();
     }
     g.collect()?;
-    assert!(g.is_empty());
+    assert_eq!(0, g.len());
     Ok(())
 }

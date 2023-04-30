@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 use sodg::{Hex, Label, Sodg};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 trait Book {
     fn price(&self) -> i64;
@@ -45,54 +45,53 @@ impl Book for Discounted {
     }
 }
 
-pub fn on_graph(total: usize) -> i64 {
-    let mut sum = 0;
-    let mut g: Sodg<16> = Sodg::empty(256);
+pub fn on_graph(total: usize) -> (i64, Duration) {
+    let mut g: Sodg<16> = Sodg::empty(total * 4);
     g.add(0);
+    let mut sum = 0;
+    let start = Instant::now();
+    let mut v1 = 1;
     for _ in 0..total {
-        let v1 = g.next_id();
         g.add(v1);
-        let v2 = v1 + 1;
-        g.add(v2);
-        g.bind(v1, v2, Label::Alpha(0));
-        let v3 = v2 + 1;
-        g.add(v3);
-        g.bind(v2, v3, Label::Greek('Δ'));
-        g.put(v3, &Hex::from(42));
-        let v4 = v3 + 1;
-        g.add(v4);
-        g.bind(v4, v1, Label::Greek('φ'));
-        assert!(g.kid(v4, Label::Alpha(0)).is_none());
-        g.kid(v4, Label::Greek('φ')).unwrap();
-        g.kid(v1, Label::Alpha(0)).unwrap();
-        let k = g.kid(v2, Label::Greek('Δ')).unwrap();
-        sum += g.data(k).unwrap().to_i64().unwrap() / 2;
+        // let v2 = v1 + 1;
+        // g.add(v2);
+        // g.bind(v1, v2, Label::Alpha(0));
+        // let v3 = v2 + 1;
+        // g.add(v3);
+        // g.bind(v2, v3, Label::Greek('Δ'));
+        // g.put(v3, &Hex::from(42));
+        // let v4 = v3 + 1;
+        // g.add(v4);
+        // g.bind(v4, v1, Label::Greek('φ'));
+        // assert!(g.kid(v4, Label::Alpha(0)).is_none());
+        // g.kid(v4, Label::Greek('φ')).unwrap();
+        // g.kid(v1, Label::Alpha(0)).unwrap();
+        // let k = g.kid(v2, Label::Greek('Δ')).unwrap();
+        // sum += g.data(k).unwrap().to_i64().unwrap() / 2;
+        v1 += 4;
     }
-    std::hint::black_box(sum)
+    (std::hint::black_box(sum), start.elapsed())
 }
 
-pub fn on_heap(total: usize) -> i64 {
+pub fn on_heap(total: usize) -> (i64, Duration) {
     let mut sum = 0;
+    let start = Instant::now();
     for _ in 0..total {
         let prime = Box::new(Prime { usd: 42 });
         let discounted = Box::new(Discounted { book: prime });
         let price = discounted.price();
         sum += std::hint::black_box(price);
     }
-    std::hint::black_box(sum)
+    (std::hint::black_box(sum), start.elapsed())
 }
 
 fn main() {
-    let total = 10000000;
-    let start1 = Instant::now();
-    let s1 = on_graph(total);
-    let e1 = start1.elapsed();
-    println!("on_graph: {:?}", e1);
-    let start2 = Instant::now();
-    let s2 = on_heap(total);
-    let e2 = start2.elapsed();
-    println!("on_heap: {:?}", e2);
-    println!("gain: {:.2}x", e2.as_nanos() as f64 / e1.as_nanos() as f64);
-    println!("loss: {:.2}x", e1.as_nanos() as f64 / e2.as_nanos() as f64);
+    let total = 1000000;
+    let (s1, d1) = on_graph(total);
+    println!("on_graph: {:?}", d1);
+    let (s2, d2) = on_heap(total);
+    println!("on_heap: {:?}", d2);
+    println!("gain: {:.2}x", d2.as_nanos() as f64 / d1.as_nanos() as f64);
+    println!("loss: {:.2}x", d1.as_nanos() as f64 / d2.as_nanos() as f64);
     assert_eq!(s1, s2);
 }

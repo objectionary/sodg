@@ -43,7 +43,7 @@ impl<const N: usize> Sodg<N> {
         fs::write(path, bytes).with_context(|| format!("Can't write to {}", path.display()))?;
         trace!(
             "Serialized {} vertices ({} bytes) to {} in {:?}",
-            self.vertices.len(),
+            self.len(),
             size,
             path.display(),
             start.elapsed()
@@ -66,7 +66,7 @@ impl<const N: usize> Sodg<N> {
             .with_context(|| format!("Can't deserialize from {}", path.display()))?;
         trace!(
             "Deserialized {} vertices ({} bytes) from {} in {:?}",
-            sodg.vertices.len(),
+            sodg.len(),
             size,
             path.display(),
             start.elapsed()
@@ -86,6 +86,19 @@ use crate::Label;
 
 #[cfg(test)]
 use std::str::FromStr;
+
+#[test]
+fn can_save() -> Result<()> {
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(0);
+    g.add(1);
+    g.bind(0, 1, Label::from_str("foo")?);
+    let tmp = TempDir::new()?;
+    let file = tmp.path().join("foo.sodg");
+    g.save(file.as_path())?;
+    assert!(file.metadata().unwrap().len() > 0);
+    Ok(())
+}
 
 #[test]
 fn saves_and_loads() -> Result<()> {

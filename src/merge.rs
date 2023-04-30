@@ -40,28 +40,26 @@ impl<const N: usize> Sodg<N> {
     /// If it's impossible to merge, an error will be returned.
     pub fn merge(&mut self, g: &Self, left: usize, right: usize) -> Result<()> {
         let mut mapped = HashMap::new();
-        let before = self.vertices.len();
+        let before = self.len();
         self.merge_rec(g, left, right, &mut mapped)?;
         let merged = mapped.len();
-        let scope = g.vertices.len();
+        let scope = g.len();
         if merged != scope {
-            let mut must = vec![];
-            for (v, _) in g.vertices.iter() {
-                must.push(v);
-            }
-            let seen: Vec<usize> = mapped.keys().copied().collect();
-            let missed: HashSet<usize> = &HashSet::from_iter(must) - &HashSet::from_iter(seen);
+            let must = g.alive.keys().collect::<Vec<usize>>();
+            let seen = mapped.keys().copied().collect::<Vec<usize>>();
+            let missed: HashSet<usize> = &HashSet::from_iter(must.clone()) - &HashSet::from_iter(seen.clone());
             let mut ordered: Vec<usize> = missed.into_iter().collect();
             ordered.sort_unstable();
             return Err(anyhow!(
-                "Just {merged} vertices merged, out of {scope}; maybe the right graph was not a tree? {} missed: {}",
+                "Just {merged} vertices merged, out of {scope} (must={}, seen={}); maybe the right graph was not a tree? {} missed: {}",
+                must.len(), seen.len(),
                 ordered.len(), ordered.iter().map(|v| format!("ν{v}")).collect::<Vec<String>>().join(", ")
             ));
         }
         debug!(
             "Merged all {merged} vertices into SODG of {}, making it have {} after the merge",
             before,
-            self.vertices.len()
+            self.len()
         );
         Ok(())
     }
@@ -89,16 +87,10 @@ impl<const N: usize> Sodg<N> {
             return Ok(());
         }
         mapped.insert(right, left);
-        let d = g
-            .vertices
-            .get(right)
-            .ok_or_else(|| anyhow!("Can't find ν{right} in the right graph"))?
-            .data
-            .clone();
-        if let Some(hex) = d {
+        if let Some(hex) = g.data.get(right) {
             self.put(left, &hex);
         }
-        for (a, to) in g.kids(right)? {
+        for (a, to) in g.kids(right) {
             let matched = if let Some(t) = self.kid(left, a) {
                 t
             } else if let Some(t) = mapped.get(&to) {
@@ -112,7 +104,7 @@ impl<const N: usize> Sodg<N> {
             };
             self.merge_rec(g, matched, to, mapped)?;
         }
-        for (a, to) in g.kids(right)? {
+        for (a, to) in g.kids(right) {
             if let Some(first) = self.kid(left, a) {
                 if let Some(second) = mapped.get(&to) {
                     if first != *second {
@@ -125,21 +117,16 @@ impl<const N: usize> Sodg<N> {
     }
 
     fn join(&mut self, left: usize, right: usize) -> Result<()> {
-        let mut keys = vec![];
-        for (v, _) in self.vertices.iter() {
-            keys.push(v);
-        }
-        for v in keys {
-            let mut vtx = self.vertices.get_mut(v).unwrap();
-            let mut ne = vtx.edges.clone();
-            for e in &vtx.edges {
+        for v in self.edges.keys() {
+            let mut ne = self.edges.get(v).unwrap().clone();
+            for e in &*self.edges.get_mut(v).unwrap() {
                 if e.1 == right {
                     ne.insert(e.0, left);
                 }
             }
-            vtx.edges = ne;
+            self.edges.insert(v, ne);
         }
-        for e in self.kids(right)? {
+        for e in self.kids(right) {
             if self.kid(left, e.0).is_some() {
                 return Err(anyhow!(
                     "Can't merge ν{right} into ν{left}, due to conflict in '{}'",
@@ -148,7 +135,7 @@ impl<const N: usize> Sodg<N> {
             }
             self.bind(left, e.1, e.0);
         }
-        self.vertices.remove(right);
+        self.remove(right);
         Ok(())
     }
 }
@@ -167,7 +154,7 @@ fn merges_two_graphs() -> Result<()> {
     extra.add(1);
     extra.bind(0, 1, Label::from_str("bar")?);
     g.merge(&extra, 0, 0)?;
-    assert_eq!(3, g.vertices.len());
+    assert_eq!(3, g.len());
     assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
     assert_eq!(2, g.kid(0, Label::from_str("bar")?).unwrap());
     Ok(())
@@ -206,7 +193,7 @@ fn merges_a_loop() -> Result<()> {
     extra.add(5);
     extra.bind(3, 5, Label::from_str("e")?);
     g.merge(&extra, 0, 0)?;
-    assert_eq!(5, g.vertices.len());
+    assert_eq!(5, g.len());
     assert_eq!(1, g.kid(0, Label::from_str("a")?).unwrap());
     assert_eq!(2, g.kid(1, Label::from_str("b")?).unwrap());
     // assert_eq!(3, g.kid(0, "c").unwrap());
@@ -228,7 +215,7 @@ fn avoids_simple_duplicates() -> Result<()> {
     extra.add(2);
     extra.bind(1, 2, Label::from_str("bar")?);
     g.merge(&extra, 0, 0)?;
-    assert_eq!(3, g.vertices.len());
+    assert_eq!(3, g.len());
     assert_eq!(5, g.kid(0, Label::from_str("foo")?).unwrap());
     assert_eq!(1, g.kid(5, Label::from_str("bar")?).unwrap());
     Ok(())
@@ -249,7 +236,7 @@ fn keeps_existing_vertices_intact() -> Result<()> {
     extra.add(5);
     extra.bind(0, 5, Label::from_str("foo")?);
     g.merge(&extra, 0, 0)?;
-    assert_eq!(4, g.vertices.len());
+    assert_eq!(4, g.len());
     assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
     assert_eq!(2, g.kid(1, Label::from_str("bar")?).unwrap());
     assert_eq!(3, g.kid(2, Label::from_str("zzz")?).unwrap());
@@ -263,7 +250,7 @@ fn merges_singletons() -> Result<()> {
     let mut extra = Sodg::empty(256);
     extra.add(13);
     g.merge(&extra, 13, 13)?;
-    assert_eq!(1, g.vertices.len());
+    assert_eq!(1, g.len());
     Ok(())
 }
 
@@ -276,7 +263,7 @@ fn merges_simple_loop() -> Result<()> {
     g.bind(2, 1, Label::from_str("bar")?);
     let extra = g.clone();
     g.merge(&extra, 1, 1)?;
-    assert_eq!(extra.vertices.len(), g.vertices.len());
+    assert_eq!(extra.len(), g.len());
     Ok(())
 }
 
@@ -293,7 +280,7 @@ fn merges_large_loop() -> Result<()> {
     g.bind(4, 1, Label::from_str("d")?);
     let extra = g.clone();
     g.merge(&extra, 1, 1)?;
-    assert_eq!(extra.vertices.len(), g.vertices.len());
+    assert_eq!(extra.len(), g.len());
     Ok(())
 }
 
@@ -308,7 +295,7 @@ fn merges_data() -> Result<()> {
     extra.add(1);
     extra.put(1, &Hex::from(42));
     g.merge(&extra, 1, 1)?;
-    assert_eq!(42, g.data(1)?.to_i64()?);
+    assert_eq!(42, g.data(1).unwrap().to_i64()?);
     Ok(())
 }
 
@@ -327,7 +314,7 @@ fn understands_same_name_kids() -> Result<()> {
     extra.add(2);
     extra.bind(1, 2, Label::from_str("x")?);
     g.merge(&extra, 0, 0)?;
-    assert_eq!(5, g.vertices.len());
+    assert_eq!(5, g.len());
     assert_eq!(1, g.kid(0, Label::from_str("a")?).unwrap());
     assert_eq!(2, g.kid(1, Label::from_str("x")?).unwrap());
     Ok(())
@@ -345,7 +332,7 @@ fn merges_into_empty_graph() -> Result<()> {
     extra.bind(2, 3, Label::from_str("b")?);
     extra.bind(3, 1, Label::from_str("c")?);
     g.merge(&extra, 1, 1)?;
-    assert_eq!(3, g.vertices.len());
+    assert_eq!(3, g.len());
     assert_eq!(0, g.kid(1, Label::from_str("a")?).unwrap());
     Ok(())
 }
@@ -361,7 +348,7 @@ fn mixed_injection() -> Result<()> {
     extra.put(5, &Hex::from(5));
     extra.bind(4, 5, Label::from_str("b")?);
     g.merge(&extra, 4, 4)?;
-    assert_eq!(2, g.vertices.len());
+    assert_eq!(2, g.len());
     Ok(())
 }
 
@@ -380,7 +367,7 @@ fn zero_to_zero() -> Result<()> {
     extra.bind(0, 1, Label::from_str("c")?);
     extra.bind(1, 0, Label::from_str("back")?);
     g.merge(&extra, 0, 0)?;
-    assert_eq!(4, g.vertices.len());
+    assert_eq!(4, g.len());
     Ok(())
 }
 
@@ -397,7 +384,7 @@ fn finds_siblings() -> Result<()> {
     extra.add(1);
     extra.bind(0, 1, Label::from_str("b")?);
     g.merge(&extra, 0, 0)?;
-    assert_eq!(3, g.vertices.len());
+    assert_eq!(3, g.len());
     Ok(())
 }
 
@@ -419,6 +406,6 @@ fn two_big_graphs() -> Result<()> {
     let mut extra = Sodg::empty(256);
     Script::from_str("ADD(0); ADD(1); BIND(0, 1, bar); BIND(1, 0, back);").deploy_to(&mut extra)?;
     g.merge(&extra, 0, 0)?;
-    assert_eq!(4, g.vertices.len());
+    assert_eq!(4, g.len());
     Ok(())
 }

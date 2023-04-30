@@ -32,16 +32,14 @@ impl<const N: usize> Display for Sodg<N> {
 impl<const N: usize> Debug for Sodg<N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
-        for (i, v) in self.vertices.iter() {
-            let mut attrs = v
-                .edges
-                .into_iter()
+        for (v, edges) in self.edges.iter() {
+            let mut attrs = edges.iter()
                 .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
-            if let Some(d) = v.data.clone() {
+            if let Some(d) = self.data.get(v) {
                 attrs.push(format!("{d}"));
             }
-            lines.push(format!("ν{i} -> ⟦{}⟧", attrs.join(", ")));
+            lines.push(format!("ν{v} -> ⟦{}⟧", attrs.join(", ")));
         }
         f.write_str(lines.join("\n").as_str())
     }
@@ -55,18 +53,17 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If the vertex is absent, an error may be returned.
     pub fn v_print(&self, v: usize) -> Result<String> {
-        let vtx = self
-            .vertices
+        let edges = self
+            .edges
             .get(v)
             .with_context(|| format!("Can't find ν{v}"))?;
-        let list: Vec<String> = vtx
-            .edges
+        let list: Vec<String> = edges
             .into_iter()
             .map(|e| format!("{}", e.0.clone()))
             .collect();
         Ok(format!(
             "ν{v}⟦{}{}⟧",
-            if vtx.data.is_none() { "" } else { "Δ, " },
+            if self.data.contains_key(v) { "" } else { "Δ, " },
             list.join(", ")
         ))
     }
