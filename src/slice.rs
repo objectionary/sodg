@@ -78,7 +78,7 @@ impl<const N: usize> Sodg<N> {
                 ng.add(v1);
             }
             for (k, v2) in edges {
-                if done.contains(&v1) {
+                if done.contains(&v2) {
                     ng.add(v2);
                     ng.bind(v1, v2, k);
                 }
