@@ -129,8 +129,8 @@ pub struct Script {
 /// sodg.bind(0, 1, Label::Alpha(0));
 /// sodg.add(2);
 /// sodg.bind(1, 2, Label::Alpha(1));
-/// assert_eq!(1, sodg.kids(0).unwrap().len());
-/// assert_eq!(1, sodg.kids(1).unwrap().len());
+/// assert_eq!(1, sodg.kids(0).len());
+/// assert_eq!(1, sodg.kids(1).len());
 /// ```
 ///
 /// This package is used in [reo](https://github.com/objectionary/reo)
@@ -143,7 +143,7 @@ pub struct Sodg<const N: usize> {
     taken: emap::Map<bool>,
     /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.
     #[serde(skip_serializing, skip_deserializing)]
-    next_v: usize
+    next_v: usize,
 }
 
 #[cfg(test)]

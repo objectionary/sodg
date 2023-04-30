@@ -53,21 +53,21 @@ pub fn on_graph(total: usize) -> (i64, Duration) {
     let mut v1 = 1;
     for _ in 0..total {
         g.add(v1);
-        // let v2 = v1 + 1;
-        // g.add(v2);
-        // g.bind(v1, v2, Label::Alpha(0));
-        // let v3 = v2 + 1;
-        // g.add(v3);
-        // g.bind(v2, v3, Label::Greek('Δ'));
-        // g.put(v3, &Hex::from(42));
-        // let v4 = v3 + 1;
-        // g.add(v4);
-        // g.bind(v4, v1, Label::Greek('φ'));
-        // assert!(g.kid(v4, Label::Alpha(0)).is_none());
-        // g.kid(v4, Label::Greek('φ')).unwrap();
-        // g.kid(v1, Label::Alpha(0)).unwrap();
-        // let k = g.kid(v2, Label::Greek('Δ')).unwrap();
-        // sum += g.data(k).unwrap().to_i64().unwrap() / 2;
+        let v2 = v1 + 1;
+        g.add(v2);
+        g.bind(v1, v2, Label::Alpha(0));
+        let v3 = v2 + 1;
+        g.add(v3);
+        g.bind(v2, v3, Label::Greek('Δ'));
+        g.put(v3, &Hex::from(42));
+        let v4 = v3 + 1;
+        g.add(v4);
+        g.bind(v4, v1, Label::Greek('φ'));
+        assert!(g.kid(v4, Label::Alpha(0)).is_none());
+        g.kid(v4, Label::Greek('φ')).unwrap();
+        g.kid(v1, Label::Alpha(0)).unwrap();
+        let k = g.kid(v2, Label::Greek('Δ')).unwrap();
+        sum += g.data(k).unwrap().to_i64().unwrap() / 2;
         v1 += 4;
     }
     (std::hint::black_box(sum), start.elapsed())

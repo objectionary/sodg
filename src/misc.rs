@@ -26,6 +26,12 @@ impl<const N: usize> Sodg<N> {
     pub fn len(&self) -> usize {
         self.alive.len()
     }
+
+    /// Is it empty?
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 #[test]
@@ -33,4 +39,3 @@ fn counts_vertices() {
     let g: Sodg<16> = Sodg::empty(256);
     assert_eq!(0, g.len());
 }
-

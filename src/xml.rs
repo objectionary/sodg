@@ -66,11 +66,7 @@ impl<const N: usize> Sodg<N> {
             .encoding("UTF-8".into())
             .build();
         let mut root = XMLElement::new("sodg");
-        for (v, edges) in self
-            .edges
-            .iter()
-            .sorted_by_key(|(v, _)| <usize>::clone(v))
-        {
+        for (v, edges) in self.edges.iter().sorted_by_key(|(v, _)| <usize>::clone(v)) {
             let mut v_node = XMLElement::new("v");
             v_node.add_attribute("id", v.to_string().as_str());
             for e in edges.into_iter().sorted_by_key(|e| e.0) {
@@ -117,10 +113,14 @@ fn prints_simple_graph() {
     let doc = parser.as_document();
     assert_eq!(
         "foo",
-        evaluate_xpath(&doc, "/sodg/v[@id=0]/e[1]/@a").unwrap().string()
+        evaluate_xpath(&doc, "/sodg/v[@id=0]/e[1]/@a")
+            .unwrap()
+            .string()
     );
     assert_eq!(
         "68 65 6C 6C 6F",
-        evaluate_xpath(&doc, "/sodg/v[@id=0]/data").unwrap().string()
+        evaluate_xpath(&doc, "/sodg/v[@id=0]/data")
+            .unwrap()
+            .string()
     );
 }

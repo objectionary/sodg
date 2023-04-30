@@ -60,11 +60,7 @@ digraph {
   edge [fontname=\"Arial\"];"
                 .to_string(),
         );
-        for (v, edges) in self
-            .edges
-            .iter()
-            .sorted_by_key(|(v, _)| <usize>::clone(v))
-        {
+        for (v, edges) in self.edges.iter().sorted_by_key(|(v, _)| <usize>::clone(v)) {
             lines.push(format!(
                 "  v{v}[shape=circle,label=\"ν{v}\"{}]; {}",
                 if self.data.contains_key(v) {
@@ -72,7 +68,8 @@ digraph {
                 } else {
                     ",color=\"#f96900\""
                 },
-                self.data.get(v)
+                self.data
+                    .get(v)
                     .as_ref()
                     .map_or_else(String::new, |d| format!("/* {d} */"))
             ));

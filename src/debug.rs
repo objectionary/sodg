@@ -33,7 +33,8 @@ impl<const N: usize> Debug for Sodg<N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
         for (v, edges) in self.edges.iter() {
-            let mut attrs = edges.iter()
+            let mut attrs = edges
+                .iter()
                 .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
             if let Some(d) = self.data.get(v) {
@@ -63,7 +64,11 @@ impl<const N: usize> Sodg<N> {
             .collect();
         Ok(format!(
             "ν{v}⟦{}{}⟧",
-            if self.data.contains_key(v) { "" } else { "Δ, " },
+            if self.data.contains_key(v) {
+                ""
+            } else {
+                "Δ, "
+            },
             list.join(", ")
         ))
     }

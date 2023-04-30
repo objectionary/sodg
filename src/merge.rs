@@ -19,9 +19,9 @@
 // SOFTWARE.
 
 use crate::Sodg;
+use anyhow::{anyhow, Result};
 use log::debug;
 use std::collections::{HashMap, HashSet};
-use anyhow::{anyhow, Result};
 
 impl<const N: usize> Sodg<N> {
     /// Merge another graph into the current one.
@@ -47,7 +47,8 @@ impl<const N: usize> Sodg<N> {
         if merged != scope {
             let must = g.alive.keys().collect::<Vec<usize>>();
             let seen = mapped.keys().copied().collect::<Vec<usize>>();
-            let missed: HashSet<usize> = &HashSet::from_iter(must.clone()) - &HashSet::from_iter(seen.clone());
+            let missed: HashSet<usize> =
+                &HashSet::from_iter(must.clone()) - &HashSet::from_iter(seen.clone());
             let mut ordered: Vec<usize> = missed.into_iter().collect();
             ordered.sort_unstable();
             return Err(anyhow!(
@@ -88,7 +89,7 @@ impl<const N: usize> Sodg<N> {
         }
         mapped.insert(right, left);
         if let Some(hex) = g.data.get(right) {
-            self.put(left, &hex);
+            self.put(left, hex);
         }
         for (a, to) in g.kids(right) {
             let matched = if let Some(t) = self.kid(left, a) {
@@ -108,7 +109,7 @@ impl<const N: usize> Sodg<N> {
             if let Some(first) = self.kid(left, a) {
                 if let Some(second) = mapped.get(&to) {
                     if first != *second {
-                        self.join(first, *second)?;
+                        self.join(first, *second);
                     }
                 }
             }
@@ -116,7 +117,7 @@ impl<const N: usize> Sodg<N> {
         Ok(())
     }
 
-    fn join(&mut self, left: usize, right: usize) -> Result<()> {
+    fn join(&mut self, left: usize, right: usize) {
         for v in self.edges.keys() {
             let mut ne = self.edges.get(v).unwrap().clone();
             for e in &*self.edges.get_mut(v).unwrap() {
@@ -127,16 +128,14 @@ impl<const N: usize> Sodg<N> {
             self.edges.insert(v, ne);
         }
         for e in self.kids(right) {
-            if self.kid(left, e.0).is_some() {
-                panic!(
-                    "Can't merge ν{right} into ν{left}, due to conflict in '{}'",
-                    e.0
-                );
-            }
+            assert!(
+                self.kid(left, e.0).is_none(),
+                "Can't merge ν{right} into ν{left}, due to conflict in '{}'",
+                e.0
+            );
             self.bind(left, e.1, e.0);
         }
         self.remove(right);
-        Ok(())
     }
 }
 
@@ -388,9 +387,12 @@ fn two_big_graphs() {
         ADD(2); BIND(0, 1, alpha);
         BIND(1, 0, back);",
     )
-    .deploy_to(&mut g).unwrap();
+    .deploy_to(&mut g)
+    .unwrap();
     let mut extra = Sodg::empty(256);
-    Script::from_str("ADD(0); ADD(1); BIND(0, 1, bar); BIND(1, 0, back);").deploy_to(&mut extra).unwrap();
+    Script::from_str("ADD(0); ADD(1); BIND(0, 1, bar); BIND(1, 0, back);")
+        .deploy_to(&mut extra)
+        .unwrap();
     g.merge(&extra, 0, 0).unwrap();
     assert_eq!(4, g.len());
 }

@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 use crate::{Label, Sodg};
-use anyhow::{Result};
+use anyhow::Result;
 use log::trace;
 use std::collections::HashSet;
 
@@ -47,6 +47,10 @@ impl<const N: usize> Sodg<N> {
     /// the kids.
     ///
     /// # Errors
+    ///
+    /// There could be errors too.
+    ///
+    /// # Panics
     ///
     /// If impossible to slice, an error will be returned.
     pub fn slice_some(&self, v: usize, p: impl Fn(usize, usize, Label) -> bool) -> Result<Self> {
@@ -128,7 +132,9 @@ fn skips_some_vertices() {
     g.bind(0, 1, Label::from_str("foo").unwrap());
     g.add(2);
     g.bind(0, 2, Label::from_str("+bar").unwrap());
-    let slice = g.slice_some(0, |_, _, a| !a.to_string().starts_with('+')).unwrap();
+    let slice = g
+        .slice_some(0, |_, _, a| !a.to_string().starts_with('+'))
+        .unwrap();
     assert_eq!(2, slice.len());
     assert_eq!(1, slice.kids(0).len());
 }

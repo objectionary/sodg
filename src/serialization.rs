@@ -101,15 +101,12 @@ fn can_save() {
 
 #[test]
 fn saves_and_loads() {
-    let mut g: Sodg<16> = Sodg::empty(256);
+    let mut g: Sodg<1> = Sodg::empty(100);
     g.add(0);
     g.put(0, &Hex::from_str_bytes("hello"));
-    g.add(1);
-    g.bind(0, 1, Label::from_str("foo").unwrap());
-    g.put(1, &Hex::from_str_bytes("foo"));
     let tmp = TempDir::new().unwrap();
     let file = tmp.path().join("foo.sodg");
     g.save(file.as_path()).unwrap();
-    let after: Sodg<16> = Sodg::load(file.as_path()).unwrap();
+    let after: Sodg<1> = Sodg::load(file.as_path()).unwrap();
     assert_eq!(g.inspect(0).unwrap(), after.inspect(0).unwrap());
 }

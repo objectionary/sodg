@@ -20,7 +20,7 @@
 
 use crate::Sodg;
 use crate::{Hex, Label};
-use anyhow::{Context};
+use anyhow::Context;
 #[cfg(debug_assertions)]
 use log::trace;
 
@@ -79,11 +79,7 @@ impl<const N: usize> Sodg<N> {
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn bind(&mut self, v1: usize, v2: usize, a: Label) {
-        self
-            .edges
-            .get_mut(v1)
-            .unwrap()
-            .insert(a, v2);
+        self.edges.get_mut(v1).unwrap().insert(a, v2);
         #[cfg(debug_assertions)]
         trace!("#bind: edge added ν{}.{} → ν{}", v1, a, v2);
     }
@@ -148,8 +144,8 @@ impl<const N: usize> Sodg<N> {
                 #[cfg(debug_assertions)]
                 trace!("#data: data of ν{v} retrieved");
                 Some(d.clone())
-            },
-            None => None
+            }
+            None => None,
         }
     }
 
@@ -164,7 +160,7 @@ impl<const N: usize> Sodg<N> {
     /// g.add(0);
     /// g.add(42);
     /// g.bind(0, 42, Label::from_str("k").unwrap());
-    /// let (a, to) = g.kids(0).unwrap().first().unwrap().clone();
+    /// let (a, to) = g.kids(0).first().unwrap().clone();
     /// assert_eq!("k", a.to_string());
     /// assert_eq!(42, to);
     /// ```
@@ -181,22 +177,23 @@ impl<const N: usize> Sodg<N> {
     /// g.bind(0, 42, Label::from_str("a").unwrap());
     /// g.bind(0, 42, Label::from_str("b").unwrap());
     /// g.bind(0, 42, Label::from_str("c").unwrap());
-    /// let mut names = g.kids(0).unwrap().into_iter().map(|(a, _)| a.to_string()).collect::<Vec<String>>();
+    /// let mut names = g.kids(0).into_iter().map(|(a, _)| a.to_string()).collect::<Vec<String>>();
     /// names.sort();
     /// assert_eq!("a,b,c", names.join(","));
     /// ```
     ///
-    /// # Errors
+    /// # Panics
     ///
     /// If vertex `v1` is absent, `Err` will be returned.
     #[inline]
+    #[must_use]
     pub fn kids(&self, v: usize) -> Vec<(Label, usize)> {
-        self
-            .edges
+        self.edges
             .get(v)
             .with_context(|| format!("Can't find ν{v} in kids()"))
             .unwrap()
-            .into_iter().map(|(a, to)| (a, to))
+            .into_iter()
+            .map(|(a, to)| (a, to))
             .collect()
     }
 
@@ -227,12 +224,17 @@ impl<const N: usize> Sodg<N> {
     /// Remove a vertex from the graph.
     ///
     /// All vertices that pointed to this one will lose the pointing edges.
+    ///
+    /// # Panics
+    ///
+    /// It may panic if the vertex is absent.
     #[inline]
     pub fn remove(&mut self, v: usize) {
         self.alive.remove(v);
+        self.data.remove(v);
         self.edges.get_mut(v).unwrap().clear();
         for (_, edges) in self.edges.iter_mut() {
-            edges.retain(|_, v1| *v1 != v)
+            edges.retain(|_, v1| *v1 != v);
         }
     }
 }
@@ -326,11 +328,7 @@ fn builds_list_of_kids() {
     g.bind(0, 1, Label::from_str("one").unwrap());
     g.bind(0, 1, Label::from_str("two").unwrap());
     g.bind(0, 1, Label::from_str("three").unwrap());
-    let mut names: Vec<String> = g
-        .kids(0)
-        .into_iter()
-        .map(|(a, _)| format!("{a}"))
-        .collect();
+    let mut names: Vec<String> = g.kids(0).into_iter().map(|(a, _)| format!("{a}")).collect();
     names.sort();
     assert_eq!("one,three,two", names.join(","));
 }

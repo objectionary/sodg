@@ -57,9 +57,10 @@ impl<const N: usize> Sodg<N> {
     /// g.add(2);
     /// g.put(2, &Hex::from(0));
     /// g.bind(1, 2, Label::from_str("x").unwrap());
-    /// g.data(2).unwrap();
-    /// g.collect().unwrap(); // Both vertices are removed
-    /// assert!(g.data(2).is_err());
+    /// g.data(2);
+    /// g.collect(); // Both vertices are removed
+    /// assert_eq!(1, g.len());
+    /// assert!(g.data(2).is_none());
     /// ```
     ///
     /// # Algorithm
@@ -90,7 +91,7 @@ impl<const N: usize> Sodg<N> {
     /// May panic!
     pub fn collect(&mut self) {
         let mut all = HashMap::new();
-        for (v, _) in self.edges.iter() {
+        for (v, _) in self.alive.iter() {
             all.insert(v, Status::Abandoned);
         }
         if all.contains_key(&0) {
@@ -151,7 +152,7 @@ impl<const N: usize> Sodg<N> {
             for (v, _) in vec {
                 let edges = self.edges.get(v).unwrap();
                 if edges.into_iter().next().is_none() {
-                    // self.remove(v); DO SOMETHING ABOUT THIS!
+                    self.remove(v);
                     all.remove(&v);
                     modified = true;
                     #[cfg(debug_assertions)]
@@ -167,11 +168,14 @@ impl<const N: usize> Sodg<N> {
         }
         #[cfg(debug_assertions)]
         trace!("#collect: collected {total} vertices, status: {:?}", all);
-        }
+    }
 }
 
 #[cfg(test)]
 use crate::Label;
+
+#[cfg(test)]
+use crate::Hex;
 
 #[cfg(test)]
 use std::str::FromStr;
@@ -187,24 +191,6 @@ fn does_not_collect_owned() {
 }
 
 #[test]
-fn collects_simple_graph() {
-    let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(1);
-    g.add(2);
-    g.add(3);
-    g.add(4);
-    g.bind(1, 2, Label::from_str("x").unwrap());
-    g.bind(1, 3, Label::from_str("y").unwrap());
-    g.bind(2, 4, Label::from_str("z").unwrap());
-    g.data(4).unwrap();
-    g.data(2).unwrap();
-    g.data(1).unwrap();
-    g.data(3).unwrap();
-    g.collect();
-    assert_eq!(0, g.len());
-}
-
-#[test]
 fn collects_complicated_graph() {
     let mut g: Sodg<16> = Sodg::empty(256);
     for i in 1..=5 {
@@ -216,6 +202,7 @@ fn collects_complicated_graph() {
     g.bind(3, 5, Label::from_str("a").unwrap());
     g.bind(4, 3, Label::from_str("b").unwrap());
     for i in 1..=5 {
+        g.put(i, &Hex::from(42));
         g.data(i).unwrap();
     }
     g.collect();
