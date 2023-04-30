@@ -184,7 +184,7 @@ impl Script {
 use std::str;
 
 #[test]
-fn simple_command() -> Result<()> {
+fn simple_command() {
     let mut g: Sodg<16> = Sodg::empty(256);
     let mut s = Script::from_str(
         "
@@ -193,9 +193,8 @@ fn simple_command() -> Result<()> {
         PUT($ν1  , d0-bf-D1-80-d0-B8-d0-b2-d0-b5-d1-82);
         ",
     );
-    let total = s.deploy_to(&mut g)?;
+    let total = s.deploy_to(&mut g).unwrap();
     assert_eq!(4, total);
-    assert_eq!("привет", g.data(1).unwrap().to_utf8()?);
-    assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
-    Ok(())
+    assert_eq!("привет", g.data(1).unwrap().to_utf8().unwrap());
+    assert_eq!(1, g.kid(0, Label::from_str("foo").unwrap()).unwrap());
 }

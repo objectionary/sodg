@@ -34,26 +34,21 @@ impl<const N: usize> Clone for Sodg<N> {
 }
 
 #[cfg(test)]
-use anyhow::Result;
-
-#[cfg(test)]
 use crate::Label;
 
 #[test]
-fn makes_a_clone() -> Result<()> {
+fn makes_a_clone() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     g.add(42);
     g.bind(1, 42, Label::Alpha(0));
     let c = g.clone();
     assert_eq!(2, c.len());
-    Ok(())
 }
 
 #[test]
-fn makes_an_empty_clone() -> Result<()> {
+fn makes_an_empty_clone() {
     let g: Sodg<16> = Sodg::empty(256);
     let c = g.clone();
     assert_eq!(0, c.len());
-    Ok(())
 }

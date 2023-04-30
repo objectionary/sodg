@@ -116,11 +116,8 @@ digraph {
 #[cfg(test)]
 use crate::Hex;
 
-#[cfg(test)]
-use anyhow::Result;
-
 #[test]
-fn simple_graph_to_dot() -> Result<()> {
+fn simple_graph_to_dot() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.put(0, &Hex::from_str_bytes("hello"));
@@ -128,5 +125,4 @@ fn simple_graph_to_dot() -> Result<()> {
     g.bind(0, 1, Label::Alpha(0));
     let dot = g.to_dot();
     assert!(dot.contains("shape=circle,label=\"ν0\""));
-    Ok(())
 }

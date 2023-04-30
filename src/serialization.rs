@@ -88,30 +88,28 @@ use crate::Label;
 use std::str::FromStr;
 
 #[test]
-fn can_save() -> Result<()> {
+fn can_save() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
-    let tmp = TempDir::new()?;
+    g.bind(0, 1, Label::from_str("foo").unwrap());
+    let tmp = TempDir::new().unwrap();
     let file = tmp.path().join("foo.sodg");
-    g.save(file.as_path())?;
+    g.save(file.as_path()).unwrap();
     assert!(file.metadata().unwrap().len() > 0);
-    Ok(())
 }
 
 #[test]
-fn saves_and_loads() -> Result<()> {
+fn saves_and_loads() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.put(0, &Hex::from_str_bytes("hello"));
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
+    g.bind(0, 1, Label::from_str("foo").unwrap());
     g.put(1, &Hex::from_str_bytes("foo"));
-    let tmp = TempDir::new()?;
+    let tmp = TempDir::new().unwrap();
     let file = tmp.path().join("foo.sodg");
-    g.save(file.as_path())?;
-    let after: Sodg<16> = Sodg::load(file.as_path())?;
-    assert_eq!(g.inspect(0)?, after.inspect(0)?);
-    Ok(())
+    g.save(file.as_path()).unwrap();
+    let after: Sodg<16> = Sodg::load(file.as_path()).unwrap();
+    assert_eq!(g.inspect(0).unwrap(), after.inspect(0).unwrap());
 }

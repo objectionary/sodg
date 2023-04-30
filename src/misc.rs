@@ -28,13 +28,9 @@ impl<const N: usize> Sodg<N> {
     }
 }
 
-#[cfg(test)]
-use anyhow::Result;
-
 #[test]
-fn counts_vertices() -> Result<()> {
+fn counts_vertices() {
     let g: Sodg<16> = Sodg::empty(256);
     assert_eq!(0, g.len());
-    Ok(())
 }
 

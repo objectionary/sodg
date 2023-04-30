@@ -19,6 +19,7 @@
 // SOFTWARE.
 
 use crate::Sodg;
+use emap::Map;
 
 impl<const N: usize> Sodg<N> {
     /// Make an empty [`Sodg`], with no vertices and no edges.
@@ -38,14 +39,9 @@ impl<const N: usize> Sodg<N> {
     }
 }
 
-#[cfg(test)]
-use anyhow::Result;
-use emap::Map;
-
 #[test]
-fn makes_an_empty_sodg() -> Result<()> {
+fn makes_an_empty_sodg() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     assert_eq!(1, g.len());
-    Ok(())
 }

@@ -19,7 +19,6 @@
 // SOFTWARE.
 
 use crate::Sodg;
-use anyhow::Result;
 #[cfg(debug_assertions)]
 use log::trace;
 use std::collections::HashMap;
@@ -89,7 +88,7 @@ impl<const N: usize> Sodg<N> {
     /// # Panics
     ///
     /// May panic!
-    pub fn collect(&mut self) -> Result<()> {
+    pub fn collect(&mut self) {
         let mut all = HashMap::new();
         for (v, _) in self.edges.iter() {
             all.insert(v, Status::Abandoned);
@@ -168,8 +167,7 @@ impl<const N: usize> Sodg<N> {
         }
         #[cfg(debug_assertions)]
         trace!("#collect: collected {total} vertices, status: {:?}", all);
-        Ok(())
-    }
+        }
 }
 
 #[cfg(test)]
@@ -179,50 +177,47 @@ use crate::Label;
 use std::str::FromStr;
 
 #[test]
-fn does_not_collect_owned() -> Result<()> {
+fn does_not_collect_owned() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("x")?);
-    g.collect()?;
+    g.bind(0, 1, Label::from_str("x").unwrap());
+    g.collect();
     assert!(g.edges.get(1).is_some());
-    Ok(())
 }
 
 #[test]
-fn collects_simple_graph() -> Result<()> {
+fn collects_simple_graph() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     g.add(2);
     g.add(3);
     g.add(4);
-    g.bind(1, 2, Label::from_str("x")?);
-    g.bind(1, 3, Label::from_str("y")?);
-    g.bind(2, 4, Label::from_str("z")?);
+    g.bind(1, 2, Label::from_str("x").unwrap());
+    g.bind(1, 3, Label::from_str("y").unwrap());
+    g.bind(2, 4, Label::from_str("z").unwrap());
     g.data(4).unwrap();
     g.data(2).unwrap();
     g.data(1).unwrap();
     g.data(3).unwrap();
-    g.collect()?;
+    g.collect();
     assert_eq!(0, g.len());
-    Ok(())
 }
 
 #[test]
-fn collects_complicated_graph() -> Result<()> {
+fn collects_complicated_graph() {
     let mut g: Sodg<16> = Sodg::empty(256);
     for i in 1..=5 {
         g.add(i);
     }
-    g.bind(1, 2, Label::from_str("x")?);
-    g.bind(1, 3, Label::from_str("y")?);
-    g.bind(2, 4, Label::from_str("z")?);
-    g.bind(3, 5, Label::from_str("a")?);
-    g.bind(4, 3, Label::from_str("b")?);
+    g.bind(1, 2, Label::from_str("x").unwrap());
+    g.bind(1, 3, Label::from_str("y").unwrap());
+    g.bind(2, 4, Label::from_str("z").unwrap());
+    g.bind(3, 5, Label::from_str("a").unwrap());
+    g.bind(4, 3, Label::from_str("b").unwrap());
     for i in 1..=5 {
         g.data(i).unwrap();
     }
-    g.collect()?;
+    g.collect();
     assert_eq!(0, g.len());
-    Ok(())
 }

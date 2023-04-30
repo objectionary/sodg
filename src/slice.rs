@@ -97,41 +97,38 @@ impl<const N: usize> Sodg<N> {
 use std::str::FromStr;
 
 #[test]
-fn makes_a_slice() -> Result<()> {
+fn makes_a_slice() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
+    g.bind(0, 1, Label::from_str("foo").unwrap());
     g.add(2);
-    g.bind(0, 2, Label::from_str("bar")?);
-    assert_eq!(1, g.slice(1)?.len());
-    assert_eq!(1, g.slice(2)?.len());
-    Ok(())
+    g.bind(0, 2, Label::from_str("bar").unwrap());
+    assert_eq!(1, g.slice(1).unwrap().len());
+    assert_eq!(1, g.slice(2).unwrap().len());
 }
 
 #[test]
-fn makes_a_partial_slice() -> Result<()> {
+fn makes_a_partial_slice() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
+    g.bind(0, 1, Label::from_str("foo").unwrap());
     g.add(2);
-    g.bind(1, 2, Label::from_str("bar")?);
-    let slice = g.slice_some(1, |_v, _to, _a| false)?;
+    g.bind(1, 2, Label::from_str("bar").unwrap());
+    let slice = g.slice_some(1, |_v, _to, _a| false).unwrap();
     assert_eq!(1, slice.len());
-    Ok(())
 }
 
 #[test]
-fn skips_some_vertices() -> Result<()> {
+fn skips_some_vertices() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
+    g.bind(0, 1, Label::from_str("foo").unwrap());
     g.add(2);
-    g.bind(0, 2, Label::from_str("+bar")?);
-    let slice = g.slice_some(0, |_, _, a| !a.to_string().starts_with('+'))?;
+    g.bind(0, 2, Label::from_str("+bar").unwrap());
+    let slice = g.slice_some(0, |_, _, a| !a.to_string().starts_with('+')).unwrap();
     assert_eq!(2, slice.len());
     assert_eq!(1, slice.kids(0).len());
-    Ok(())
 }

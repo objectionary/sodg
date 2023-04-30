@@ -70,19 +70,17 @@ impl<const N: usize> Sodg<N> {
 }
 
 #[test]
-fn prints_itself() -> Result<()> {
+fn prints_itself() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
     assert_ne!("", format!("{g:?}"));
-    Ok(())
 }
 
 #[test]
-fn displays_itself() -> Result<()> {
+fn displays_itself() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
     assert_ne!("", format!("{g}"));
-    Ok(())
 }

@@ -450,166 +450,146 @@ impl FromStr for Hex {
 }
 
 #[test]
-fn simple_int() -> Result<()> {
+fn simple_int() {
     let i = 42;
     let d = Hex::from(i);
-    assert_eq!(i, d.to_i64()?);
+    assert_eq!(i, d.to_i64().unwrap());
     assert_eq!("00-00-00-00-00-00-00-2A", d.print());
-    Ok(())
 }
 
 #[test]
-fn simple_bool() -> Result<()> {
+fn simple_bool() {
     let b = true;
     let d = Hex::from(b);
     assert_eq!(b, d.to_bool());
     assert_eq!("01", d.print());
-    Ok(())
 }
 
 #[test]
-fn simple_float() -> Result<()> {
+fn simple_float() {
     let f = std::f64::consts::PI;
     let d = Hex::from(f);
-    assert_eq!(f, d.to_f64()?);
+    assert_eq!(f, d.to_f64().unwrap());
     assert_eq!("40-09-21-FB-54-44-2D-18", d.print());
-    Ok(())
 }
 
 #[test]
-fn compares_with_data() -> Result<()> {
+fn compares_with_data() {
     let i = 42;
     let left = Hex::from(i);
     let right = Hex::from(i);
     assert_eq!(left, right);
-    Ok(())
 }
 
 #[test]
-fn prints_bytes() -> Result<()> {
+fn prints_bytes() {
     let txt = "привет";
     let d = Hex::from_str_bytes(txt);
     assert_eq!("D0-BF-D1-80-D0-B8-D0-B2-D0-B5-D1-82", d.print());
-    assert_eq!(txt, Hex::from_str(&d.print())?.to_utf8()?);
-    Ok(())
+    assert_eq!(txt, Hex::from_str(&d.print()).unwrap().to_utf8().unwrap());
 }
 
 #[test]
-fn prints_empty_bytes() -> Result<()> {
+fn prints_empty_bytes() {
     let txt = "";
     let d = Hex::from_str_bytes(txt);
     assert_eq!("--", d.print());
-    Ok(())
 }
 
 #[test]
-fn broken_int_from_small_data() -> Result<()> {
+fn broken_int_from_small_data() {
     let d = Hex::from_vec([0x01, 0x02].to_vec());
     let ret = d.to_i64();
     assert!(ret.is_err());
-    Ok(())
 }
 
 #[test]
-fn broken_float_from_small_data() -> Result<()> {
+fn broken_float_from_small_data() {
     let d = Hex::from_vec([0x00].to_vec());
     let ret = d.to_f64();
     assert!(ret.is_err());
-    Ok(())
 }
 
 #[test]
-fn direct_access_to_vec() -> Result<()> {
+fn direct_access_to_vec() {
     let d = Hex::from_vec([0x1F, 0x01].to_vec());
     assert_eq!(0x1F, *d.bytes().first().unwrap());
-    Ok(())
 }
 
 #[test]
-fn not_enough_data_for_int() -> Result<()> {
+fn not_enough_data_for_int() {
     let d = Hex::from_vec(vec![0x00, 0x2A]);
     assert!(d.to_i64().is_err());
-    Ok(())
 }
 
 #[test]
-fn not_enough_data_for_float() -> Result<()> {
+fn not_enough_data_for_float() {
     let d = Hex::from_vec(vec![0x00, 0x2A]);
     assert!(d.to_f64().is_err());
-    Ok(())
 }
 
 #[test]
-fn too_much_data_for_int() -> Result<()> {
+fn too_much_data_for_int() {
     let d = Hex::from_vec(vec![0x00, 0x2A, 0x00, 0x2A, 0x00, 0x2A, 0x00, 0x2A, 0x11]);
     assert!(d.to_i64().is_err());
-    Ok(())
 }
 
 #[test]
-fn makes_string() -> Result<()> {
+fn makes_string() {
     let d = Hex::from_vec(vec![0x41, 0x42, 0x43]);
-    assert_eq!("ABC", d.to_utf8()?.as_str());
-    Ok(())
+    assert_eq!("ABC", d.to_utf8().unwrap().as_str());
 }
 
 #[test]
-fn empty_string() -> Result<()> {
+fn empty_string() {
     let d = Hex::from_vec(vec![]);
-    assert_eq!("", d.to_utf8()?.as_str());
-    Ok(())
+    assert_eq!("", d.to_utf8().unwrap().as_str());
 }
 
 #[test]
-fn non_utf8_string() -> Result<()> {
+fn non_utf8_string() {
     let d = Hex::from_vec(vec![0x00, 0xEF]);
     assert!(d.to_utf8().is_err());
-    Ok(())
 }
 
 #[test]
-fn takes_tail() -> Result<()> {
+fn takes_tail() {
     let d = Hex::from_str_bytes("Hello, world!");
-    assert_eq!("world!", d.tail(7).to_utf8()?);
-    Ok(())
+    assert_eq!("world!", d.tail(7).to_utf8().unwrap());
 }
 
 #[test]
-fn takes_one_byte() -> Result<()> {
+fn takes_one_byte() {
     let d = Hex::from_str_bytes("Ура!");
     assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
     assert_eq!(0xD1, d.byte_at(2));
-    Ok(())
 }
 
 #[test]
-fn measures_length() -> Result<()> {
+fn measures_length() {
     let d = Hex::from_str_bytes("Ура!");
     assert_eq!(7, d.len());
-    Ok(())
 }
 
 #[test]
-fn correct_equality() -> Result<()> {
-    let d = Hex::from_str("DE-AD-BE-EF")?;
-    let d1 = Hex::from_str("AA-BB")?;
-    let d2 = Hex::from_str("DE-AD-BE-EF")?;
+fn correct_equality() {
+    let d = Hex::from_str("DE-AD-BE-EF").unwrap();
+    let d1 = Hex::from_str("AA-BB").unwrap();
+    let d2 = Hex::from_str("DE-AD-BE-EF").unwrap();
     assert_eq!(d, d);
     assert_ne!(d, d1);
     assert_eq!(d, d2);
-    Ok(())
 }
 
 #[test]
-fn concat_test() -> Result<()> {
-    let a = Hex::from_str("DE-AD")?;
-    let b = Hex::from_str("BE-EF")?;
-    assert_eq!(a.concat(&b), Hex::from_str("DE-AD-BE-EF")?);
-    Ok(())
+fn concat_test() {
+    let a = Hex::from_str("DE-AD").unwrap();
+    let b = Hex::from_str("BE-EF").unwrap();
+    assert_eq!(a.concat(&b), Hex::from_str("DE-AD-BE-EF").unwrap());
 }
 
 #[test]
-fn creates_from_big_slice() -> Result<()> {
+fn creates_from_big_slice() {
     let s: [u8; 9] = [0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
     let mut accum = vec![];
     for el in s {
@@ -620,25 +600,22 @@ fn creates_from_big_slice() -> Result<()> {
     let h = Hex::from_slice(accum.as_slice());
     assert_eq!(27, h.len());
     assert_eq!(h.to_vec(), accum);
-    Ok(())
 }
 
 #[test]
-fn concatenates_from_hex_vec() -> Result<()> {
+fn concatenates_from_hex_vec() {
     let a = Hex::from_vec(vec![0x12, 0xAB]);
     let b = Hex::from_slice(b"as_bytesss");
     let c = Hex::from_vec(vec![0x12, 0xAD]);
     let res = a.concat(&b).concat(&c);
     assert_eq!(14, res.len());
-    Ok(())
 }
 
 #[test]
-fn concatenates_from_hex_str() -> Result<()> {
+fn concatenates_from_hex_str() {
     let a = Hex::from_str_bytes("Привет!");
     let b = Hex::from_vec(vec![0x01, 0x02]);
     let c = Hex::from_str_bytes("Пока!");
     let res = a.concat(&b).concat(&c);
     assert_eq!(24, res.len());
-    Ok(())
 }

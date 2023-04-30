@@ -20,7 +20,7 @@
 
 use crate::Sodg;
 use crate::{Hex, Label};
-use anyhow::{Context, Result};
+use anyhow::{Context};
 #[cfg(debug_assertions)]
 use log::trace;
 
@@ -241,80 +241,74 @@ impl<const N: usize> Sodg<N> {
 use std::str::FromStr;
 
 #[test]
-fn adds_simple_vertex() -> Result<()> {
+fn adds_simple_vertex() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     g.add(2);
     g.bind(1, 2, Label::Alpha(0));
     assert_eq!(2, g.len());
-    Ok(())
 }
 
 #[test]
-fn fetches_kid() -> Result<()> {
+fn fetches_kid() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     g.add(2);
-    let k = Label::from_str("hello")?;
+    let k = Label::from_str("hello").unwrap();
     g.bind(1, 2, k);
     assert_eq!(2, g.kid(1, k).unwrap());
-    Ok(())
 }
 
 #[test]
-fn binds_two_names() -> Result<()> {
+fn binds_two_names() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     g.add(2);
-    let first = Label::from_str("first")?;
+    let first = Label::from_str("first").unwrap();
     g.bind(1, 2, first);
-    let second = Label::from_str("second")?;
+    let second = Label::from_str("second").unwrap();
     g.bind(1, 2, second);
     assert_eq!(2, g.kid(1, first).unwrap());
     assert_eq!(2, g.kid(1, second).unwrap());
-    Ok(())
 }
 
 #[test]
-fn overwrites_edge() -> Result<()> {
+fn overwrites_edge() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     g.add(2);
-    g.bind(1, 2, Label::from_str("foo")?);
+    g.bind(1, 2, Label::from_str("foo").unwrap());
     g.add(3);
-    g.bind(1, 3, Label::from_str("foo")?);
-    assert_eq!(3, g.kid(1, Label::from_str("foo")?).unwrap());
-    Ok(())
+    g.bind(1, 3, Label::from_str("foo").unwrap());
+    assert_eq!(3, g.kid(1, Label::from_str("foo").unwrap()).unwrap());
 }
 
 #[test]
-fn binds_to_root() -> Result<()> {
+fn binds_to_root() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("x")?);
-    assert!(g.kid(0, Label::from_str("ρ")?).is_none());
-    assert!(g.kid(0, Label::from_str("σ")?).is_none());
-    Ok(())
+    g.bind(0, 1, Label::from_str("x").unwrap());
+    assert!(g.kid(0, Label::from_str("ρ").unwrap()).is_none());
+    assert!(g.kid(0, Label::from_str("σ").unwrap()).is_none());
 }
 
 #[test]
-fn sets_simple_data() -> Result<()> {
+fn sets_simple_data() {
     let mut g: Sodg<16> = Sodg::empty(256);
     let data = Hex::from_str_bytes("hello");
     g.add(0);
     g.put(0, &data);
     assert_eq!(data, g.data(0).unwrap());
-    Ok(())
 }
 
 #[test]
-fn finds_all_kids() -> Result<()> {
+fn finds_all_kids() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("one")?);
-    g.bind(0, 1, Label::from_str("two")?);
+    g.bind(0, 1, Label::from_str("one").unwrap());
+    g.bind(0, 1, Label::from_str("two").unwrap());
     assert_eq!(2, g.kids(0).len());
     let mut names = vec![];
     for (a, to) in g.kids(0) {
@@ -322,17 +316,16 @@ fn finds_all_kids() -> Result<()> {
     }
     names.sort();
     assert_eq!("one/1,two/1", names.join(","));
-    Ok(())
 }
 
 #[test]
-fn builds_list_of_kids() -> Result<()> {
+fn builds_list_of_kids() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("one")?);
-    g.bind(0, 1, Label::from_str("two")?);
-    g.bind(0, 1, Label::from_str("three")?);
+    g.bind(0, 1, Label::from_str("one").unwrap());
+    g.bind(0, 1, Label::from_str("two").unwrap());
+    g.bind(0, 1, Label::from_str("three").unwrap());
     let mut names: Vec<String> = g
         .kids(0)
         .into_iter()
@@ -340,36 +333,31 @@ fn builds_list_of_kids() -> Result<()> {
         .collect();
     names.sort();
     assert_eq!("one,three,two", names.join(","));
-    Ok(())
 }
 
 #[test]
-fn gets_data_from_empty_vertex() -> Result<()> {
+fn gets_data_from_empty_vertex() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     assert!(g.data(0).is_none());
-    Ok(())
 }
 
 #[test]
-fn gets_absent_kid() -> Result<()> {
+fn gets_absent_kid() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
-    assert!(g.kid(0, Label::from_str("hello")?).is_none());
-    Ok(())
+    assert!(g.kid(0, Label::from_str("hello").unwrap()).is_none());
 }
 
 #[test]
-fn gets_kid_from_absent_vertex() -> Result<()> {
+fn gets_kid_from_absent_vertex() {
     let g: Sodg<16> = Sodg::empty(256);
-    assert!(g.kid(0, Label::from_str("hello")?).is_none());
-    Ok(())
+    assert!(g.kid(0, Label::from_str("hello").unwrap()).is_none());
 }
 
 #[test]
-fn adds_twice() -> Result<()> {
+fn adds_twice() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(0);
-    Ok(())
 }

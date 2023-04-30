@@ -19,9 +19,9 @@
 // SOFTWARE.
 
 use crate::Sodg;
-use anyhow::{anyhow, Result};
 use log::debug;
 use std::collections::{HashMap, HashSet};
+use anyhow::{anyhow, Result};
 
 impl<const N: usize> Sodg<N> {
     /// Merge another graph into the current one.
@@ -128,10 +128,10 @@ impl<const N: usize> Sodg<N> {
         }
         for e in self.kids(right) {
             if self.kid(left, e.0).is_some() {
-                return Err(anyhow!(
+                panic!(
                     "Can't merge ν{right} into ν{left}, due to conflict in '{}'",
                     e.0
-                ));
+                );
             }
             self.bind(left, e.1, e.0);
         }
@@ -144,24 +144,23 @@ impl<const N: usize> Sodg<N> {
 use std::str::FromStr;
 
 #[test]
-fn merges_two_graphs() -> Result<()> {
+fn merges_two_graphs() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
+    g.bind(0, 1, Label::from_str("foo").unwrap());
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(1);
-    extra.bind(0, 1, Label::from_str("bar")?);
-    g.merge(&extra, 0, 0)?;
+    extra.bind(0, 1, Label::from_str("bar").unwrap());
+    g.merge(&extra, 0, 0).unwrap();
     assert_eq!(3, g.len());
-    assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
-    assert_eq!(2, g.kid(0, Label::from_str("bar")?).unwrap());
-    Ok(())
+    assert_eq!(1, g.kid(0, Label::from_str("foo").unwrap()).unwrap());
+    assert_eq!(2, g.kid(0, Label::from_str("bar").unwrap()).unwrap());
 }
 
 #[test]
-fn merges_two_non_trees() -> Result<()> {
+fn merges_two_non_trees() {
     let mut g: Sodg<16> = Sodg::empty(256);
     let mut extra = Sodg::empty(256);
     extra.add(0);
@@ -172,173 +171,163 @@ fn merges_two_non_trees() -> Result<()> {
     assert!(r.is_err());
     let msg = r.err().unwrap().to_string();
     assert!(msg.contains("ν2, ν13, ν42"), "{}", msg);
-    Ok(())
 }
 
 #[test]
-fn merges_a_loop() -> Result<()> {
+fn merges_a_loop() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("a")?);
+    g.bind(0, 1, Label::from_str("a").unwrap());
     g.add(2);
-    g.bind(1, 2, Label::from_str("b")?);
+    g.bind(1, 2, Label::from_str("b").unwrap());
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(4);
-    extra.bind(0, 4, Label::from_str("c")?);
+    extra.bind(0, 4, Label::from_str("c").unwrap());
     extra.add(3);
-    extra.bind(0, 3, Label::from_str("a")?);
-    extra.bind(4, 3, Label::from_str("d")?);
+    extra.bind(0, 3, Label::from_str("a").unwrap());
+    extra.bind(4, 3, Label::from_str("d").unwrap());
     extra.add(5);
-    extra.bind(3, 5, Label::from_str("e")?);
-    g.merge(&extra, 0, 0)?;
+    extra.bind(3, 5, Label::from_str("e").unwrap());
+    g.merge(&extra, 0, 0).unwrap();
     assert_eq!(5, g.len());
-    assert_eq!(1, g.kid(0, Label::from_str("a")?).unwrap());
-    assert_eq!(2, g.kid(1, Label::from_str("b")?).unwrap());
+    assert_eq!(1, g.kid(0, Label::from_str("a").unwrap()).unwrap());
+    assert_eq!(2, g.kid(1, Label::from_str("b").unwrap()).unwrap());
     // assert_eq!(3, g.kid(0, "c").unwrap());
     // assert_eq!(1, g.kid(3, "d").unwrap());
     // assert_eq!(5, g.kid(1, "e").unwrap());
-    Ok(())
 }
 
 #[test]
-fn avoids_simple_duplicates() -> Result<()> {
+fn avoids_simple_duplicates() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(5);
-    g.bind(0, 5, Label::from_str("foo")?);
+    g.bind(0, 5, Label::from_str("foo").unwrap());
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(1);
-    extra.bind(0, 1, Label::from_str("foo")?);
+    extra.bind(0, 1, Label::from_str("foo").unwrap());
     extra.add(2);
-    extra.bind(1, 2, Label::from_str("bar")?);
-    g.merge(&extra, 0, 0)?;
+    extra.bind(1, 2, Label::from_str("bar").unwrap());
+    g.merge(&extra, 0, 0).unwrap();
     assert_eq!(3, g.len());
-    assert_eq!(5, g.kid(0, Label::from_str("foo")?).unwrap());
-    assert_eq!(1, g.kid(5, Label::from_str("bar")?).unwrap());
-    Ok(())
+    assert_eq!(5, g.kid(0, Label::from_str("foo").unwrap()).unwrap());
+    assert_eq!(1, g.kid(5, Label::from_str("bar").unwrap()).unwrap());
 }
 
 #[test]
-fn keeps_existing_vertices_intact() -> Result<()> {
+fn keeps_existing_vertices_intact() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
+    g.bind(0, 1, Label::from_str("foo").unwrap());
     g.add(2);
-    g.bind(1, 2, Label::from_str("bar")?);
+    g.bind(1, 2, Label::from_str("bar").unwrap());
     g.add(3);
-    g.bind(2, 3, Label::from_str("zzz")?);
+    g.bind(2, 3, Label::from_str("zzz").unwrap());
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(5);
-    extra.bind(0, 5, Label::from_str("foo")?);
-    g.merge(&extra, 0, 0)?;
+    extra.bind(0, 5, Label::from_str("foo").unwrap());
+    g.merge(&extra, 0, 0).unwrap();
     assert_eq!(4, g.len());
-    assert_eq!(1, g.kid(0, Label::from_str("foo")?).unwrap());
-    assert_eq!(2, g.kid(1, Label::from_str("bar")?).unwrap());
-    assert_eq!(3, g.kid(2, Label::from_str("zzz")?).unwrap());
-    Ok(())
+    assert_eq!(1, g.kid(0, Label::from_str("foo").unwrap()).unwrap());
+    assert_eq!(2, g.kid(1, Label::from_str("bar").unwrap()).unwrap());
+    assert_eq!(3, g.kid(2, Label::from_str("zzz").unwrap()).unwrap());
 }
 
 #[test]
-fn merges_singletons() -> Result<()> {
+fn merges_singletons() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(13);
     let mut extra = Sodg::empty(256);
     extra.add(13);
-    g.merge(&extra, 13, 13)?;
+    g.merge(&extra, 13, 13).unwrap();
     assert_eq!(1, g.len());
-    Ok(())
 }
 
 #[test]
-fn merges_simple_loop() -> Result<()> {
+fn merges_simple_loop() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     g.add(2);
-    g.bind(1, 2, Label::from_str("foo")?);
-    g.bind(2, 1, Label::from_str("bar")?);
+    g.bind(1, 2, Label::from_str("foo").unwrap());
+    g.bind(2, 1, Label::from_str("bar").unwrap());
     let extra = g.clone();
-    g.merge(&extra, 1, 1)?;
+    g.merge(&extra, 1, 1).unwrap();
     assert_eq!(extra.len(), g.len());
-    Ok(())
 }
 
 #[test]
-fn merges_large_loop() -> Result<()> {
+fn merges_large_loop() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     g.add(2);
     g.add(3);
     g.add(4);
-    g.bind(1, 2, Label::from_str("a")?);
-    g.bind(2, 3, Label::from_str("b")?);
-    g.bind(3, 4, Label::from_str("c")?);
-    g.bind(4, 1, Label::from_str("d")?);
+    g.bind(1, 2, Label::from_str("a").unwrap());
+    g.bind(2, 3, Label::from_str("b").unwrap());
+    g.bind(3, 4, Label::from_str("c").unwrap());
+    g.bind(4, 1, Label::from_str("d").unwrap());
     let extra = g.clone();
-    g.merge(&extra, 1, 1)?;
+    g.merge(&extra, 1, 1).unwrap();
     assert_eq!(extra.len(), g.len());
-    Ok(())
 }
 
 #[cfg(test)]
 use crate::Hex;
 
 #[test]
-fn merges_data() -> Result<()> {
+fn merges_data() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     let mut extra = Sodg::empty(256);
     extra.add(1);
     extra.put(1, &Hex::from(42));
-    g.merge(&extra, 1, 1)?;
-    assert_eq!(42, g.data(1).unwrap().to_i64()?);
-    Ok(())
+    g.merge(&extra, 1, 1).unwrap();
+    assert_eq!(42, g.data(1).unwrap().to_i64().unwrap());
 }
 
 #[test]
-fn understands_same_name_kids() -> Result<()> {
+fn understands_same_name_kids() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("a")?);
+    g.bind(0, 1, Label::from_str("a").unwrap());
     g.add(2);
-    g.bind(1, 2, Label::from_str("x")?);
+    g.bind(1, 2, Label::from_str("x").unwrap());
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(1);
-    extra.bind(0, 1, Label::from_str("b")?);
+    extra.bind(0, 1, Label::from_str("b").unwrap());
     extra.add(2);
-    extra.bind(1, 2, Label::from_str("x")?);
-    g.merge(&extra, 0, 0)?;
+    extra.bind(1, 2, Label::from_str("x").unwrap());
+    g.merge(&extra, 0, 0).unwrap();
     assert_eq!(5, g.len());
-    assert_eq!(1, g.kid(0, Label::from_str("a")?).unwrap());
-    assert_eq!(2, g.kid(1, Label::from_str("x")?).unwrap());
-    Ok(())
+    assert_eq!(1, g.kid(0, Label::from_str("a").unwrap()).unwrap());
+    assert_eq!(2, g.kid(1, Label::from_str("x").unwrap()).unwrap());
 }
 
 #[test]
-fn merges_into_empty_graph() -> Result<()> {
+fn merges_into_empty_graph() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(1);
     let mut extra = Sodg::empty(256);
     extra.add(1);
     extra.add(2);
     extra.add(3);
-    extra.bind(1, 2, Label::from_str("a")?);
-    extra.bind(2, 3, Label::from_str("b")?);
-    extra.bind(3, 1, Label::from_str("c")?);
-    g.merge(&extra, 1, 1)?;
+    extra.bind(1, 2, Label::from_str("a").unwrap());
+    extra.bind(2, 3, Label::from_str("b").unwrap());
+    extra.bind(3, 1, Label::from_str("c").unwrap());
+    g.merge(&extra, 1, 1).unwrap();
     assert_eq!(3, g.len());
-    assert_eq!(0, g.kid(1, Label::from_str("a")?).unwrap());
-    Ok(())
+    assert_eq!(0, g.kid(1, Label::from_str("a").unwrap()).unwrap());
 }
 
 #[test]
-fn mixed_injection() -> Result<()> {
+fn mixed_injection() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(4);
     let mut extra = Sodg::empty(256);
@@ -346,46 +335,43 @@ fn mixed_injection() -> Result<()> {
     extra.put(4, &Hex::from(4));
     extra.add(5);
     extra.put(5, &Hex::from(5));
-    extra.bind(4, 5, Label::from_str("b")?);
-    g.merge(&extra, 4, 4)?;
+    extra.bind(4, 5, Label::from_str("b").unwrap());
+    g.merge(&extra, 4, 4).unwrap();
     assert_eq!(2, g.len());
-    Ok(())
 }
 
 #[test]
-fn zero_to_zero() -> Result<()> {
+fn zero_to_zero() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("a")?);
-    g.bind(1, 0, Label::from_str("back")?);
+    g.bind(0, 1, Label::from_str("a").unwrap());
+    g.bind(1, 0, Label::from_str("back").unwrap());
     g.add(2);
-    g.bind(0, 2, Label::from_str("b")?);
+    g.bind(0, 2, Label::from_str("b").unwrap());
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(1);
-    extra.bind(0, 1, Label::from_str("c")?);
-    extra.bind(1, 0, Label::from_str("back")?);
-    g.merge(&extra, 0, 0)?;
+    extra.bind(0, 1, Label::from_str("c").unwrap());
+    extra.bind(1, 0, Label::from_str("back").unwrap());
+    g.merge(&extra, 0, 0).unwrap();
     assert_eq!(4, g.len());
-    Ok(())
 }
 
 #[test]
-fn finds_siblings() -> Result<()> {
+fn finds_siblings() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("a")?);
+    g.bind(0, 1, Label::from_str("a").unwrap());
     g.add(2);
-    g.bind(0, 2, Label::from_str("b")?);
+    g.bind(0, 2, Label::from_str("b").unwrap());
     let mut extra = Sodg::empty(256);
     extra.add(0);
     extra.add(1);
-    extra.bind(0, 1, Label::from_str("b")?);
-    g.merge(&extra, 0, 0)?;
+    extra.bind(0, 1, Label::from_str("b").unwrap());
+    g.merge(&extra, 0, 0).unwrap();
     assert_eq!(3, g.len());
-    Ok(())
 }
 
 #[cfg(test)]
@@ -395,17 +381,16 @@ use crate::Script;
 use crate::Label;
 
 #[test]
-fn two_big_graphs() -> Result<()> {
+fn two_big_graphs() {
     let mut g: Sodg<16> = Sodg::empty(256);
     Script::from_str(
         "ADD(0); ADD(1); BIND(0, 1, foo);
         ADD(2); BIND(0, 1, alpha);
         BIND(1, 0, back);",
     )
-    .deploy_to(&mut g)?;
+    .deploy_to(&mut g).unwrap();
     let mut extra = Sodg::empty(256);
-    Script::from_str("ADD(0); ADD(1); BIND(0, 1, bar); BIND(1, 0, back);").deploy_to(&mut extra)?;
-    g.merge(&extra, 0, 0)?;
+    Script::from_str("ADD(0); ADD(1); BIND(0, 1, bar); BIND(1, 0, back);").deploy_to(&mut extra).unwrap();
+    g.merge(&extra, 0, 0).unwrap();
     assert_eq!(4, g.len());
-    Ok(())
 }
