@@ -77,10 +77,11 @@ pub fn on_heap(total: usize) -> (i64, Duration) {
     let mut sum = 0;
     let start = Instant::now();
     for _ in 0..total {
-        let prime = Box::new(Prime { usd: 42 });
-        let discounted = Box::new(Discounted { book: prime });
+        let prime = std::hint::black_box(Box::new(Prime { usd: 42 }));
+        let discounted = std::hint::black_box(Box::new(Discounted { book: prime }));
         let price = discounted.price();
-        sum += std::hint::black_box(price);
+        sum += price;
+        std::hint::black_box(Box::leak(discounted));
     }
     (std::hint::black_box(sum), start.elapsed())
 }
