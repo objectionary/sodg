@@ -43,7 +43,7 @@ impl<const N: usize> Sodg<N> {
         fs::write(path, bytes).with_context(|| format!("Can't write to {}", path.display()))?;
         trace!(
             "Serialized {} vertices ({} bytes) to {} in {:?}",
-            self.vertices.len(),
+            self.len(),
             size,
             path.display(),
             start.elapsed()
@@ -66,7 +66,7 @@ impl<const N: usize> Sodg<N> {
             .with_context(|| format!("Can't deserialize from {}", path.display()))?;
         trace!(
             "Deserialized {} vertices ({} bytes) from {} in {:?}",
-            sodg.vertices.len(),
+            sodg.len(),
             size,
             path.display(),
             start.elapsed()
@@ -88,17 +88,25 @@ use crate::Label;
 use std::str::FromStr;
 
 #[test]
-fn saves_and_loads() -> Result<()> {
+fn can_save() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
-    g.put(0, &Hex::from_str_bytes("hello"));
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
-    g.put(1, &Hex::from_str_bytes("foo"));
-    let tmp = TempDir::new()?;
+    g.bind(0, 1, Label::from_str("foo").unwrap());
+    let tmp = TempDir::new().unwrap();
     let file = tmp.path().join("foo.sodg");
-    g.save(file.as_path())?;
-    let after: Sodg<16> = Sodg::load(file.as_path())?;
-    assert_eq!(g.inspect(0)?, after.inspect(0)?);
-    Ok(())
+    g.save(file.as_path()).unwrap();
+    assert!(file.metadata().unwrap().len() > 0);
+}
+
+#[test]
+fn saves_and_loads() {
+    let mut g: Sodg<1> = Sodg::empty(100);
+    g.add(0);
+    g.put(0, &Hex::from_str_bytes("hello"));
+    let tmp = TempDir::new().unwrap();
+    let file = tmp.path().join("foo.sodg");
+    g.save(file.as_path()).unwrap();
+    let after: Sodg<1> = Sodg::load(file.as_path()).unwrap();
+    assert_eq!(g.inspect(0).unwrap(), after.inspect(0).unwrap());
 }

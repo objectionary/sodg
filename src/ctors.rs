@@ -18,10 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
-use crate::Vertices;
-#[cfg(feature = "sober")]
-use std::collections::HashSet;
+use crate::{Hex, Persistence, Sodg, Vertex};
+use emap::Map;
 
 impl<const N: usize> Sodg<N> {
     /// Make an empty [`Sodg`], with no vertices and no edges.
@@ -31,77 +29,30 @@ impl<const N: usize> Sodg<N> {
     /// May panic if vertices provided to alerts are absent (should never happen, though).
     #[must_use]
     pub fn empty(cap: usize) -> Self {
+        const MAX_BRANCHES: usize = 16;
         let mut g = Self {
-            vertices: Vertices::with_capacity(cap),
+            vertices: Map::with_capacity_some(
+                cap,
+                Vertex {
+                    branch: 0,
+                    data: Hex::empty(),
+                    persistence: Persistence::Empty,
+                    edges: micromap::Map::new(),
+                },
+            ),
+            stores: Map::with_capacity_some(MAX_BRANCHES, 0),
+            branches: Map::with_capacity_some(MAX_BRANCHES, vec![]),
             next_v: 0,
-            alerts: vec![],
-            alerts_active: true,
-            #[cfg(feature = "sober")]
-            finds: HashSet::new(),
         };
-        g.alert_on(|g, vx| {
-            let mut errors = Vec::new();
-            for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
-                    if !g.vertices.contains(e.1) {
-                        errors.push(format!("Edge ν{v}.{} arrives to lost ν{}", e.0, e.1));
-                    }
-                }
-            }
-            errors
-        });
-        g.alert_on(|g, vx| {
-            let mut errors = Vec::new();
-            for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
-                    if e.1 == *v {
-                        errors.push(format!("Edge ν{v}.{} arrives to ν{} (loop)", e.0, e.1));
-                    }
-                }
-            }
-            errors
-        });
-        g.alert_on(|g, vx| {
-            let mut errors = Vec::new();
-            for v in &vx {
-                for e in &g.vertices.get(*v).unwrap().edges {
-                    if !g.vertices.contains(e.1) {
-                        errors.push(format!(
-                            "Edge ν{v}.{} points to ν{}, which doesn't exist",
-                            e.0, e.1
-                        ));
-                    }
-                }
-            }
-            errors
-        });
-        g.alerts_off();
-        #[cfg(feature = "sober")]
-        g.alerts_on().unwrap();
+        g.branches.insert(0, vec![0]);
+        g.branches.insert(1, vec![0]);
         g
     }
 }
 
-#[cfg(test)]
-use anyhow::Result;
-
-#[cfg(test)]
-use crate::Label;
-
 #[test]
-fn makes_an_empty_sodg() -> Result<()> {
+fn makes_an_empty_sodg() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
-    assert_eq!(1, g.vertices.len());
-    Ok(())
-}
-
-#[test]
-fn prohibits_loops() -> Result<()> {
-    let mut g: Sodg<16> = Sodg::empty(256);
-    g.alerts_off();
-    g.add(0);
-    g.bind(0, 0, Label::Alpha(0));
-    assert!(g.alerts_on().is_err());
-    Ok(())
+    assert_eq!(1, g.len());
 }
