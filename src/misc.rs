@@ -24,13 +24,23 @@ impl<const N: usize> Sodg<N> {
     /// Get total number of vertices in the graph.
     #[must_use]
     pub fn len(&self) -> usize {
-        self.alive.len()
+        self.keys().len()
     }
 
     /// Is it empty?
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.len() == 0
+    }
+
+    /// Get keys of all vertices alive?
+    #[must_use]
+    pub fn keys(&self) -> Vec<usize> {
+        self.vertices
+            .iter()
+            .filter(|(_, vtx)| vtx.branch != 0)
+            .map(|(v, _)| v)
+            .collect::<Vec<usize>>()
     }
 }
 

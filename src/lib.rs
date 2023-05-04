@@ -47,7 +47,6 @@ mod clone;
 mod ctors;
 mod debug;
 mod dot;
-mod gc;
 mod hex;
 mod inspect;
 mod label;
@@ -62,6 +61,8 @@ mod xml;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+
+const HEX_SIZE: usize = 8;
 
 /// An object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
@@ -84,7 +85,7 @@ use std::collections::HashMap;
 #[derive(Serialize, Deserialize, Clone)]
 pub enum Hex {
     Vector(Vec<u8>),
-    Bytes([u8; 24], usize),
+    Bytes([u8; HEX_SIZE], usize),
 }
 
 /// A label on an edge.
@@ -129,21 +130,38 @@ pub struct Script {
 /// sodg.bind(0, 1, Label::Alpha(0));
 /// sodg.add(2);
 /// sodg.bind(1, 2, Label::Alpha(1));
-/// assert_eq!(1, sodg.kids(0).len());
-/// assert_eq!(1, sodg.kids(1).len());
+/// assert_eq!(1, sodg.kids(0).count());
+/// assert_eq!(1, sodg.kids(1).count());
 /// ```
 ///
 /// This package is used in [reo](https://github.com/objectionary/reo)
 /// project, as a memory model for objects and dependencies between them.
 #[derive(Serialize, Deserialize)]
 pub struct Sodg<const N: usize> {
-    alive: emap::Map<bool>,
-    edges: emap::Map<micromap::Map<Label, usize, N>>,
-    data: emap::Map<Hex>,
-    taken: emap::Map<bool>,
+    stores: emap::Map<usize>,
+    branches: emap::Map<Vec<usize>>,
+    vertices: emap::Map<Vertex<N>>,
     /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.
     #[serde(skip_serializing, skip_deserializing)]
     next_v: usize,
+}
+
+#[derive(PartialEq, Serialize, Deserialize, Clone)]
+enum Persistence {
+    Empty,
+    Stored,
+    Taken,
+}
+
+const BRANCH_NONE: usize = 0;
+const BRANCH_STATIC: usize = 1;
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Vertex<const N: usize> {
+    branch: usize,
+    data: Hex,
+    persistence: Persistence,
+    edges: micromap::Map<Label, usize, N>,
 }
 
 #[cfg(test)]

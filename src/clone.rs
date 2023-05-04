@@ -24,10 +24,9 @@ impl<const N: usize> Clone for Sodg<N> {
     /// Make a clone of the graph.
     fn clone(&self) -> Self {
         Self {
-            alive: self.alive.clone(),
-            edges: self.edges.clone(),
-            data: self.data.clone(),
-            taken: self.taken.clone(),
+            vertices: self.vertices.clone(),
+            branches: self.branches.clone(),
+            stores: self.stores.clone(),
             next_v: self.next_v,
         }
     }

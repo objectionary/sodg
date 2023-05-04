@@ -50,16 +50,18 @@ pub fn on_graph(total: usize) -> (i64, Duration) {
     g.add(0);
     let mut sum = 0;
     let start = Instant::now();
-    let mut v1 = 1;
+    let fourty_two = Hex::from(42);
     for _ in 0..total {
+        let v1 = 1;
         g.add(v1);
         let v2 = v1 + 1;
         g.add(v2);
         g.bind(v1, v2, Label::Alpha(0));
+        g.bind(v2, v1, Label::Greek('ρ'));
         let v3 = v2 + 1;
         g.add(v3);
         g.bind(v2, v3, Label::Greek('Δ'));
-        g.put(v3, &Hex::from(42));
+        g.put(v3, &fourty_two);
         let v4 = v3 + 1;
         g.add(v4);
         g.bind(v4, v1, Label::Greek('φ'));
@@ -68,7 +70,6 @@ pub fn on_graph(total: usize) -> (i64, Duration) {
         g.kid(v1, Label::Alpha(0)).unwrap();
         let k = g.kid(v2, Label::Greek('Δ')).unwrap();
         sum += g.data(k).unwrap().to_i64().unwrap() / 2;
-        v1 += 4;
     }
     (std::hint::black_box(sum), start.elapsed())
 }
@@ -81,7 +82,6 @@ pub fn on_heap(total: usize) -> (i64, Duration) {
         let discounted = std::hint::black_box(Box::new(Discounted { book: prime }));
         let price = discounted.price();
         sum += price;
-        std::hint::black_box(Box::leak(discounted));
     }
     (std::hint::black_box(sum), start.elapsed())
 }

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Hex;
+use crate::{Hex, HEX_SIZE};
 use anyhow::{Context, Result};
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
@@ -45,7 +45,7 @@ impl Display for Hex {
 
 impl Hex {
     /// Empty Hex, for performance improvement.
-    const BLANK: [u8; 24] = [0_u8; 24];
+    const BLANK: [u8; HEX_SIZE] = [0_u8; HEX_SIZE];
 
     /// Make an empty `Hex`.
     ///
@@ -118,10 +118,10 @@ impl Hex {
     /// ```
     #[must_use]
     pub fn from_slice(slice: &[u8]) -> Self {
-        if slice.len() <= 24 {
+        if slice.len() <= HEX_SIZE {
             Self::Bytes(
                 {
-                    let mut x = [0; 24];
+                    let mut x = [0; HEX_SIZE];
                     x[..slice.len()].copy_from_slice(slice);
                     x
                 },
@@ -143,7 +143,7 @@ impl Hex {
     /// ```
     #[must_use]
     pub fn from_vec(bytes: Vec<u8>) -> Self {
-        if bytes.len() <= 24 {
+        if bytes.len() <= HEX_SIZE {
             Self::from_slice(&bytes)
         } else {
             Self::Vector(bytes)
@@ -350,7 +350,7 @@ impl Hex {
                 Self::Vector(vx)
             }
             Self::Bytes(b, l) => {
-                if l + h.len() <= 24 {
+                if l + h.len() <= HEX_SIZE {
                     let mut bytes = *b;
                     bytes[*l..*l + h.len()].copy_from_slice(h.bytes());
                     Self::Bytes(bytes, l + h.len())
@@ -608,7 +608,7 @@ fn concatenates_from_hex_vec() {
     let b = Hex::from_slice(b"as_bytesss");
     let c = Hex::from_vec(vec![0x12, 0xAD]);
     let res = a.concat(&b).concat(&c);
-    assert_eq!(14, res.len());
+    assert_eq!(20, res.len());
 }
 
 #[test]

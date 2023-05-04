@@ -44,9 +44,10 @@ impl<const N: usize> Sodg<N> {
     fn inspect_v(&self, v: usize, seen: &mut HashSet<usize>) -> Result<Vec<String>> {
         seen.insert(v);
         let mut lines = vec![];
-        self.edges
+        self.vertices
             .get(v)
             .with_context(|| format!("Can't find ν{v}"))?
+            .edges
             .into_iter()
             .sorted()
             .for_each(|e| {

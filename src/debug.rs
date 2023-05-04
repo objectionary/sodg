@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
+use crate::{Persistence, Sodg};
 use anyhow::{Context, Result};
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
@@ -32,15 +32,32 @@ impl<const N: usize> Display for Sodg<N> {
 impl<const N: usize> Debug for Sodg<N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
-        for (v, edges) in self.edges.iter() {
-            let mut attrs = edges
+        for (v, vtx) in self.vertices.iter() {
+            if vtx.branch == 0 {
+                continue;
+            }
+            let mut attrs = vtx
+                .edges
                 .iter()
                 .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
-            if let Some(d) = self.data.get(v) {
-                attrs.push(format!("{d}"));
+            if vtx.persistence != Persistence::Empty {
+                attrs.push(format!("{}", vtx.data));
             }
             lines.push(format!("ν{v} -> ⟦{}⟧", attrs.join(", ")));
+        }
+        for (b, members) in self.branches.iter() {
+            if members.is_empty() {
+                continue;
+            }
+            lines.push(format!(
+                "b{b}: {{{}}}",
+                members
+                    .iter()
+                    .map(|v| format!("ν{v}"))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            ));
         }
         f.write_str(lines.join("\n").as_str())
     }
@@ -54,17 +71,18 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If the vertex is absent, an error may be returned.
     pub fn v_print(&self, v: usize) -> Result<String> {
-        let edges = self
-            .edges
+        let vtx = &self
+            .vertices
             .get(v)
             .with_context(|| format!("Can't find ν{v}"))?;
-        let list: Vec<String> = edges
+        let list: Vec<String> = vtx
+            .edges
             .into_iter()
             .map(|e| format!("{}", e.0.clone()))
             .collect();
         Ok(format!(
             "ν{v}⟦{}{}⟧",
-            if self.data.contains_key(v) {
+            if vtx.persistence == Persistence::Empty {
                 ""
             } else {
                 "Δ, "

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
+use crate::{Label, Persistence, Sodg};
 use anyhow::{anyhow, Result};
 use log::debug;
 use std::collections::{HashMap, HashSet};
@@ -45,7 +45,7 @@ impl<const N: usize> Sodg<N> {
         let merged = mapped.len();
         let scope = g.len();
         if merged != scope {
-            let must = g.alive.keys().collect::<Vec<usize>>();
+            let must = g.keys();
             let seen = mapped.keys().copied().collect::<Vec<usize>>();
             let missed: HashSet<usize> =
                 &HashSet::from_iter(must.clone()) - &HashSet::from_iter(seen.clone());
@@ -88,8 +88,8 @@ impl<const N: usize> Sodg<N> {
             return Ok(());
         }
         mapped.insert(right, left);
-        if let Some(hex) = g.data.get(right) {
-            self.put(left, hex);
+        if g.vertices.get(right).unwrap().persistence != Persistence::Empty {
+            self.put(left, &g.vertices.get(right).unwrap().data);
         }
         for (a, to) in g.kids(right) {
             let matched = if let Some(t) = self.kid(left, a) {
@@ -118,16 +118,16 @@ impl<const N: usize> Sodg<N> {
     }
 
     fn join(&mut self, left: usize, right: usize) {
-        for v in self.edges.keys() {
-            let mut ne = self.edges.get(v).unwrap().clone();
-            for e in &*self.edges.get_mut(v).unwrap() {
+        for v in self.keys() {
+            let mut nv = self.vertices.get(v).unwrap().clone();
+            for e in &self.vertices.get_mut(v).unwrap().edges {
                 if e.1 == right {
-                    ne.insert(e.0, left);
+                    nv.edges.insert(e.0, left);
                 }
             }
-            self.edges.insert(v, ne);
+            self.vertices.insert(v, nv);
         }
-        for e in self.kids(right) {
+        for e in self.kids(right).collect::<Vec<(Label, usize)>>() {
             assert!(
                 self.kid(left, e.0).is_none(),
                 "Can't merge ν{right} into ν{left}, due to conflict in '{}'",
@@ -135,7 +135,7 @@ impl<const N: usize> Sodg<N> {
             );
             self.bind(left, e.1, e.0);
         }
-        self.remove(right);
+        self.vertices.remove(right);
     }
 }
 
@@ -375,9 +375,6 @@ fn finds_siblings() {
 
 #[cfg(test)]
 use crate::Script;
-
-#[cfg(test)]
-use crate::Label;
 
 #[test]
 fn two_big_graphs() {

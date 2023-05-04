@@ -64,7 +64,7 @@ impl<const N: usize> Sodg<N> {
             let before: Vec<usize> = todo.drain().collect();
             for v in before {
                 done.insert(v);
-                for e in self.edges.get(v).unwrap() {
+                for e in &self.vertices.get(v).unwrap().edges {
                     if done.contains(&e.1) {
                         continue;
                     }
@@ -76,12 +76,12 @@ impl<const N: usize> Sodg<N> {
                 }
             }
         }
-        let mut ng = Self::empty(self.edges.capacity());
-        for (v1, edges) in self.edges.iter().filter(|(v, _)| done.contains(v)) {
+        let mut ng = Self::empty(self.vertices.capacity());
+        for (v1, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
             if done.contains(&v1) {
                 ng.add(v1);
             }
-            for (k, v2) in edges {
+            for (k, v2) in &vtx.edges {
                 if done.contains(&v2) {
                     ng.add(v2);
                     ng.bind(v1, v2, k);
@@ -136,5 +136,5 @@ fn skips_some_vertices() {
         .slice_some(0, |_, _, a| !a.to_string().starts_with('+'))
         .unwrap();
     assert_eq!(2, slice.len());
-    assert_eq!(1, slice.kids(0).len());
+    assert_eq!(1, slice.kids(0).collect::<Vec<(Label, usize)>>().len());
 }

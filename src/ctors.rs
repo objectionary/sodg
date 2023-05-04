@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
+use crate::{Hex, Persistence, Sodg, Vertex};
 use emap::Map;
 
 impl<const N: usize> Sodg<N> {
@@ -29,13 +29,24 @@ impl<const N: usize> Sodg<N> {
     /// May panic if vertices provided to alerts are absent (should never happen, though).
     #[must_use]
     pub fn empty(cap: usize) -> Self {
-        Self {
-            alive: Map::with_capacity_none(cap),
-            edges: Map::with_capacity_some(cap, micromap::Map::new()),
-            data: Map::with_capacity_none(cap),
-            taken: Map::with_capacity_none(cap),
+        const MAX_BRANCHES: usize = 16;
+        let mut g = Self {
+            vertices: Map::with_capacity_some(
+                cap,
+                Vertex {
+                    branch: 0,
+                    data: Hex::empty(),
+                    persistence: Persistence::Empty,
+                    edges: micromap::Map::new(),
+                },
+            ),
+            stores: Map::with_capacity_some(MAX_BRANCHES, 0),
+            branches: Map::with_capacity_some(MAX_BRANCHES, vec![]),
             next_v: 0,
-        }
+        };
+        g.branches.insert(0, vec![0]);
+        g.branches.insert(1, vec![0]);
+        g
     }
 }
 

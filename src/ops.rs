@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
 use crate::{Hex, Label};
+use crate::{Persistence, Sodg, BRANCH_NONE, BRANCH_STATIC};
 use anyhow::Context;
 #[cfg(debug_assertions)]
 use log::trace;
@@ -38,16 +38,14 @@ impl<const N: usize> Sodg<N> {
     /// g.bind(0, 42, Label::from_str("hello").unwrap());
     /// ```
     ///
-    /// If vertex `v1` already exists in the graph, `Ok` will be returned.
+    /// If vertex `v1` already exists in the graph, nothing will happen.
     ///
     /// # Panics
     ///
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn add(&mut self, v1: usize) {
-        self.alive.insert(v1, true);
-        self.edges.get_mut(v1).unwrap().clear();
-        self.data.remove(v1);
+        self.vertices.get_mut(v1).unwrap().branch = 1;
         #[cfg(debug_assertions)]
         trace!("#add: vertex ν{v1} added");
     }
@@ -79,9 +77,42 @@ impl<const N: usize> Sodg<N> {
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn bind(&mut self, v1: usize, v2: usize, a: Label) {
-        self.edges.get_mut(v1).unwrap().insert(a, v2);
+        let mut ours = self.vertices.get(v1).unwrap().branch;
+        let theirs = self.vertices.get(v2).unwrap().branch;
+        let vtx1 = self.vertices.get_mut(v1).unwrap();
+        vtx1.edges.insert(a, v2);
+        if ours == BRANCH_STATIC {
+            if theirs == BRANCH_STATIC {
+                for b in self.branches.iter_mut() {
+                    if b.1.is_empty() {
+                        b.1.push(v1);
+                        ours = b.0;
+                        vtx1.branch = ours;
+                        break;
+                    }
+                }
+                self.vertices.get_mut(v2).unwrap().branch = ours;
+                self.branches.get_mut(ours).unwrap().push(v2);
+            } else {
+                vtx1.branch = theirs;
+                self.branches.get_mut(theirs).unwrap().push(v1);
+            }
+        } else {
+            let vtx2 = self.vertices.get_mut(v2).unwrap();
+            if vtx2.branch == BRANCH_STATIC {
+                vtx2.branch = ours;
+                self.branches.get_mut(ours).unwrap().push(v2);
+            }
+        }
         #[cfg(debug_assertions)]
-        trace!("#bind: edge added ν{}.{} → ν{}", v1, a, v2);
+        trace!(
+            "#bind: edge added ν{}(b={}).{} → ν{}(b={})",
+            v1,
+            self.vertices.get(v1).unwrap().branch,
+            a,
+            v2,
+            self.vertices.get(v2).unwrap().branch,
+        );
     }
 
     /// Set vertex data.
@@ -103,9 +134,12 @@ impl<const N: usize> Sodg<N> {
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn put(&mut self, v: usize, d: &Hex) {
-        self.data.insert(v, d.clone());
+        let vtx = self.vertices.get_mut(v).unwrap();
+        vtx.persistence = Persistence::Stored;
+        vtx.data = d.clone();
+        *self.stores.get_mut(vtx.branch).unwrap() += 1;
         #[cfg(debug_assertions)]
-        trace!("#data: data of ν{v} set to {d}");
+        trace!("#put: data of ν{v} set to {d}");
     }
 
     /// Read vertex data, and then submit the vertex to garbage collection.
@@ -131,21 +165,47 @@ impl<const N: usize> Sodg<N> {
     /// assert!(g.data(42).is_none());
     /// ```
     ///
-    /// # Errors
+    /// # Panics
     ///
-    /// If vertex `v1` is absent, an `Err` will be returned.
-    ///
-    /// If garbage collection triggers any error, the error will be returned here.
+    /// If vertex `v1` is absent, it will panic.
     #[inline]
     pub fn data(&mut self, v: usize) -> Option<Hex> {
-        match self.data.get(v) {
-            Some(d) => {
-                self.taken.insert(v, true);
+        let vtx = self.vertices.get_mut(v).unwrap();
+        match vtx.persistence {
+            Persistence::Stored => {
+                let d = vtx.data.clone();
+                vtx.persistence = Persistence::Taken;
+                let branch = vtx.branch;
+                let s = self.stores.get_mut(branch).unwrap();
+                *s -= 1;
+                if *s == 0 {
+                    let members = self.branches.get_mut(branch).unwrap();
+                    for v in members.iter() {
+                        self.vertices.get_mut(*v).unwrap().branch = BRANCH_NONE;
+                    }
+                    #[cfg(debug_assertions)]
+                    trace!(
+                        "#data: branch no.{} destroyed {} vertices as garbage: {}",
+                        branch,
+                        members.len(),
+                        members
+                            .iter()
+                            .map(|v| format!("ν{v}"))
+                            .collect::<Vec<String>>()
+                            .join(", ")
+                    );
+                    members.clear();
+                }
                 #[cfg(debug_assertions)]
                 trace!("#data: data of ν{v} retrieved");
-                Some(d.clone())
+                Some(d)
             }
-            None => None,
+            Persistence::Taken => {
+                #[cfg(debug_assertions)]
+                trace!("#data: data of ν{v} retrieved again");
+                Some(vtx.data.clone())
+            }
+            Persistence::Empty => None,
         }
     }
 
@@ -160,7 +220,7 @@ impl<const N: usize> Sodg<N> {
     /// g.add(0);
     /// g.add(42);
     /// g.bind(0, 42, Label::from_str("k").unwrap());
-    /// let (a, to) = g.kids(0).first().unwrap().clone();
+    /// let (a, to) = g.kids(0).next().unwrap().clone();
     /// assert_eq!("k", a.to_string());
     /// assert_eq!(42, to);
     /// ```
@@ -186,15 +246,14 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If vertex `v1` is absent, `Err` will be returned.
     #[inline]
-    #[must_use]
-    pub fn kids(&self, v: usize) -> Vec<(Label, usize)> {
-        self.edges
+    pub fn kids(&self, v: usize) -> impl Iterator<Item = (Label, usize)> + '_ {
+        self.vertices
             .get(v)
             .with_context(|| format!("Can't find ν{v} in kids()"))
             .unwrap()
+            .edges
             .into_iter()
             .map(|(a, to)| (a, to))
-            .collect()
     }
 
     /// Find a kid of a vertex, by its edge name, and return the ID of the vertex found.
@@ -212,30 +271,18 @@ impl<const N: usize> Sodg<N> {
     /// assert_eq!(42, g.kid(0, k).unwrap());
     /// ```
     ///
-    /// If vertex `v1` is absent, `None` will be returned.
+    /// # Panics
+    ///
+    /// If vertex `v1` is absent, it will panic.
     #[must_use]
     #[inline]
     pub fn kid(&self, v: usize, a: Label) -> Option<usize> {
-        self.edges
-            .get(v)
-            .and_then(|edges| edges.into_iter().find(|e| e.0 == a).map(|e| e.1))
-    }
-
-    /// Remove a vertex from the graph.
-    ///
-    /// All vertices that pointed to this one will lose the pointing edges.
-    ///
-    /// # Panics
-    ///
-    /// It may panic if the vertex is absent.
-    #[inline]
-    pub fn remove(&mut self, v: usize) {
-        self.alive.remove(v);
-        self.data.remove(v);
-        self.edges.get_mut(v).unwrap().clear();
-        for (_, edges) in self.edges.iter_mut() {
-            edges.retain(|_, v1| *v1 != v);
+        for e in self.vertices.get(v).unwrap().edges.iter() {
+            if *e.0 == a {
+                return Some(*e.1);
+            }
         }
+        None
     }
 }
 
@@ -249,6 +296,27 @@ fn adds_simple_vertex() {
     g.add(2);
     g.bind(1, 2, Label::Alpha(0));
     assert_eq!(2, g.len());
+}
+
+#[test]
+fn sets_branch_correctly() {
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(1);
+    g.add(2);
+    g.bind(1, 2, Label::Alpha(0));
+    assert_eq!(1, g.branches.get(1).unwrap().len());
+    assert_eq!(2, g.branches.get(2).unwrap().len());
+    g.put(2, &Hex::from(42));
+    assert_eq!(&1, g.stores.get(2).unwrap());
+    g.add(3);
+    g.bind(1, 3, Label::Alpha(1));
+    assert_eq!(3, g.branches.get(2).unwrap().len());
+    g.add(4);
+    g.add(5);
+    g.bind(4, 5, Label::Alpha(0));
+    assert_eq!(2, g.branches.get(3).unwrap().len());
+    g.data(2);
+    assert_eq!(0, g.branches.get(2).unwrap().len());
 }
 
 #[test]
@@ -305,13 +373,28 @@ fn sets_simple_data() {
 }
 
 #[test]
+fn collects_garbage() {
+    let mut g: Sodg<16> = Sodg::empty(256);
+    g.add(1);
+    g.add(2);
+    g.bind(1, 2, Label::Alpha(0));
+    g.put(2, &Hex::from_str_bytes("hello"));
+    g.add(3);
+    g.bind(1, 3, Label::Alpha(0));
+    assert_eq!(3, g.len());
+    assert_eq!(3, g.branches.get(2).unwrap().len());
+    g.data(2);
+    assert_eq!(0, g.len());
+}
+
+#[test]
 fn finds_all_kids() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
     g.bind(0, 1, Label::from_str("one").unwrap());
     g.bind(0, 1, Label::from_str("two").unwrap());
-    assert_eq!(2, g.kids(0).len());
+    assert_eq!(2, g.kids(0).collect::<Vec<(Label, usize)>>().len());
     let mut names = vec![];
     for (a, to) in g.kids(0) {
         names.push(format!("{a}/{to}"));

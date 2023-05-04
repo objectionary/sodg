@@ -25,10 +25,19 @@ impl<const N: usize> Sodg<N> {
     ///
     /// This ID will never be returned by [`Sodg::next_id`] again. Also, this ID will not
     /// be equal to any of the existing IDs of vertices.
+    ///
+    /// # Panics
+    ///
+    /// May panic if not enough IDs are available.
     #[inline]
     pub fn next_id(&mut self) -> usize {
         let mut id = self.next_v;
-        id = self.alive.next_key_gte(id);
+        id = self
+            .vertices
+            .iter()
+            .find(|(v, vtx)| vtx.branch == 0 && *v >= id)
+            .map(|(v, _)| v)
+            .unwrap();
         let next = id + 1;
         if next > self.next_v {
             self.next_v = next;
