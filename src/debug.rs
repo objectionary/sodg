@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::Sodg;
+use crate::{Persistence, Sodg};
 use anyhow::{Context, Result};
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
@@ -32,16 +32,32 @@ impl<const N: usize> Display for Sodg<N> {
 impl<const N: usize> Debug for Sodg<N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         let mut lines = vec![];
-        for (i, v) in self.vertices.iter() {
-            let mut attrs = v
+        for (v, vtx) in self.vertices.iter() {
+            if vtx.branch == 0 {
+                continue;
+            }
+            let mut attrs = vtx
                 .edges
-                .into_iter()
+                .iter()
                 .map(|e| format!("\n\t{} ➞ ν{}", e.0, e.1))
                 .collect::<Vec<String>>();
-            if let Some(d) = v.data.clone() {
-                attrs.push(format!("{d}"));
+            if vtx.persistence != Persistence::Empty {
+                attrs.push(format!("{}", vtx.data));
             }
-            lines.push(format!("ν{i} -> ⟦{}⟧", attrs.join(", ")));
+            lines.push(format!("ν{v} -> ⟦{}⟧", attrs.join(", ")));
+        }
+        for (b, members) in self.branches.iter() {
+            if members.is_empty() {
+                continue;
+            }
+            lines.push(format!(
+                "b{b}: {{{}}}",
+                members
+                    .iter()
+                    .map(|v| format!("ν{v}"))
+                    .collect::<Vec<String>>()
+                    .join(", ")
+            ));
         }
         f.write_str(lines.join("\n").as_str())
     }
@@ -55,7 +71,7 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If the vertex is absent, an error may be returned.
     pub fn v_print(&self, v: usize) -> Result<String> {
-        let vtx = self
+        let vtx = &self
             .vertices
             .get(v)
             .with_context(|| format!("Can't find ν{v}"))?;
@@ -66,26 +82,28 @@ impl<const N: usize> Sodg<N> {
             .collect();
         Ok(format!(
             "ν{v}⟦{}{}⟧",
-            if vtx.data.is_none() { "" } else { "Δ, " },
+            if vtx.persistence == Persistence::Empty {
+                ""
+            } else {
+                "Δ, "
+            },
             list.join(", ")
         ))
     }
 }
 
 #[test]
-fn prints_itself() -> Result<()> {
+fn prints_itself() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
     assert_ne!("", format!("{g:?}"));
-    Ok(())
 }
 
 #[test]
-fn displays_itself() -> Result<()> {
+fn displays_itself() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
     assert_ne!("", format!("{g}"));
-    Ok(())
 }

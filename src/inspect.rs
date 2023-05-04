@@ -82,14 +82,12 @@ use crate::Hex;
 use crate::Label;
 
 #[test]
-fn inspects_simple_object() -> Result<()> {
+fn inspects_simple_object() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.put(0, &Hex::from_str_bytes("hello"));
     g.add(1);
-    let txt = g.inspect(0)?;
+    let txt = g.inspect(0).unwrap();
     g.bind(0, 1, Label::Alpha(0));
-    println!("{txt}");
     assert_ne!(String::new(), txt);
-    Ok(())
 }

@@ -21,7 +21,7 @@ regex = "1.8.1"
 lazy_static = "1.4.0"
 simple_logger = "4.1.0"
 micromap = { version = "0.0.12", features = ["serde"] }
-emap = {version = "0.0.8", features = ["serde"] }
+emap = {version = "0.0.13", features = ["serde"] }
 nohash-hasher = "0.2.0"
 libc = "0.2.142"
 sxd-xpath = "0.4.2"

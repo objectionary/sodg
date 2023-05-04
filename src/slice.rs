@@ -18,9 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Edges, Vertices};
 use crate::{Label, Sodg};
-use anyhow::{anyhow, Context, Result};
+use anyhow::Result;
 use log::trace;
 use std::collections::HashSet;
 
@@ -36,8 +35,8 @@ impl<const N: usize> Sodg<N> {
         let g: Sodg<N> = self.slice_some(v, |_, _, _| true)?;
         trace!(
             "#slice: taken {} vertices out of {} at ν{v}",
-            g.vertices.len(),
-            self.vertices.len()
+            g.len(),
+            self.len()
         );
         Ok(g)
     }
@@ -48,6 +47,10 @@ impl<const N: usize> Sodg<N> {
     /// the kids.
     ///
     /// # Errors
+    ///
+    /// There could be errors too.
+    ///
+    /// # Panics
     ///
     /// If impossible to slice, an error will be returned.
     pub fn slice_some(&self, v: usize, p: impl Fn(usize, usize, Label) -> bool) -> Result<Self> {
@@ -61,11 +64,7 @@ impl<const N: usize> Sodg<N> {
             let before: Vec<usize> = todo.drain().collect();
             for v in before {
                 done.insert(v);
-                let vtx = self
-                    .vertices
-                    .get(v)
-                    .ok_or_else(|| anyhow!("Can't find ν{v}"))?;
-                for e in &vtx.edges {
+                for e in &self.vertices.get(v).unwrap().edges {
                     if done.contains(&e.1) {
                         continue;
                     }
@@ -77,34 +76,24 @@ impl<const N: usize> Sodg<N> {
                 }
             }
         }
-        let mut new_vertices: Vertices<N> = Vertices::with_capacity(self.vertices.capacity());
-        for (v, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
-            let mut nv = vtx.clone();
-            let mut ne = Edges::new();
-            for (k, v) in &nv.edges {
-                if done.contains(&v) {
-                    ne.insert(k, v);
+        let mut ng = Self::empty(self.vertices.capacity());
+        for (v1, vtx) in self.vertices.iter().filter(|(v, _)| done.contains(v)) {
+            if done.contains(&v1) {
+                ng.add(v1);
+            }
+            for (k, v2) in &vtx.edges {
+                if done.contains(&v2) {
+                    ng.add(v2);
+                    ng.bind(v1, v2, k);
                 }
             }
-            nv.edges = ne;
-            new_vertices.insert(v);
-            let vtx = new_vertices.get_mut(v).with_context(|| "Can't find?")?;
-            for e in &nv.edges {
-                vtx.edges.insert(e.0, e.1);
-            }
         }
-        let g = Self {
-            vertices: new_vertices,
-            next_v: self.next_v,
-            alerts: self.alerts.clone(),
-            alerts_active: self.alerts_active,
-        };
         trace!(
             "#slice_some: taken {} vertices out of {} at ν{v}",
-            g.vertices.len(),
-            self.vertices.len()
+            ng.len(),
+            self.len()
         );
-        Ok(g)
+        Ok(ng)
     }
 }
 
@@ -112,41 +101,40 @@ impl<const N: usize> Sodg<N> {
 use std::str::FromStr;
 
 #[test]
-fn makes_a_slice() -> Result<()> {
+fn makes_a_slice() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
+    g.bind(0, 1, Label::from_str("foo").unwrap());
     g.add(2);
-    g.bind(0, 2, Label::from_str("bar")?);
-    assert_eq!(1, g.slice(1)?.vertices.len());
-    assert_eq!(1, g.slice(2)?.vertices.len());
-    Ok(())
+    g.bind(0, 2, Label::from_str("bar").unwrap());
+    assert_eq!(1, g.slice(1).unwrap().len());
+    assert_eq!(1, g.slice(2).unwrap().len());
 }
 
 #[test]
-fn makes_a_partial_slice() -> Result<()> {
+fn makes_a_partial_slice() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
+    g.bind(0, 1, Label::from_str("foo").unwrap());
     g.add(2);
-    g.bind(1, 2, Label::from_str("bar")?);
-    let slice = g.slice_some(1, |_v, _to, _a| false)?;
-    assert_eq!(1, slice.vertices.len());
-    Ok(())
+    g.bind(1, 2, Label::from_str("bar").unwrap());
+    let slice = g.slice_some(1, |_v, _to, _a| false).unwrap();
+    assert_eq!(1, slice.len());
 }
 
 #[test]
-fn skips_some_vertices() -> Result<()> {
+fn skips_some_vertices() {
     let mut g: Sodg<16> = Sodg::empty(256);
     g.add(0);
     g.add(1);
-    g.bind(0, 1, Label::from_str("foo")?);
+    g.bind(0, 1, Label::from_str("foo").unwrap());
     g.add(2);
-    g.bind(0, 2, Label::from_str("+bar")?);
-    let slice = g.slice_some(0, |_, _, a| !a.to_string().starts_with('+'))?;
-    assert_eq!(2, slice.vertices.len());
-    assert_eq!(1, slice.kids(0)?.len());
-    Ok(())
+    g.bind(0, 2, Label::from_str("+bar").unwrap());
+    let slice = g
+        .slice_some(0, |_, _, a| !a.to_string().starts_with('+'))
+        .unwrap();
+    assert_eq!(2, slice.len());
+    assert_eq!(1, slice.kids(0).collect::<Vec<(Label, usize)>>().len());
 }

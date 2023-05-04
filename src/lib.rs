@@ -43,13 +43,10 @@
 #![allow(clippy::multiple_inherent_impl)]
 #![allow(clippy::multiple_crate_versions)]
 
-mod alerts;
 mod clone;
 mod ctors;
 mod debug;
 mod dot;
-mod edges;
-mod gc;
 mod hex;
 mod inspect;
 mod label;
@@ -60,18 +57,12 @@ mod ops;
 mod script;
 mod serialization;
 mod slice;
-mod vertex;
-mod vertices;
 mod xml;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// A function that is called when a problem is found in [`Sodg`].
-///
-/// Instances of this type can be used in [`Sodg::alert_on`] method,
-/// in order to ensure runtime consistency of data inside the graph.
-pub type Alert<const N: usize> = fn(g: &Sodg<N>, vx: Vec<usize>) -> Vec<String>;
+const HEX_SIZE: usize = 8;
 
 /// An object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
@@ -94,7 +85,7 @@ pub type Alert<const N: usize> = fn(g: &Sodg<N>, vx: Vec<usize>) -> Vec<String>;
 #[derive(Serialize, Deserialize, Clone)]
 pub enum Hex {
     Vector(Vec<u8>),
-    Bytes([u8; 24], usize),
+    Bytes([u8; HEX_SIZE], usize),
 }
 
 /// A label on an edge.
@@ -103,34 +94,6 @@ pub enum Label {
     Greek(char),
     Alpha(usize),
     Str([char; 8]),
-}
-
-/// A vertex in the [`Sodg`].
-#[derive(Clone, Serialize, Deserialize)]
-pub(crate) struct Vertex<const N: usize> {
-    /// This is a list of edges departing from this vertex.
-    pub edges: Edges<N>,
-    /// This is the data in the vertex (possibly empty).
-    pub data: Option<Hex>,
-    /// This is `TRUE` if the data has been already taken by the use of [`Sodg::data`].
-    pub taken: bool,
-}
-
-/// Internal structure, map of all vertices.
-#[derive(Serialize, Deserialize, Clone)]
-pub(crate) struct Vertices<const N: usize> {
-    emap: emap::Map<Vertex<N>>,
-}
-
-/// Internal structure, map of all edges.
-#[derive(Serialize, Deserialize, Clone)]
-pub(crate) struct Edges<const N: usize> {
-    map: micromap::Map<Label, usize, N>,
-}
-
-/// Iterator over edges.
-pub(crate) struct EdgesIntoIter<'a, const N: usize> {
-    iter: micromap::IntoIter<'a, Label, usize, N>,
 }
 
 /// A wrapper of a plain text with graph-modifying instructions.
@@ -167,26 +130,38 @@ pub struct Script {
 /// sodg.bind(0, 1, Label::Alpha(0));
 /// sodg.add(2);
 /// sodg.bind(1, 2, Label::Alpha(1));
-/// assert_eq!(1, sodg.kids(0).unwrap().len());
-/// assert_eq!(1, sodg.kids(1).unwrap().len());
+/// assert_eq!(1, sodg.kids(0).count());
+/// assert_eq!(1, sodg.kids(1).count());
 /// ```
 ///
 /// This package is used in [reo](https://github.com/objectionary/reo)
 /// project, as a memory model for objects and dependencies between them.
 #[derive(Serialize, Deserialize)]
 pub struct Sodg<const N: usize> {
-    /// This is a map of vertices with their unique numbers/IDs.
-    vertices: Vertices<N>,
+    stores: emap::Map<usize>,
+    branches: emap::Map<Vec<usize>>,
+    vertices: emap::Map<Vertex<N>>,
     /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.
     #[serde(skip_serializing, skip_deserializing)]
     next_v: usize,
-    /// This is the list of alerts, which is managed by the [`Sodg::alert_on`] function.
-    #[serde(skip_serializing, skip_deserializing)]
-    alerts: Vec<Alert<N>>,
-    /// This is the flag that either enables or disables alerts, through [`Sodg::alerts_on`]
-    /// and [`Sodg::alerts_off`].
-    #[serde(skip_serializing, skip_deserializing)]
-    alerts_active: bool,
+}
+
+#[derive(PartialEq, Serialize, Deserialize, Clone)]
+enum Persistence {
+    Empty,
+    Stored,
+    Taken,
+}
+
+const BRANCH_NONE: usize = 0;
+const BRANCH_STATIC: usize = 1;
+
+#[derive(Serialize, Deserialize, Clone)]
+struct Vertex<const N: usize> {
+    branch: usize,
+    data: Hex,
+    persistence: Persistence,
+    edges: micromap::Map<Label, usize, N>,
 }
 
 #[cfg(test)]
