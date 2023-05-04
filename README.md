@@ -26,16 +26,16 @@ Here is how you can create a di-graph:
 use sodg::Sodg;
 use sodg::Hex;
 let mut g = Sodg::empty(256);
-g.add(0)?; // add a vertex no.0
-g.add(1)?; // add a vertex no.1
-g.bind(0, 1, "foo")?; // connect v0 to v1 with label "foo"
-g.put(1, Hex::from_str_bytes("Hello, world!"))?; // attach data to v1
+g.add(0); // add a vertex no.0
+g.add(1); // add a vertex no.1
+g.bind(0, 1, "foo"); // connect v0 to v1 with label "foo"
+g.put(1, &Hex::from_str_bytes("Hello, world!")); // attach data to v1
 ```
 
 Then, you can find a vertex by the label of an edge departing from another vertex:
 
 ```rust
-let id = g.kid(0, "foo")?;
+let id = g.kid(0, "foo");
 assert_eq!(1, id);
 ```
 
@@ -51,7 +51,7 @@ assert_eq!(1, kids[0].2);
 Then, you can read the data of a vertex:
 
 ```rust
-let hex: Hex = g.data(1)?;
+let hex: Hex = g.data(1);
 let num: i64 = hex.to_i64()?;
 assert_eq!(42, num);
 ```
