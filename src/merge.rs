@@ -92,22 +92,22 @@ impl<const N: usize> Sodg<N> {
             self.put(left, &g.vertices.get(right).unwrap().data);
         }
         for (a, to) in g.kids(right) {
-            let matched = if let Some(t) = self.kid(left, a) {
+            let matched = if let Some(t) = self.kid(left, *a) {
                 t
-            } else if let Some(t) = mapped.get(&to) {
-                self.bind(left, *t, a);
+            } else if let Some(t) = mapped.get(to) {
+                self.bind(left, *t, *a);
                 *t
             } else {
                 let id = self.next_id();
                 self.add(id);
-                self.bind(left, id, a);
+                self.bind(left, id, *a);
                 id
             };
-            self.merge_rec(g, matched, to, mapped)?;
+            self.merge_rec(g, matched, *to, mapped)?;
         }
         for (a, to) in g.kids(right) {
-            if let Some(first) = self.kid(left, a) {
-                if let Some(second) = mapped.get(&to) {
+            if let Some(first) = self.kid(left, *a) {
+                if let Some(second) = mapped.get(to) {
                     if first != *second {
                         self.join(first, *second);
                     }
@@ -121,13 +121,17 @@ impl<const N: usize> Sodg<N> {
         for v in self.keys() {
             let mut nv = self.vertices.get(v).unwrap().clone();
             for e in &self.vertices.get_mut(v).unwrap().edges {
-                if e.1 == right {
-                    nv.edges.insert(e.0, left);
+                if *e.1 == right {
+                    nv.edges.insert(*e.0, left);
                 }
             }
             self.vertices.insert(v, nv);
         }
-        for e in self.kids(right).collect::<Vec<(Label, usize)>>() {
+        let kids = self
+            .kids(right)
+            .map(|(a, v)| (*a, *v))
+            .collect::<Vec<(Label, usize)>>();
+        for e in kids {
             assert!(
                 self.kid(left, e.0).is_none(),
                 "Can't merge ν{right} into ν{left}, due to conflict in '{}'",

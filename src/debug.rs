@@ -77,7 +77,7 @@ impl<const N: usize> Sodg<N> {
             .with_context(|| format!("Can't find ν{v}"))?;
         let list: Vec<String> = vtx
             .edges
-            .into_iter()
+            .iter()
             .map(|e| format!("{}", e.0.clone()))
             .collect();
         Ok(format!(

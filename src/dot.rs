@@ -78,14 +78,14 @@ digraph {
                     format!("/* {} */", vtx.data)
                 },
             ));
-            for e in vtx.edges.into_iter().sorted_by_key(|e| e.0) {
+            for e in vtx.edges.iter().sorted_by_key(|e| e.0) {
                 lines.push(format!(
                     "  v{v} -> v{} [label=\"{}\"{}{}];",
                     e.1,
                     e.0,
                     match e.0 {
                         Label::Greek(g) => {
-                            if g == 'ρ' || g == 'σ' {
+                            if *g == 'ρ' || *g == 'σ' {
                                 ",color=gray,fontcolor=gray"
                             } else {
                                 ""
@@ -97,7 +97,7 @@ digraph {
                     },
                     match e.0 {
                         Label::Greek(g) => {
-                            if g == 'π' {
+                            if *g == 'π' {
                                 ",style=dashed"
                             } else {
                                 ""

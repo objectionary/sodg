@@ -222,7 +222,7 @@ impl<const N: usize> Sodg<N> {
     /// g.bind(0, 42, Label::from_str("k").unwrap());
     /// let (a, to) = g.kids(0).next().unwrap().clone();
     /// assert_eq!("k", a.to_string());
-    /// assert_eq!(42, to);
+    /// assert_eq!(42, *to);
     /// ```
     ///
     /// Just in case, if you need to put all names into a single line:
@@ -246,13 +246,13 @@ impl<const N: usize> Sodg<N> {
     ///
     /// If vertex `v1` is absent, `Err` will be returned.
     #[inline]
-    pub fn kids(&self, v: usize) -> impl Iterator<Item = (Label, usize)> + '_ {
+    pub fn kids(&self, v: usize) -> impl Iterator<Item = (&Label, &usize)> + '_ {
         self.vertices
             .get(v)
             .with_context(|| format!("Can't find ν{v} in kids()"))
             .unwrap()
             .edges
-            .into_iter()
+            .iter()
             .map(|(a, to)| (a, to))
     }
 
@@ -394,7 +394,7 @@ fn finds_all_kids() {
     g.add(1);
     g.bind(0, 1, Label::from_str("one").unwrap());
     g.bind(0, 1, Label::from_str("two").unwrap());
-    assert_eq!(2, g.kids(0).collect::<Vec<(Label, usize)>>().len());
+    assert_eq!(2, g.kids(0).collect::<Vec<(&Label, &usize)>>().len());
     let mut names = vec![];
     for (a, to) in g.kids(0) {
         names.push(format!("{a}/{to}"));
