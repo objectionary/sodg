@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Hex, Persistence, Sodg, Vertex};
+use crate::{Hex, Persistence, Sodg, Vertex, MAX_BRANCHES, MAX_BRANCH_SIZE};
 use emap::Map;
 
 impl<const N: usize> Sodg<N> {
@@ -29,7 +29,6 @@ impl<const N: usize> Sodg<N> {
     /// May panic if vertices provided to alerts are absent (should never happen, though).
     #[must_use]
     pub fn empty(cap: usize) -> Self {
-        const MAX_BRANCHES: usize = 16;
         let mut g = Self {
             vertices: Map::with_capacity_some(
                 cap,
@@ -41,7 +40,7 @@ impl<const N: usize> Sodg<N> {
                 },
             ),
             stores: Map::with_capacity_some(MAX_BRANCHES, 0),
-            branches: Map::with_capacity_some(MAX_BRANCHES, vec![]),
+            branches: Map::with_capacity_some(MAX_BRANCHES, Vec::with_capacity(MAX_BRANCH_SIZE)),
             next_v: 0,
         };
         g.branches.insert(0, vec![0]);

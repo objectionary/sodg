@@ -63,6 +63,8 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 const HEX_SIZE: usize = 8;
+const MAX_BRANCHES: usize = 16;
+const MAX_BRANCH_SIZE: usize = 16;
 
 /// An object-oriented representation of binary data
 /// in hexadecimal format, which can be put into vertices of the graph.
