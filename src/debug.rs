@@ -53,7 +53,7 @@ impl<const N: usize> Debug for Sodg<N> {
             lines.push(format!(
                 "b{b}: {{{}}}",
                 members
-                    .iter()
+                    .into_iter()
                     .map(|v| format!("ν{v}"))
                     .collect::<Vec<String>>()
                     .join(", ")

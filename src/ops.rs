@@ -180,8 +180,8 @@ impl<const N: usize> Sodg<N> {
                 *s -= 1;
                 if *s == 0 {
                     let members = self.branches.get_mut(branch).unwrap();
-                    for v in members.iter() {
-                        self.vertices.get_mut(*v).unwrap().branch = BRANCH_NONE;
+                    for v in members.into_iter() {
+                        self.vertices.get_mut(v).unwrap().branch = BRANCH_NONE;
                     }
                     #[cfg(debug_assertions)]
                     trace!(
@@ -189,7 +189,7 @@ impl<const N: usize> Sodg<N> {
                         branch,
                         members.len(),
                         members
-                            .iter()
+                            .into_iter()
                             .map(|v| format!("ν{v}"))
                             .collect::<Vec<String>>()
                             .join(", ")

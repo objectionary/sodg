@@ -58,11 +58,9 @@ mod script;
 mod serialization;
 mod slice;
 mod xml;
-mod pile;
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::mem::MaybeUninit;
 
 const HEX_SIZE: usize = 8;
 const MAX_BRANCHES: usize = 16;
@@ -143,7 +141,7 @@ pub struct Script {
 #[derive(Serialize, Deserialize)]
 pub struct Sodg<const N: usize> {
     stores: emap::Map<usize>,
-    branches: emap::Map<Pile<usize, MAX_BRANCH_SIZE>>,
+    branches: emap::Map<microstack::Stack<usize, MAX_BRANCH_SIZE>>,
     vertices: emap::Map<Vertex<N>>,
     /// This is the next ID of a vertex to be returned by the [`Sodg::next_v`] function.
     #[serde(skip_serializing, skip_deserializing)]
@@ -166,13 +164,6 @@ struct Vertex<const N: usize> {
     data: Hex,
     persistence: Persistence,
     edges: micromap::Map<Label, usize, N>,
-}
-
-struct Pile<V: Clone, const N: usize> {
-    /// The tail of the array, where next insert should go to.
-    next: usize,
-    /// The fixed-size array of values.
-    items: [MaybeUninit<V>; N],
 }
 
 #[cfg(test)]

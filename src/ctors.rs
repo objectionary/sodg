@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-use crate::{Hex, Persistence, Sodg, Vertex, MAX_BRANCHES, Pile};
+use crate::{Hex, Persistence, Sodg, Vertex, MAX_BRANCHES};
 use emap::Map;
 
 impl<const N: usize> Sodg<N> {
@@ -40,11 +40,13 @@ impl<const N: usize> Sodg<N> {
                 },
             ),
             stores: Map::with_capacity_some(MAX_BRANCHES, 0),
-            branches: Map::with_capacity_some(MAX_BRANCHES, Pile::new()),
+            branches: Map::with_capacity_some(MAX_BRANCHES, microstack::Stack::new()),
             next_v: 0,
         };
-        g.branches.insert(0, Pile::from_vec([0].to_vec()));
-        g.branches.insert(1, Pile::from_vec([0].to_vec()));
+        g.branches
+            .insert(0, microstack::Stack::from_vec([0].to_vec()));
+        g.branches
+            .insert(1, microstack::Stack::from_vec([0].to_vec()));
         g
     }
 }

@@ -374,6 +374,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "microstack"
+version = "0.0.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "94dbf9c7c8430f26609597b36ee0c3c35c113c9e15cc85dc368663c086381d7c"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "nohash-hasher"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -610,6 +619,7 @@ dependencies = [
  "libc",
  "log",
  "micromap",
+ "microstack",
  "nohash-hasher",
  "predicates",
  "regex",
