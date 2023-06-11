@@ -16,7 +16,7 @@ gc = []
 [dependencies]
 tinymap = "0.4.0"
 anyhow = "1.0.71"
-log = "0.4.18"
+log = "0.4.19"
 regex = "1.8.4"
 lazy_static = "1.4.0"
 simple_logger = "4.1.0"
