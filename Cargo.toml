@@ -19,7 +19,7 @@ anyhow = "1.0.71"
 log = "0.4.19"
 regex = "1.8.4"
 lazy_static = "1.4.0"
-simple_logger = "4.1.0"
+simple_logger = "4.2.0"
 micromap = { version = "0.0.13", features = ["serde"] }
 microstack = { version = "0.0.4", features = ["serde"] }
 emap = {version = "0.0.13", features = ["serde"] }
