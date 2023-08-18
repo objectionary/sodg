@@ -38,5 +38,5 @@ rustc-hash = "1.1.0"
 
 [dev-dependencies]
 fsutils = "0.1.7"
-tempfile = "3.7.1"
+tempfile = "3.8.0"
 predicates = "3.0.3"
