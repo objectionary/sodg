@@ -24,7 +24,7 @@ micromap = { version = "0.0.13", features = ["serde"] }
 microstack = { version = "0.0.4", features = ["serde"] }
 emap = {version = "0.0.13", features = ["serde"] }
 nohash-hasher = "0.2.0"
-libc = "0.2.142"
+libc = "0.2.154"
 sxd-xpath = "0.4.2"
 sxd-document = "0.3.2"
 xml-builder = "0.5.2"
