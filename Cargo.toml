@@ -20,7 +20,7 @@ log = "0.4.20"
 regex = "1.9.3"
 lazy_static = "1.4.0"
 simple_logger = "4.2.0"
-micromap = { version = "0.0.13", features = ["serde"] }
+micromap = { version = "0.0.15", features = ["serde"] }
 microstack = { version = "0.0.4", features = ["serde"] }
 emap = {version = "0.0.13", features = ["serde"] }
 nohash-hasher = "0.2.0"
