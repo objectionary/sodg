@@ -67,12 +67,12 @@ Using `merge()`, you can merge two graphs together, provided they are trees.
 
 Using `save()` and `load()`, you can serialize and deserialize the graph.
 
-Using `to_xml()` and `to_dot()`, you can print it to 
-[XML](https://en.wikipedia.org/wiki/XML) and 
+Using `to_xml()` and `to_dot()`, you can print it to
+[XML](https://en.wikipedia.org/wiki/XML) and
 [DOT](https://graphviz.org/doc/info/lang.html).
 
-Using `slice()` and `slice_some()`, you can take a part/slice 
-of the graph (mostly for debugging purposes). 
+Using `slice()` and `slice_some()`, you can take a part/slice
+of the graph (mostly for debugging purposes).
 
 Read [the documentation](https://docs.rs/sodg/latest/sodg/).
 
@@ -88,5 +88,5 @@ If everything goes well, fork repository, make changes, send us a
 [pull request](https://www.yegor256.com/2014/04/15/github-guidelines.html).
 We will review your changes and apply them to the `master` branch shortly,
 provided they don't violate our quality standards. To avoid frustration,
-before sending us your pull request please run `cargo test` again. Also, 
+before sending us your pull request please run `cargo test` again. Also,
 run `cargo fmt` and `cargo clippy`.
