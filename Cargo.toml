@@ -51,7 +51,7 @@ nohash-hasher = "0.2.0"
 openssl = { version = "0.10.59", features = ["vendored"] }
 regex = "1.9.3"
 rstest = "0.23.0"
-rustc-hash = "1.1.0"
+rustc-hash = "2.0.0"
 serde = { version = "1.0.162", features = ["derive"] }
 simple_logger = "4.2.0"
 sxd-document = "0.3.2"
