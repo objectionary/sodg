@@ -33,7 +33,6 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - run: sudo apt-get update && sudo apt install -y openssl
       - uses: actions-rs/toolchain@v1.0.6
         with:
           toolchain: stable
