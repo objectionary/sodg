@@ -1,4 +1,4 @@
-<img alt="logo" src="https://www.objectionary.com/cactus.svg" height="100px" />
+# Surging Object Di-Graph, in Rust
 
 [![EO principles respected here](https://www.elegantobjects.org/badge.svg)](https://www.elegantobjects.org)
 [![We recommend IntelliJ IDEA](https://www.elegantobjects.org/intellij-idea.svg)](https://www.jetbrains.com/idea/)
@@ -17,8 +17,8 @@ This Rust library implements a Surging Object DiGraph (SODG) for
 [EO](https://www.eolang.org) programs. The graph is "surging" because
 it automatically behind the scene deletes vertices and edges from itself,
 which is also known as "garbage collection" mechanism. A vertex gets deleted
-right after the data it contains is read _and_ no other vertices transitively point
-to it.
+right after the data it contains is read _and_ no other vertices
+transitively point to it.
 
 Here is how you can create a di-graph:
 
@@ -32,7 +32,8 @@ g.bind(0, 1, "foo"); // connect v0 to v1 with label "foo"
 g.put(1, &Hex::from_str_bytes("Hello, world!")); // attach data to v1
 ```
 
-Then, you can find a vertex by the label of an edge departing from another vertex:
+Then, you can find a vertex by the label of an edge departing
+from another vertex:
 
 ```rust
 let id = g.kid(0, "foo");
@@ -80,10 +81,11 @@ Read [the documentation](https://docs.rs/sodg/latest/sodg/).
 First, install [Rust](https://www.rust-lang.org/tools/install) and then:
 
 ```bash
-$ cargo test -vv
+cargo test -vv
 ```
 
-If everything goes well, fork repository, make changes, send us a [pull request](https://www.yegor256.com/2014/04/15/github-guidelines.html).
+If everything goes well, fork repository, make changes, send us a
+[pull request](https://www.yegor256.com/2014/04/15/github-guidelines.html).
 We will review your changes and apply them to the `master` branch shortly,
 provided they don't violate our quality standards. To avoid frustration,
 before sending us your pull request please run `cargo test` again. Also, 
