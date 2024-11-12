@@ -253,7 +253,6 @@ impl<const N: usize> Sodg<N> {
             .unwrap()
             .edges
             .iter()
-            .map(|(a, to)| (a, to))
     }
 
     /// Find a kid of a vertex, by its edge name, and return the ID of the vertex found.
@@ -277,7 +276,7 @@ impl<const N: usize> Sodg<N> {
     #[must_use]
     #[inline]
     pub fn kid(&self, v: usize, a: Label) -> Option<usize> {
-        for e in self.vertices.get(v).unwrap().edges.iter() {
+        for e in &self.vertices.get(v).unwrap().edges {
             if *e.0 == a {
                 return Some(*e.1);
             }

@@ -19,7 +19,7 @@
 // SOFTWARE.
 
 //! This is a memory structure with vertices and edges between them,
-//! which we call Surging Object DiGraph (SODG), because it expects
+//! which we call Surging Object `DiGraph` (SODG), because it expects
 //! modifications comping from a user (through [`Sodg::add`],
 //! [`Sodg::bind`], and [`Sodg::put`]) and then decides itself when
 //! it's time to delete some vertices (something similar to

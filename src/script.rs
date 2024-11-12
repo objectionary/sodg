@@ -111,18 +111,18 @@ impl Script {
             .collect();
         match &cap[1] {
             "ADD" => {
-                let v = self.parse(args.get(0).with_context(|| "V is expected")?, g)?;
+                let v = self.parse(args.first().with_context(|| "V is expected")?, g)?;
                 g.add(v);
             }
             "BIND" => {
-                let v1 = self.parse(args.get(0).with_context(|| "V1 is expected")?, g)?;
+                let v1 = self.parse(args.first().with_context(|| "V1 is expected")?, g)?;
                 let v2 = self.parse(args.get(1).with_context(|| "V2 is expected")?, g)?;
                 let a =
                     Label::from_str(args.get(2).with_context(|| "Label is expected")?.as_str())?;
                 g.bind(v1, v2, a);
             }
             "PUT" => {
-                let v = self.parse(args.get(0).with_context(|| "V is expected")?, g)?;
+                let v = self.parse(args.first().with_context(|| "V is expected")?, g)?;
                 let d = Self::parse_data(args.get(1).with_context(|| "Data is expected")?)?;
                 g.put(v, &d);
             }
