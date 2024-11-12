@@ -8,7 +8,6 @@
 [![PDD status](http://www.0pdd.com/svg?name=objectionary/sodg)](http://www.0pdd.com/p?name=objectionary/sodg)
 [![codecov](https://codecov.io/gh/objectionary/sodg/branch/master/graph/badge.svg)](https://codecov.io/gh/objectionary/sodg)
 [![Hits-of-Code](https://hitsofcode.com/github/objectionary/sodg)](https://hitsofcode.com/view/github/objectionary/sodg)
-![Lines of code](https://img.shields.io/tokei/lines/github/objectionary/sodg)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/objectionary/sodg/blob/master/LICENSE.txt)
 [![docs.rs](https://img.shields.io/docsrs/sodg)](https://docs.rs/sodg/latest/sodg/)
 
