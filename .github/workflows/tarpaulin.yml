@@ -30,7 +30,7 @@ name: tarpaulin
       - master
 jobs:
   check:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rs/toolchain@v1.0.7
@@ -41,6 +41,6 @@ jobs:
         with:
           version: '0.22.0'
           args: '--all-features --exclude-files src/lib.rs -- --test-threads 1'
-      - uses: codecov/codecov-action@v5-beta
+      - uses: codecov/codecov-action@v5
         with:
           fail_ci_if_error: true
