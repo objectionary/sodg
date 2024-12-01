@@ -37,11 +37,6 @@ jobs:
         with:
           toolchain: stable
           override: true
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb
-          sudo dpkg -i libssl1.1_1.1.1f-1ubuntu2.16_amd64.deb || sudo apt -f install -y
       - uses: actions-rs/tarpaulin@v0.1
         with:
           version: '0.22.0'
