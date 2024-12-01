@@ -136,5 +136,5 @@ fn skips_some_vertices() {
         .slice_some(0, |_, _, a| !a.to_string().starts_with('+'))
         .unwrap();
     assert_eq!(2, slice.len());
-    assert_eq!(1, slice.kids(0).collect::<Vec<(&Label, &usize)>>().len());
+    assert_eq!(1, slice.kids(0).count());
 }

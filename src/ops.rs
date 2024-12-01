@@ -393,7 +393,7 @@ fn finds_all_kids() {
     g.add(1);
     g.bind(0, 1, Label::from_str("one").unwrap());
     g.bind(0, 1, Label::from_str("two").unwrap());
-    assert_eq!(2, g.kids(0).collect::<Vec<(&Label, &usize)>>().len());
+    assert_eq!(2, g.kids(0).count());
     let mut names = vec![];
     for (a, to) in g.kids(0) {
         names.push(format!("{a}/{to}"));
@@ -410,7 +410,7 @@ fn builds_list_of_kids() {
     g.bind(0, 1, Label::from_str("one").unwrap());
     g.bind(0, 1, Label::from_str("two").unwrap());
     g.bind(0, 1, Label::from_str("three").unwrap());
-    let mut names: Vec<String> = g.kids(0).into_iter().map(|(a, _)| format!("{a}")).collect();
+    let mut names: Vec<String> = g.kids(0).map(|(a, _)| format!("{a}")).collect();
     names.sort();
     assert_eq!("one,three,two", names.join(","));
 }
