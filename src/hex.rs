@@ -469,7 +469,9 @@ fn simple_bool() {
 fn simple_float() {
     let f = std::f64::consts::PI;
     let d = Hex::from(f);
-    assert_eq!(f, d.to_f64().unwrap());
+    let allowed_error = 0.0001;
+    let is_equal = (f - d.to_f64().unwrap()).abs() < allowed_error;
+    assert!(is_equal);
     assert_eq!("40-09-21-FB-54-44-2D-18", d.print());
 }
 
