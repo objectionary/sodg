@@ -31,6 +31,7 @@ name: markdown-lint
     paths-ignore: [ 'paper/**', 'sandbox/**' ]
 jobs:
   markdown-lint:
+    timeout-minutes: 15
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
