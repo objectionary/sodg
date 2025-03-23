@@ -363,6 +363,51 @@ impl From<i64> for Hex {
     }
 }
 
+impl From<i32> for Hex {
+    /// Make a new `Hex` from `i32`.
+    ///
+    /// For example:
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from(65536_i32);
+    /// assert_eq!("00-01-00-00", d.print());
+    /// ```
+    fn from(d: i32) -> Self {
+        Self::from_slice(&d.to_be_bytes())
+    }
+}
+
+impl From<i16> for Hex {
+    /// Make a new `Hex` from `i16`.
+    ///
+    /// For example:
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from(256_i16);
+    /// assert_eq!("01-00", d.print());
+    /// ```
+    fn from(d: i16) -> Self {
+        Self::from_slice(&d.to_be_bytes())
+    }
+}
+
+impl From<i8> for Hex {
+    /// Make a new `Hex` from `i8`.
+    ///
+    /// For example:
+    ///
+    /// ```
+    /// use sodg::Hex;
+    /// let d = Hex::from(42_i8);
+    /// assert_eq!("2A", d.print());
+    /// ```
+    fn from(d: i8) -> Self {
+        Self::from_slice(&d.to_be_bytes())
+    }
+}
+
 impl From<f64> for Hex {
     /// Make a new `Hex` from `f64`.
     ///
@@ -375,6 +420,22 @@ impl From<f64> for Hex {
     /// assert_eq!("40-09-21-FB-54-44-2D-18", d.print());
     /// ```
     fn from(d: f64) -> Self {
+        Self::from_slice(&d.to_be_bytes())
+    }
+}
+
+impl From<f32> for Hex {
+    /// Make a new `Hex` from `f32`.
+    ///
+    /// For example:
+    ///
+    /// ```
+    /// use std::f32::consts::PI;
+    /// use sodg::Hex;
+    /// let d = Hex::from(PI);
+    /// assert_eq!("40-49-0F-DB", d.print());
+    /// ```
+    fn from(d: f32) -> Self {
         Self::from_slice(&d.to_be_bytes())
     }
 }
@@ -438,6 +499,34 @@ fn simple_int() {
     let d = Hex::from(i);
     assert_eq!(i, d.to_i64().unwrap());
     assert_eq!("00-00-00-00-00-00-00-2A", d.print());
+}
+
+#[test]
+fn simple_i32() {
+    let i = 42_i32;
+    let d = Hex::from(i);
+    assert_eq!("00-00-00-2A", d.print());
+}
+
+#[test]
+fn simple_i16() {
+    let i = 42_i16;
+    let d = Hex::from(i);
+    assert_eq!("00-2A", d.print());
+}
+
+#[test]
+fn simple_i8() {
+    let i = 42_i8;
+    let d = Hex::from(i);
+    assert_eq!("2A", d.print());
+}
+
+#[test]
+fn simple_f32() {
+    let f = std::f32::consts::PI;
+    let d = Hex::from(f);
+    assert_eq!("40-49-0F-DB", d.print());
 }
 
 #[test]
