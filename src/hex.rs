@@ -52,7 +52,7 @@ impl Hex {
     ///
     /// ```
     /// use sodg::Hex;
-    /// let d = Hex::from(2);
+    /// let d = Hex::from(2_i64);
     /// assert_eq!(8, d.len())
     /// ```
     #[must_use]
@@ -77,7 +77,7 @@ impl Hex {
     ///
     /// ```
     /// use sodg::Hex;
-    /// let d = Hex::from(42);
+    /// let d = Hex::from(42_i64);
     /// assert_eq!(8, d.len());
     /// ```
     #[must_use]
@@ -355,7 +355,7 @@ impl From<i64> for Hex {
     ///
     /// ```
     /// use sodg::Hex;
-    /// let d = Hex::from(65536);
+    /// let d = Hex::from(65536_i64);
     /// assert_eq!("00-00-00-00-00-01-00-00", d.print());
     /// ```
     fn from(d: i64) -> Self {

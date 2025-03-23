@@ -271,7 +271,7 @@ fn merges_data() {
     g.add(1);
     let mut extra = Sodg::empty(256);
     extra.add(1);
-    extra.put(1, &Hex::from(42));
+    extra.put(1, &Hex::from(42_i64));
     g.merge(&extra, 1, 1).unwrap();
     assert_eq!(42, g.data(1).unwrap().to_i64().unwrap());
 }
