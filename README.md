@@ -5,7 +5,7 @@
 
 [![cargo](https://github.com/objectionary/sodg/actions/workflows/cargo.yml/badge.svg)](https://github.com/objectionary/sodg/actions/workflows/cargo.yml)
 [![crates.io](https://img.shields.io/crates/v/sodg.svg)](https://crates.io/crates/sodg)
-[![PDD status](http://www.0pdd.com/svg?name=objectionary/sodg)](http://www.0pdd.com/p?name=objectionary/sodg)
+[![PDD status](https://www.0pdd.com/svg?name=objectionary/sodg)](https://www.0pdd.com/p?name=objectionary/sodg)
 [![codecov](https://codecov.io/gh/objectionary/sodg/branch/master/graph/badge.svg)](https://codecov.io/gh/objectionary/sodg)
 [![Hits-of-Code](https://hitsofcode.com/github/objectionary/sodg)](https://hitsofcode.com/view/github/objectionary/sodg)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/objectionary/sodg/blob/master/LICENSE.txt)
