@@ -21,6 +21,10 @@
 use crate::{Hex, HEX_SIZE};
 use anyhow::{Context, Result};
 use std::fmt::{Debug, Display, Formatter};
+use std::ops::{
+    Index, IndexMut, Range, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
+};
+
 use std::str::FromStr;
 
 impl Debug for Hex {
@@ -40,6 +44,137 @@ impl Eq for Hex {}
 impl Display for Hex {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_str(self.print().as_str())
+    }
+}
+
+impl Index<usize> for Hex {
+    type Output = u8;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        match self {
+            Self::Vector(v) => &v[index],
+            Self::Bytes(a, len) => {
+                if index < *len {
+                    &a[index]
+                } else {
+                    panic!("Index {index} out of bounds (len = {len})")
+                }
+            }
+        }
+    }
+}
+
+impl IndexMut<usize> for Hex {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        match self {
+            Self::Vector(v) => &mut v[index],
+            Self::Bytes(a, len) => {
+                if index < *len {
+                    &mut a[index]
+                } else {
+                    panic!("Index {index} out of bounds (len = {len})")
+                }
+            }
+        }
+    }
+}
+
+impl Index<Range<usize>> for Hex {
+    type Output = [u8];
+
+    fn index(&self, index: Range<usize>) -> &Self::Output {
+        match self {
+            Self::Vector(v) => &v[index],
+            Self::Bytes(a, len) => {
+                if index.end <= *len {
+                    &a[index]
+                } else {
+                    panic!("Range {index:?} out of bounds (len = {len})")
+                }
+            }
+        }
+    }
+}
+
+impl Index<RangeFrom<usize>> for Hex {
+    type Output = [u8];
+
+    fn index(&self, index: RangeFrom<usize>) -> &Self::Output {
+        match self {
+            Self::Vector(v) => &v[index],
+            Self::Bytes(a, len) => {
+                if index.start <= *len {
+                    &a[index.start..*len]
+                } else {
+                    panic!("RangeFrom {:?} out of bounds (len = {})", index, *len)
+                }
+            }
+        }
+    }
+}
+
+impl Index<RangeFull> for Hex {
+    type Output = [u8];
+
+    fn index(&self, index: RangeFull) -> &Self::Output {
+        match self {
+            Self::Vector(v) => &v[index],
+            Self::Bytes(a, len) => &a[0..*len],
+        }
+    }
+}
+
+impl Index<RangeInclusive<usize>> for Hex {
+    type Output = [u8];
+
+    fn index(&self, index: RangeInclusive<usize>) -> &Self::Output {
+        match self {
+            Self::Vector(v) => &v[index],
+            Self::Bytes(a, len) => {
+                if *index.end() < *len {
+                    &a[index]
+                } else {
+                    panic!("RangeInclusive {index:?} out of bounds (len = {})", *len)
+                }
+            }
+        }
+    }
+}
+
+impl Index<RangeTo<usize>> for Hex {
+    type Output = [u8];
+
+    fn index(&self, index: RangeTo<usize>) -> &Self::Output {
+        match self {
+            Self::Vector(v) => &v[index],
+            Self::Bytes(a, len) => {
+                if index.end <= *len {
+                    &a[index]
+                } else {
+                    panic!("RangeTo {:?} out of bounds (len = {})", index, *len)
+                }
+            }
+        }
+    }
+}
+
+impl Index<RangeToInclusive<usize>> for Hex {
+    type Output = [u8];
+
+    fn index(&self, index: RangeToInclusive<usize>) -> &Self::Output {
+        match self {
+            Self::Vector(v) => &v[index],
+            Self::Bytes(a, len) => {
+                if index.end < *len {
+                    &a[index]
+                } else {
+                    panic!(
+                        "RangeToInclusive {:?} out of bounds (len = {})",
+                        index, *len
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -620,4 +755,166 @@ fn concatenates_from_hex_str() {
     let c = Hex::from_str_bytes("Пока!");
     let res = a.concat(&b).concat(&c);
     assert_eq!(24, res.len());
+}
+
+#[test]
+fn test_index_vec() {
+    // vector
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+    let a = Hex::from_vec(base);
+    assert_eq!(a[1], 0xD8);
+    // array
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
+    let a = Hex::from_vec(base);
+    assert_eq!(a[1], 0xD8);
+}
+
+#[test]
+#[should_panic(expected = "Index 6 out of bounds (len = 3)")]
+fn test_index_out_of_range() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
+    let a = Hex::from_vec(base);
+    assert_eq!(a[6], 0xAB);
+}
+
+#[test]
+fn test_index_vec_mut() {
+    // vector
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+    let mut a = Hex::from_vec(base);
+    a[0] = 0xD8;
+    assert_eq!(a[0], 0xD8);
+    // array
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
+    let mut a = Hex::from_vec(base);
+    a[0] = 0xD8;
+    assert_eq!(a[0], 0xD8);
+}
+
+#[test]
+#[should_panic(expected = "Index 6 out of bounds (len = 3)")]
+fn test_index_out_of_range_mut() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
+    let mut a = Hex::from_vec(base);
+    a[6] = 0xAB;
+}
+
+#[test]
+fn test_range() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+    let a = Hex::from_vec(base);
+    let b = &a[0..4];
+    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8], b);
+
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let b = &a[0..2];
+    assert_eq!(&[0xAB, 0xD8], b);
+}
+
+#[test]
+#[should_panic(expected = "Range 0..10 out of bounds (len = 4)")]
+fn test_range_panic() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let _ = &a[0..10];
+}
+
+#[test]
+fn test_range_from() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+    let a = Hex::from_vec(base);
+    let b = &a[2..];
+    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB], b);
+
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let b = &a[2..];
+    assert_eq!(&[0xAB, 0xD8], b);
+    let b = &a[4..];
+    assert!(b.is_empty());
+}
+
+#[test]
+#[should_panic(expected = "RangeFrom 5.. out of bounds (len = 4)")]
+fn test_range_from_panic() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let _ = &a[5..];
+}
+
+#[test]
+fn test_range_full() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+    let a = Hex::from_vec(base);
+    let b = &a[..];
+    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB], b);
+
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let b = &a[..];
+    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8], b);
+}
+
+#[test]
+fn test_range_inclusive() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+    let a = Hex::from_vec(base);
+    let b = &a[1..=4];
+    assert_eq!(&[0xD8, 0xAB, 0xD8, 0xAB], b);
+
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let b = &a[1..=3];
+    assert_eq!(&[0xD8, 0xAB, 0xD8], b);
+}
+
+#[test]
+#[should_panic(expected = "RangeInclusive 2..=4 out of bounds (len = 4)")]
+fn test_range_inclusive_panic() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let _ = &a[2..=4];
+}
+
+#[test]
+fn test_range_to() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+    let a = Hex::from_vec(base);
+    let b = &a[..4];
+    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8], b);
+
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let b = &a[..2];
+    assert_eq!(&[0xAB, 0xD8], b);
+}
+
+#[test]
+#[should_panic(expected = "RangeTo ..7 out of bounds (len = 4)")]
+fn test_range_to_panic() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let _ = &a[..7];
+}
+
+#[test]
+fn test_range_to_inclusive() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+    let a = Hex::from_vec(base);
+    let b = &a[..=4];
+    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8, 0xAB], b);
+
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let b = &a[..=2];
+    assert_eq!(&[0xAB, 0xD8, 0xAB], b);
+}
+
+#[test]
+#[should_panic(expected = "RangeToInclusive ..=7 out of bounds (len = 4)")]
+fn test_range_to_inclusive_panic() {
+    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+    let a = Hex::from_vec(base);
+    let _ = &a[..=7];
 }
