@@ -1,4 +1,6 @@
-.idea/
-target/
 *.relf
 *.svg
+.DS_Store
+.idea/
+node_modules/
+target/
