@@ -20,6 +20,10 @@ jobs:
         with:
           toolchain: stable
           override: true
+      - name: Install libssl1.1 (Ubuntu 24.04 fix)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl1.1
       - uses: actions-rs/tarpaulin@v0.1
         with:
           version: '0.22.0'
