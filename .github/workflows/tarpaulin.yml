@@ -20,10 +20,14 @@ jobs:
         with:
           toolchain: stable
           override: true
-      - uses: actions-rs/tarpaulin@v0.1
-        with:
-          version: 'latest'
-          args: '--all-features --exclude-files src/lib.rs -- --test-threads 1'
+      - name: Install and build tarpaulin with OpenSSL 3
+        run: |
+          cargo install cargo-tarpaulin --version 0.26.0 --force
+      - name: Run tarpaulin
+        run: |
+          cargo tarpaulin --out Xml --all-features --exclude-files src/lib.rs -- --test-threads 1
+      - name: Install OpenSSL 3
+        run: sudo apt-get install -y libssl3
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
