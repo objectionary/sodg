@@ -61,9 +61,7 @@ impl Script {
 
     /// Get all commands.
     fn commands(&self) -> Vec<String> {
-        static STRIP_COMMENTS: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("#.*\n").unwrap()
-        });
+        static STRIP_COMMENTS: Lazy<Regex> = Lazy::new(|| Regex::new("#.*\n").unwrap());
         let text = self.txt.as_str();
         let clean: &str = &STRIP_COMMENTS.replace_all(text, "");
         clean
@@ -80,9 +78,7 @@ impl Script {
     ///
     /// If impossible to deploy, an error will be returned.
     fn deploy_one<const N: usize>(&mut self, cmd: &str, g: &mut Sodg<N>) -> Result<()> {
-        static LINE: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap()
-        });
+        static LINE: Lazy<Regex> = Lazy::new(|| Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap());
         let cap = LINE
             .captures(cmd)
             .with_context(|| format!("Can't parse '{cmd}'"))?;
@@ -122,12 +118,9 @@ impl Script {
     ///
     /// If impossible to parse, an error will be returned.
     fn parse_data(s: &str) -> Result<Hex> {
-        static DATA_STRIP: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("[ \t\n\r\\-]").unwrap()
-        });
-        static DATA: Lazy<Regex> = Lazy::new(|| {
-            Regex::new("^[0-9A-Fa-f]{2}([0-9A-Fa-f]{2})*$").unwrap()
-        });        
+        static DATA_STRIP: Lazy<Regex> = Lazy::new(|| Regex::new("[ \t\n\r\\-]").unwrap());
+        static DATA: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^[0-9A-Fa-f]{2}([0-9A-Fa-f]{2})*$").unwrap());
         let d: &str = &DATA_STRIP.replace_all(s, "");
         if DATA.is_match(d) {
             let bytes: Vec<u8> = (0..d.len())
