@@ -20,11 +20,14 @@ jobs:
         with:
           toolchain: stable
           override: true
-      - uses: actions-rs/tarpaulin@v0.1
-        with:
-          version: '0.22.0'
-          args: '--all-features --exclude-files src/lib.rs -- --test-threads 1'
+      - name: Install and build tarpaulin with OpenSSL 3
+        run: |
+          cargo install cargo-tarpaulin --version 0.26.0 --force
+      - name: Run tarpaulin
+        run: |
+          cargo tarpaulin --out Xml --all-features --exclude-files src/lib.rs -- --test-threads 1
       - uses: codecov/codecov-action@v5
+        if: github.repository == 'objectionary/sodg'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
