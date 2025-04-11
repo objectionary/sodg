@@ -57,14 +57,14 @@ const MAX_BRANCH_SIZE: usize = 16;
 /// ```
 /// use sodg::Hex;
 /// let d = Hex::from(65534);
-/// assert_eq!("00-00-00-00-00-00-FF-FE", d.print());
+/// assert_eq!("00-00-FF-FE", d.print());
 /// ```
 ///
 /// Then, you can turn it back to Rust primitives:
 ///
 /// ```
 /// use sodg::Hex;
-/// let d = Hex::from(65534);
+/// let d = Hex::from(65534_i64);
 /// assert_eq!(65534, d.to_i64().unwrap());
 /// ```
 #[derive(Serialize, Deserialize, Clone)]
