@@ -20,7 +20,7 @@ gc = []
 
 [dependencies]
 anyhow = "1.0.75"
-bincode = "1.3.3"
+bincode = "2.0.0"
 ctor = "0.4.0"
 emap = {version = "0.0.13", features = ["serde"] }
 hex = "0.4.3"
