@@ -4,11 +4,11 @@
 use crate::{Hex, Script};
 use crate::{Label, Sodg};
 use anyhow::{anyhow, Context, Result};
-use lazy_static::lazy_static;
 use log::trace;
 use regex::Regex;
 use std::collections::HashMap;
 use std::str::FromStr;
+use std::sync::LazyLock as Lazy;
 
 impl Script {
     /// Make a new one, parsing a string with instructions.
@@ -61,9 +61,7 @@ impl Script {
 
     /// Get all commands.
     fn commands(&self) -> Vec<String> {
-        lazy_static! {
-            static ref STRIP_COMMENTS: Regex = Regex::new("#.*\n").unwrap();
-        }
+        static STRIP_COMMENTS: Lazy<Regex> = Lazy::new(|| Regex::new("#.*\n").unwrap());
         let text = self.txt.as_str();
         let clean: &str = &STRIP_COMMENTS.replace_all(text, "");
         clean
@@ -80,9 +78,7 @@ impl Script {
     ///
     /// If impossible to deploy, an error will be returned.
     fn deploy_one<const N: usize>(&mut self, cmd: &str, g: &mut Sodg<N>) -> Result<()> {
-        lazy_static! {
-            static ref LINE: Regex = Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap();
-        }
+        static LINE: Lazy<Regex> = Lazy::new(|| Regex::new("^([A-Z]+) *\\(([^)]*)\\)$").unwrap());
         let cap = LINE
             .captures(cmd)
             .with_context(|| format!("Can't parse '{cmd}'"))?;
@@ -122,10 +118,9 @@ impl Script {
     ///
     /// If impossible to parse, an error will be returned.
     fn parse_data(s: &str) -> Result<Hex> {
-        lazy_static! {
-            static ref DATA_STRIP: Regex = Regex::new("[ \t\n\r\\-]").unwrap();
-            static ref DATA: Regex = Regex::new("^[0-9A-Fa-f]{2}([0-9A-Fa-f]{2})*$").unwrap();
-        }
+        static DATA_STRIP: Lazy<Regex> = Lazy::new(|| Regex::new("[ \t\n\r\\-]").unwrap());
+        static DATA: Lazy<Regex> =
+            Lazy::new(|| Regex::new("^[0-9A-Fa-f]{2}([0-9A-Fa-f]{2})*$").unwrap());
         let d: &str = &DATA_STRIP.replace_all(s, "");
         if DATA.is_match(d) {
             let bytes: Vec<u8> = (0..d.len())
