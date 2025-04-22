@@ -1,5 +1,4 @@
-// SPDX-FileCopyrightText: Copyright (c) 2023-2025 Yegor Bugayenko
-// SPDX-FileCopyrightText: Copyright (c) 2025 owtotwo
+// SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
 /// Benchmark Usage:
