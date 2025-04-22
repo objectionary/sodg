@@ -16,7 +16,7 @@ use sodg::{Hex, Label, Sodg};
 fn setup_graph(n: usize) -> Sodg<16> {
     let mut graph = Sodg::<16>::empty(n);
     for i in 0..n {
-        graph.add(i); // Добавляем вершины
+        graph.add(i);
     }
     graph
 }
