@@ -8,7 +8,7 @@
 /// command `cargo bench` will run all benchmarks in the project.)
 ///
 /// If you want to run a single benchmark, you can use the command
-/// `cargo bench -- bench_name`, for example `cargo bench -- init_graph`.
+/// `cargo bench -- bench_name`, for example `cargo bench -- add_vertices`.
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use sodg::{Hex, Label, Sodg};
 
@@ -20,34 +20,17 @@ fn setup_graph(n: usize) -> Sodg<16> {
     graph
 }
 
-fn bench_init_graph(c: &mut Criterion) {
-    let sizes = [10, 100, 1000, 10_000];
-    let mut group = c.benchmark_group("init_graph");
-    for &size in &sizes {
-        group.bench_with_input(BenchmarkId::from_parameter(size), &size, |b, &size| {
-            b.iter(|| {
-                let mut graph = black_box(Sodg::<16>::empty(black_box(size)));
-                for i in 0..size {
-                    black_box(graph.add(black_box(i))); // Добавляем вершины
-                }
-                black_box(graph)
-            });
-        });
-    }
-    group.finish();
-}
-
 fn bench_add_vertices(c: &mut Criterion) {
     let sizes = [10, 100, 1000, 10_000];
     let mut group = c.benchmark_group("add_vertices");
     for &size in &sizes {
         group.bench_with_input(BenchmarkId::from_parameter(size), &size, |b, &size| {
+            let mut graph = black_box(Sodg::<16>::empty(black_box(size)));
             b.iter(|| {
-                let mut graph = black_box(Sodg::<16>::empty(black_box(size)));
                 for i in 0..size {
                     black_box(graph.add(black_box(i)));
                 }
-                black_box(graph)
+                black_box(&mut graph);
             })
         });
     }
@@ -119,6 +102,6 @@ fn bench_put_and_data(c: &mut Criterion) {
 criterion_group!(
     name = benches;
     config = Criterion::default().sample_size(20);
-    targets = bench_init_graph, bench_add_vertices, bench_bind_edges, bench_put, bench_put_and_data,
+    targets = bench_add_vertices, bench_bind_edges, bench_put, bench_put_and_data,
 );
 criterion_main!(benches);
