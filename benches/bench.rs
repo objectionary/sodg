@@ -9,7 +9,7 @@
 ///
 /// If you want to run a single benchmark, you can use the command
 /// `cargo bench -- bench_name`, for example `cargo bench -- init_graph`.
-use criterion::{black_box, criterion_group, criterion_main, BatchSize, BenchmarkId, Criterion};
+use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use sodg::{Hex, Label, Sodg};
 
 fn setup_graph(n: usize) -> Sodg<16> {
@@ -59,22 +59,19 @@ fn bench_bind_edges(c: &mut Criterion) {
     let mut group = c.benchmark_group("bind_edges");
     for &size in &sizes {
         group.bench_with_input(BenchmarkId::from_parameter(size), &size, |b, &size| {
-            b.iter_batched(
-                || setup_graph(size),
-                |mut graph| {
-                    for i in 0..size - 1 {
-                        if i % 16 != 0 {
-                            black_box(graph.bind(
-                                black_box(i),
-                                black_box(i + 1),
-                                black_box(Label::Alpha(0)),
-                            ));
-                        }
+            let mut graph = setup_graph(size);
+            b.iter(|| {
+                for i in 0..size - 1 {
+                    if i % 16 != 0 {
+                        black_box(graph.bind(
+                            black_box(i),
+                            black_box(i + 1),
+                            black_box(Label::Alpha(0)),
+                        ));
                     }
-                    black_box(graph)
-                },
-                BatchSize::SmallInput,
-            )
+                }
+                black_box(&mut graph);
+            })
         });
     }
     group.finish();
@@ -85,18 +82,15 @@ fn bench_put(c: &mut Criterion) {
     let mut group = c.benchmark_group("put");
     for &size in &sizes {
         group.bench_with_input(BenchmarkId::from_parameter(size), &size, |b, &size| {
-            b.iter_batched(
-                || setup_graph(size),
-                |mut graph| {
-                    for i in 0..size {
-                        black_box(
-                            graph.put(black_box(i), black_box(&Hex::from_str_bytes("some string"))),
-                        );
-                    }
-                    black_box(graph)
-                },
-                BatchSize::SmallInput,
-            )
+            let mut graph = setup_graph(size);
+            b.iter(|| {
+                for i in 0..size {
+                    black_box(
+                        graph.put(black_box(i), black_box(&Hex::from_str_bytes("some string"))),
+                    );
+                }
+                black_box(&mut graph);
+            })
         });
     }
     group.finish();
@@ -107,19 +101,16 @@ fn bench_put_and_data(c: &mut Criterion) {
     let mut group = c.benchmark_group("put_and_data");
     for &size in &sizes {
         group.bench_with_input(BenchmarkId::from_parameter(size), &size, |b, &size| {
-            b.iter_batched(
-                || setup_graph(size),
-                |mut graph| {
-                    for i in 0..size {
-                        black_box(
-                            graph.put(black_box(i), black_box(&Hex::from_str_bytes("some string"))),
-                        );
-                        _ = black_box(graph.data(black_box(i)));
-                    }
-                    black_box(graph)
-                },
-                BatchSize::SmallInput,
-            )
+            let mut graph = setup_graph(size);
+            b.iter(|| {
+                for i in 0..size {
+                    black_box(
+                        graph.put(black_box(i), black_box(&Hex::from_str_bytes("some string"))),
+                    );
+                    _ = black_box(graph.data(black_box(i)));
+                }
+                black_box(&mut graph);
+            })
         });
     }
     group.finish();
