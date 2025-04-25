@@ -28,3 +28,4 @@ jobs:
       - run: cargo --color=never fmt --check
       - run: cargo --color=never doc --no-deps
       - run: cargo --color=never clippy -- --no-deps
+      - run: cargo --color=never bench -vv -- --nocapture
