@@ -1,6 +1,6 @@
-*.relf
-*.svg
 .DS_Store
 .idea/
+*.relf
+*.svg
 node_modules/
 target/
