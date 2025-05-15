@@ -79,6 +79,23 @@ fn bench_put(c: &mut Criterion) {
     group.finish();
 }
 
+fn bench_next_id(c: &mut Criterion) {
+    let sizes = [100, 500, 1000];
+    let mut group = c.benchmark_group("next_id");
+    for &size in &sizes {
+        group.bench_with_input(BenchmarkId::from_parameter(size), &size, |b, &size| {
+            b.iter(|| {
+                let mut graph = black_box(Sodg::<16>::empty(black_box(size)));
+                for _ in 1..size {
+                    black_box(graph.next_id());
+                }
+                black_box(&mut graph);
+            })
+        });
+    }
+    group.finish();
+}
+
 fn bench_put_and_data(c: &mut Criterion) {
     let sizes = [10, 100, 1000, 10_000];
     let mut group = c.benchmark_group("put_and_data");
@@ -101,7 +118,7 @@ fn bench_put_and_data(c: &mut Criterion) {
 
 criterion_group!(
     name = benches;
-    config = Criterion::default().sample_size(20);
-    targets = bench_add_vertices, bench_bind_edges, bench_put, bench_put_and_data,
+    config = Criterion::default().sample_size(10);
+    targets = bench_add_vertices, bench_bind_edges, bench_put, bench_put_and_data, bench_next_id
 );
 criterion_main!(benches);

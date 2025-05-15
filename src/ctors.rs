@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::{Hex, Persistence, Sodg, Vertex, MAX_BRANCHES};
+use crate::{Sodg, MAX_BRANCHES};
 use emap::Map;
 
 impl<const N: usize> Sodg<N> {
@@ -13,15 +13,7 @@ impl<const N: usize> Sodg<N> {
     #[must_use]
     pub fn empty(cap: usize) -> Self {
         let mut g = Self {
-            vertices: Map::with_capacity_some(
-                cap,
-                Vertex {
-                    branch: 0,
-                    data: Hex::empty(),
-                    persistence: Persistence::Empty,
-                    edges: micromap::Map::new(),
-                },
-            ),
+            vertices: Map::with_capacity_none(cap),
             stores: Map::with_capacity_some(MAX_BRANCHES, 0),
             branches: Map::with_capacity_some(MAX_BRANCHES, microstack::Stack::new()),
             next_v: 0,

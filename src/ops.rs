@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::{Hex, Label};
+use crate::{Hex, Label, Vertex};
 use crate::{Persistence, Sodg, BRANCH_NONE, BRANCH_STATIC};
 use anyhow::Context;
 #[cfg(debug_assertions)]
@@ -28,7 +28,13 @@ impl<const N: usize> Sodg<N> {
     /// If alerts trigger any error, the error will be returned here.
     #[inline]
     pub fn add(&mut self, v1: usize) {
-        self.vertices.get_mut(v1).unwrap().branch = 1;
+        let vertex = Vertex {
+            branch: 1,
+            data: Hex::empty(),
+            persistence: Persistence::Empty,
+            edges: micromap::Map::new(),
+        };
+        self.vertices.insert(v1, vertex);
         #[cfg(debug_assertions)]
         trace!("#add: vertex ν{v1} added");
     }
@@ -153,6 +159,7 @@ impl<const N: usize> Sodg<N> {
     /// If vertex `v1` is absent, it will panic.
     #[inline]
     pub fn data(&mut self, v: usize) -> Option<Hex> {
+        self.vertices.get(v)?;
         let vtx = self.vertices.get_mut(v).unwrap();
         match vtx.persistence {
             Persistence::Stored => {
@@ -164,6 +171,9 @@ impl<const N: usize> Sodg<N> {
                 if *s == 0 {
                     let members = self.branches.get_mut(branch).unwrap();
                     for v in members.into_iter() {
+                        if self.vertices.get(v).is_none() {
+                            continue;
+                        }
                         self.vertices.get_mut(v).unwrap().branch = BRANCH_NONE;
                     }
                     #[cfg(debug_assertions)]
@@ -259,6 +269,7 @@ impl<const N: usize> Sodg<N> {
     #[must_use]
     #[inline]
     pub fn kid(&self, v: usize, a: Label) -> Option<usize> {
+        self.vertices.get(v)?;
         for e in &self.vertices.get(v).unwrap().edges {
             if *e.0 == a {
                 return Some(*e.1);
