@@ -29,13 +29,13 @@ impl Book for Discounted {
 }
 
 pub fn on_graph(total: usize) -> (i64, Duration) {
-    let mut g: Sodg<16> = Sodg::empty(total * 4);
+    let mut g: Sodg<16> = Sodg::empty(total * 4 + 100);
     g.add(0);
     let mut sum = 0;
     let start = Instant::now();
-    let fourty_two = Hex::from(42);
-    for _ in 0..total {
-        let v1 = 1;
+    let fourty_two = Hex::from(42_i64);
+    for i in 0..total {
+        let v1 = if i % 80 == 0 { g.next_id() } else { 1 };
         g.add(v1);
         let v2 = v1 + 1;
         g.add(v2);
@@ -70,12 +70,16 @@ pub fn on_heap(total: usize) -> (i64, Duration) {
 }
 
 fn main() {
-    let total = 1000000;
-    let (s1, d1) = on_graph(total);
-    println!("on_graph: {:?}", d1);
-    let (s2, d2) = on_heap(total);
-    println!("on_heap: {:?}", d2);
-    println!("gain: {:.2}x", d2.as_nanos() as f64 / d1.as_nanos() as f64);
-    println!("loss: {:.2}x", d1.as_nanos() as f64 / d2.as_nanos() as f64);
-    assert_eq!(s1, s2);
+    let sizes = [
+        10_000, 30_000, 60_000, 90_000, 120_000, 150_000, 180_000, 210_000, 240_000,
+    ];
+    for size in sizes {
+        let (s1, d1) = on_graph(size);
+        println!("on_graph: {:?}", d1);
+        let (s2, d2) = on_heap(size);
+        println!("on_heap: {:?}", d2);
+        println!("gain: {:.2}x", d2.as_nanos() as f64 / d1.as_nanos() as f64);
+        println!("loss: {:.2}x", d1.as_nanos() as f64 / d2.as_nanos() as f64);
+        assert_eq!(s1, s2);
+    }
 }

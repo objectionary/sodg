@@ -14,18 +14,9 @@ impl<const N: usize> Sodg<N> {
     /// May panic if not enough IDs are available.
     #[inline]
     pub fn next_id(&mut self) -> usize {
-        let mut id = self.next_v;
-        id = self
-            .vertices
-            .iter()
-            .find(|(v, vtx)| vtx.branch == 0 && *v >= id)
-            .map(|(v, _)| v)
-            .unwrap();
-        let next = id + 1;
-        if next > self.next_v {
-            self.next_v = next;
-        }
-        id
+        let key = self.vertices.next_key();
+        self.add(key);
+        key
     }
 }
 
