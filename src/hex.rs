@@ -990,3 +990,11 @@ fn test_range_to_inclusive_panic() {
     let a = Hex::from_vec(base);
     let _ = &a[..=7];
 }
+
+#[test]
+fn test_from_str_bytes_correctly() {
+    let a = Hex::from_str_bytes("Hello, world!");
+    let b = &a[5..];
+    let res = String::from_utf8(b.to_vec()).unwrap();
+    assert_eq!(&res, ", world!")
+}
