@@ -216,6 +216,7 @@ impl Hex {
     /// assert_eq!(8, d.len());
     /// ```
     #[must_use]
+    #[allow(clippy::missing_const_for_fn)]
     pub fn len(&self) -> usize {
         match self {
             Self::Vector(x) => x.len(),

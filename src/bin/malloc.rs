@@ -33,7 +33,7 @@ pub fn on_graph(total: usize) -> (i64, Duration) {
     g.add(0);
     let mut sum = 0;
     let start = Instant::now();
-    let fourty_two = Hex::from(42);
+    let forty_two = Hex::from(42);
     for _ in 0..total {
         let v1 = 1;
         g.add(v1);
@@ -44,7 +44,7 @@ pub fn on_graph(total: usize) -> (i64, Duration) {
         let v3 = v2 + 1;
         g.add(v3);
         g.bind(v2, v3, Label::Greek('Δ'));
-        g.put(v3, &fourty_two);
+        g.put(v3, &forty_two);
         let v4 = v3 + 1;
         g.add(v4);
         g.bind(v4, v1, Label::Greek('φ'));
