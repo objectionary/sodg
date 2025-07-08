@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
+use crate::{BRANCH_NONE, BRANCH_STATIC, Persistence, Sodg};
 use crate::{Hex, Label};
-use crate::{Persistence, Sodg, BRANCH_NONE, BRANCH_STATIC};
 use anyhow::Context;
 #[cfg(debug_assertions)]
 use log::trace;

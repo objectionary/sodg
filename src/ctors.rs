@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::{Hex, Persistence, Sodg, Vertex, MAX_BRANCHES};
+use crate::{Hex, MAX_BRANCHES, Persistence, Sodg, Vertex};
 use emap::Map;
 
 impl<const N: usize> Sodg<N> {

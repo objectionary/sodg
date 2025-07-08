@@ -3,7 +3,7 @@
 
 use crate::{Hex, Script};
 use crate::{Label, Sodg};
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result, anyhow};
 use log::trace;
 use regex::Regex;
 use std::collections::HashMap;

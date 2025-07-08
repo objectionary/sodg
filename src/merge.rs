@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 use crate::{Label, Persistence, Sodg};
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use log::debug;
 use std::collections::{HashMap, HashSet};
 
@@ -36,8 +36,14 @@ impl<const N: usize> Sodg<N> {
             ordered.sort_unstable();
             return Err(anyhow!(
                 "Just {merged} vertices merged, out of {scope} (must={}, seen={}); maybe the right graph was not a tree? {} missed: {}",
-                must.len(), seen.len(),
-                ordered.len(), ordered.iter().map(|v| format!("ν{v}")).collect::<Vec<String>>().join(", ")
+                must.len(),
+                seen.len(),
+                ordered.len(),
+                ordered
+                    .iter()
+                    .map(|v| format!("ν{v}"))
+                    .collect::<Vec<String>>()
+                    .join(", ")
             ));
         }
         debug!(

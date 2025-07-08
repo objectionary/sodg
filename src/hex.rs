@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::{Hex, HEX_SIZE};
+use crate::{HEX_SIZE, Hex};
 use anyhow::{Context, Result};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::{

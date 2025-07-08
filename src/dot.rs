@@ -80,11 +80,7 @@ digraph {
                     },
                     match e.0 {
                         Label::Greek(g) => {
-                            if *g == 'π' {
-                                ",style=dashed"
-                            } else {
-                                ""
-                            }
+                            if *g == 'π' { ",style=dashed" } else { "" }
                         }
                         _ => {
                             ""
