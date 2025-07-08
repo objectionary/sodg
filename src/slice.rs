@@ -1,9 +1,10 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
+use std::collections::HashSet;
+
 use anyhow::Result;
 use log::trace;
-use std::collections::HashSet;
 
 use crate::{Label, Sodg};
 
@@ -83,7 +84,7 @@ impl<const N: usize> Sodg<N> {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
+    use std::str::FromStr as _;
 
     use super::*;
 

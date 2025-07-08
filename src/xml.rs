@@ -13,7 +13,7 @@ impl<const N: usize> Sodg<N> {
     /// For example, for this code:
     ///
     /// ```
-    /// use std::str::FromStr;
+    /// use std::str::FromStr as _;
     /// use sodg::{Hex, Label};
     /// use sodg::Sodg;
     /// let mut g : Sodg<16> = Sodg::empty(256);
@@ -79,7 +79,7 @@ impl<const N: usize> Sodg<N> {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
+    use std::str::FromStr as _;
 
     use sxd_xpath::evaluate_xpath;
 

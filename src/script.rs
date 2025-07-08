@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 
 use std::collections::HashMap;
-use std::str::FromStr;
+use std::str::FromStr as _;
 use std::sync::LazyLock as Lazy;
 
 use anyhow::{Context as _, Result, bail};
@@ -26,9 +26,10 @@ impl Script {
     /// For example:
     ///
     /// ```
-    /// use std::str::FromStr;
+    /// use std::str::FromStr as _;
     /// use sodg::{Label, Script};
     /// use sodg::Sodg;
+    ///
     /// let mut s = Script::from_str(
     ///   "ADD(0); ADD($ν1); BIND(ν0, $ν1, foo);"
     /// );

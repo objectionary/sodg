@@ -14,7 +14,7 @@ impl<const N: usize> Sodg<N> {
     /// For example:
     ///
     /// ```
-    /// use std::str::FromStr;
+    /// use std::str::FromStr as _;
     /// use sodg::{Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0);
@@ -39,7 +39,7 @@ impl<const N: usize> Sodg<N> {
     /// For example:
     ///
     /// ```
-    /// use std::str::FromStr;
+    /// use std::str::FromStr as _;
     /// use sodg::{Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0);
@@ -198,7 +198,7 @@ impl<const N: usize> Sodg<N> {
     /// For example:
     ///
     /// ```
-    /// use std::str::FromStr;
+    /// use std::str::FromStr as _;
     /// use sodg::{Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0);
@@ -212,7 +212,7 @@ impl<const N: usize> Sodg<N> {
     /// Just in case, if you need to put all names into a single line:
     ///
     /// ```
-    /// use std::str::FromStr;
+    /// use std::str::FromStr as _;
     /// use itertools::Itertools;
     /// use sodg::{Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
@@ -244,7 +244,7 @@ impl<const N: usize> Sodg<N> {
     /// For example:
     ///
     /// ```
-    /// use std::str::FromStr;
+    /// use std::str::FromStr as _;
     /// use sodg::{Label, Sodg};
     /// let mut g : Sodg<16> = Sodg::empty(256);
     /// g.add(0);
@@ -271,7 +271,7 @@ impl<const N: usize> Sodg<N> {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
+    use std::str::FromStr as _;
 
     use super::*;
 

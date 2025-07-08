@@ -1,8 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use std::fmt;
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{self, Debug, Display, Formatter};
 use std::str::FromStr;
 
 use anyhow::bail;

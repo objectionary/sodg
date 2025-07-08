@@ -12,7 +12,7 @@
 //! di-graph with two vertices and an edge between them:
 //!
 //! ```
-//! use std::str::FromStr;
+//! use std::str::FromStr as _;
 //! use sodg::{Label, Sodg};
 //! let mut sodg : Sodg<16> = Sodg::empty(256);
 //! sodg.add(0);

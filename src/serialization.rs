@@ -63,7 +63,7 @@ impl<const N: usize> Sodg<N> {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
+    use std::str::FromStr as _;
 
     use tempfile::TempDir;
 
