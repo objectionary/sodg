@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::{Label, Persistence, Sodg};
 use itertools::Itertools;
+
+use crate::{Label, Persistence, Sodg};
 
 impl<const N: usize> Sodg<N> {
     /// Print SODG as a DOT graph.
@@ -10,7 +11,7 @@ impl<const N: usize> Sodg<N> {
     /// For example, for this code:
     ///
     /// ```
-    /// use std::str::FromStr;
+    /// use std::str::FromStr as _;
     /// use sodg::{Hex, Label};
     /// use sodg::Sodg;
     /// let mut g : Sodg<16> = Sodg::empty(256);
@@ -80,11 +81,7 @@ digraph {
                     },
                     match e.0 {
                         Label::Greek(g) => {
-                            if *g == 'π' {
-                                ",style=dashed"
-                            } else {
-                                ""
-                            }
+                            if *g == 'π' { ",style=dashed" } else { "" }
                         }
                         _ => {
                             ""

@@ -12,7 +12,7 @@
 //! di-graph with two vertices and an edge between them:
 //!
 //! ```
-//! use std::str::FromStr;
+//! use std::str::FromStr as _;
 //! use sodg::{Label, Sodg};
 //! let mut sodg : Sodg<16> = Sodg::empty(256);
 //! sodg.add(0);
@@ -25,6 +25,10 @@
 #![warn(clippy::all, clippy::pedantic, clippy::nursery, clippy::cargo)]
 #![allow(clippy::multiple_inherent_impl)]
 #![allow(clippy::multiple_crate_versions)]
+
+use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
 
 mod clone;
 mod ctors;
@@ -41,9 +45,6 @@ mod script;
 mod serialization;
 mod slice;
 mod xml;
-
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 const HEX_SIZE: usize = 8;
 const MAX_BRANCHES: usize = 16;
@@ -150,14 +151,11 @@ struct Vertex<const N: usize> {
 }
 
 #[cfg(test)]
-use simple_logger::SimpleLogger;
-
-#[cfg(test)]
-use log::LevelFilter;
-
-#[cfg(test)]
 #[ctor::ctor]
 fn init() {
+    use log::LevelFilter;
+    use simple_logger::SimpleLogger;
+
     SimpleLogger::new()
         .without_timestamps()
         .with_level(LevelFilter::Trace)

@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
+#![allow(clippy::unit_arg)]
 /// Benchmark Usage:
 ///
 /// `cargo bench --bench bench` will run all benchmarks in this file.
@@ -9,7 +10,10 @@
 ///
 /// If you want to run a single benchmark, you can use the command
 /// `cargo bench -- bench_name`, for example `cargo bench -- add_vertices`.
-use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
+use std::hint::black_box;
+
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
+
 use sodg::{Hex, Label, Sodg};
 
 fn setup_graph(n: usize) -> Sodg<16> {
@@ -31,7 +35,7 @@ fn bench_add_vertices(c: &mut Criterion) {
                     black_box(graph.add(black_box(i)));
                 }
                 black_box(&mut graph);
-            })
+            });
         });
     }
     group.finish();
@@ -54,7 +58,7 @@ fn bench_bind_edges(c: &mut Criterion) {
                     }
                 }
                 black_box(&mut graph);
-            })
+            });
         });
     }
     group.finish();
@@ -73,7 +77,7 @@ fn bench_put(c: &mut Criterion) {
                     );
                 }
                 black_box(&mut graph);
-            })
+            });
         });
     }
     group.finish();
@@ -93,7 +97,7 @@ fn bench_put_and_data(c: &mut Criterion) {
                     _ = black_box(graph.data(black_box(i)));
                 }
                 black_box(&mut graph);
-            })
+            });
         });
     }
     group.finish();

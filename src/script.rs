@@ -1,14 +1,16 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::{Hex, Script};
-use crate::{Label, Sodg};
-use anyhow::{anyhow, Context, Result};
+use std::collections::HashMap;
+use std::str::FromStr as _;
+use std::sync::LazyLock as Lazy;
+
+use anyhow::{Context as _, Result, bail};
 use log::trace;
 use regex::Regex;
-use std::collections::HashMap;
-use std::str::FromStr;
-use std::sync::LazyLock as Lazy;
+
+use crate::{Hex, Script};
+use crate::{Label, Sodg};
 
 impl Script {
     /// Make a new one, parsing a string with instructions.
@@ -24,9 +26,10 @@ impl Script {
     /// For example:
     ///
     /// ```
-    /// use std::str::FromStr;
+    /// use std::str::FromStr as _;
     /// use sodg::{Label, Script};
     /// use sodg::Sodg;
+    ///
     /// let mut s = Script::from_str(
     ///   "ADD(0); ADD($ν1); BIND(ν0, $ν1, foo);"
     /// );
@@ -90,23 +93,22 @@ impl Script {
             .collect();
         match &cap[1] {
             "ADD" => {
-                let v = self.parse(args.first().with_context(|| "V is expected")?, g)?;
+                let v = self.parse(args.first().context("V is expected")?, g)?;
                 g.add(v);
             }
             "BIND" => {
-                let v1 = self.parse(args.first().with_context(|| "V1 is expected")?, g)?;
-                let v2 = self.parse(args.get(1).with_context(|| "V2 is expected")?, g)?;
-                let a =
-                    Label::from_str(args.get(2).with_context(|| "Label is expected")?.as_str())?;
+                let v1 = self.parse(args.first().context("V1 is expected")?, g)?;
+                let v2 = self.parse(args.get(1).context("V2 is expected")?, g)?;
+                let a = Label::from_str(args.get(2).context("Label is expected")?.as_str())?;
                 g.bind(v1, v2, a);
             }
             "PUT" => {
-                let v = self.parse(args.first().with_context(|| "V is expected")?, g)?;
-                let d = Self::parse_data(args.get(1).with_context(|| "Data is expected")?)?;
+                let v = self.parse(args.first().context("V is expected")?, g)?;
+                let d = Self::parse_data(args.get(1).context("Data is expected")?)?;
                 g.put(v, &d);
             }
             cmd => {
-                return Err(anyhow!("Unknown command: {cmd}"));
+                bail!("Unknown command: {cmd}");
             }
         }
         Ok(())
@@ -122,15 +124,14 @@ impl Script {
         static DATA: Lazy<Regex> =
             Lazy::new(|| Regex::new("^[0-9A-Fa-f]{2}([0-9A-Fa-f]{2})*$").unwrap());
         let d: &str = &DATA_STRIP.replace_all(s, "");
-        if DATA.is_match(d) {
-            let bytes: Vec<u8> = (0..d.len())
-                .step_by(2)
-                .map(|i| u8::from_str_radix(&d[i..i + 2], 16).unwrap())
-                .collect();
-            Ok(Hex::from_vec(bytes))
-        } else {
-            Err(anyhow!("Can't parse data '{s}'"))
+        if !DATA.is_match(d) {
+            bail!("Can't parse data '{s}'");
         }
+        let bytes: Vec<u8> = (0..d.len())
+            .step_by(2)
+            .map(|i| u8::from_str_radix(&d[i..i + 2], 16).unwrap())
+            .collect();
+        Ok(Hex::from_vec(bytes))
     }
 
     /// Parse `$ν5` into `5`, and `ν23` into `23`, and `42` into `42`.
@@ -139,10 +140,7 @@ impl Script {
     ///
     /// If impossible to parse, an error will be returned.
     fn parse<const N: usize>(&mut self, s: &str, g: &mut Sodg<N>) -> Result<usize> {
-        let head = s
-            .chars()
-            .next()
-            .with_context(|| "Empty identifier".to_string())?;
+        let head = s.chars().next().context("Empty identifier")?;
         if head == '$' || head == 'ν' {
             let tail: String = s.chars().skip(1).collect::<Vec<_>>().into_iter().collect();
             if head == '$' {
@@ -159,20 +157,22 @@ impl Script {
 }
 
 #[cfg(test)]
-use std::str;
+mod tests {
+    use super::*;
 
-#[test]
-fn simple_command() {
-    let mut g: Sodg<16> = Sodg::empty(256);
-    let mut s = Script::from_str(
-        "
-        ADD(0);  ADD($ν1); # adding two vertices
-        BIND(ν0, $ν1, foo  );
-        PUT($ν1  , d0-bf-D1-80-d0-B8-d0-b2-d0-b5-d1-82);
-        ",
-    );
-    let total = s.deploy_to(&mut g).unwrap();
-    assert_eq!(4, total);
-    assert_eq!("привет", g.data(1).unwrap().to_utf8().unwrap());
-    assert_eq!(1, g.kid(0, Label::from_str("foo").unwrap()).unwrap());
+    #[test]
+    fn simple_command() {
+        let mut g: Sodg<16> = Sodg::empty(256);
+        let mut s = Script::from_str(
+            "
+            ADD(0);  ADD($ν1); # adding two vertices
+            BIND(ν0, $ν1, foo  );
+            PUT($ν1  , d0-bf-D1-80-d0-B8-d0-b2-d0-b5-d1-82);
+            ",
+        );
+        let total = s.deploy_to(&mut g).unwrap();
+        assert_eq!(4, total);
+        assert_eq!("привет", g.data(1).unwrap().to_utf8().unwrap());
+        assert_eq!(1, g.kid(0, Label::from_str("foo").unwrap()).unwrap());
+    }
 }

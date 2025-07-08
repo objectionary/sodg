@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::{Hex, Persistence, Sodg, Vertex, MAX_BRANCHES};
 use emap::Map;
+
+use crate::{Hex, MAX_BRANCHES, Persistence, Sodg, Vertex};
 
 impl<const N: usize> Sodg<N> {
     /// Make an empty [`Sodg`], with no vertices and no edges.
@@ -26,10 +27,8 @@ impl<const N: usize> Sodg<N> {
             branches: Map::with_capacity_some(MAX_BRANCHES, microstack::Stack::new()),
             next_v: 0,
         };
-        g.branches
-            .insert(0, microstack::Stack::from_vec([0].to_vec()));
-        g.branches
-            .insert(1, microstack::Stack::from_vec([0].to_vec()));
+        g.branches.insert(0, microstack::Stack::from_vec(vec![0]));
+        g.branches.insert(1, microstack::Stack::from_vec(vec![0]));
         g
     }
 }

@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::{Persistence, Sodg};
 use anyhow::Result;
-use itertools::Itertools;
+use itertools::Itertools as _;
 use xml_builder::{XMLBuilder, XMLElement, XMLVersion};
+
+use crate::{Persistence, Sodg};
 
 impl<const N: usize> Sodg<N> {
     /// Make XML graph.
@@ -12,7 +13,7 @@ impl<const N: usize> Sodg<N> {
     /// For example, for this code:
     ///
     /// ```
-    /// use std::str::FromStr;
+    /// use std::str::FromStr as _;
     /// use sodg::{Hex, Label};
     /// use sodg::Sodg;
     /// let mut g : Sodg<16> = Sodg::empty(256);
@@ -77,37 +78,35 @@ impl<const N: usize> Sodg<N> {
 }
 
 #[cfg(test)]
-use sxd_xpath::evaluate_xpath;
+mod tests {
+    use std::str::FromStr as _;
 
-#[cfg(test)]
-use crate::Hex;
+    use sxd_xpath::evaluate_xpath;
 
-#[cfg(test)]
-use crate::Label;
+    use super::*;
+    use crate::{Hex, Label};
 
-#[cfg(test)]
-use std::str::FromStr;
-
-#[test]
-fn prints_simple_graph() {
-    let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0);
-    g.put(0, &Hex::from_str_bytes("hello"));
-    g.add(1);
-    g.bind(0, 1, Label::from_str("foo").unwrap());
-    let xml = g.to_xml().unwrap();
-    let parser = sxd_document::parser::parse(xml.as_str()).unwrap();
-    let doc = parser.as_document();
-    assert_eq!(
-        "foo",
-        evaluate_xpath(&doc, "/sodg/v[@id=0]/e[1]/@a")
-            .unwrap()
-            .string()
-    );
-    assert_eq!(
-        "68 65 6C 6C 6F",
-        evaluate_xpath(&doc, "/sodg/v[@id=0]/data")
-            .unwrap()
-            .string()
-    );
+    #[test]
+    fn prints_simple_graph() {
+        let mut g: Sodg<16> = Sodg::empty(256);
+        g.add(0);
+        g.put(0, &Hex::from_str_bytes("hello"));
+        g.add(1);
+        g.bind(0, 1, Label::from_str("foo").unwrap());
+        let xml = g.to_xml().unwrap();
+        let parser = sxd_document::parser::parse(xml.as_str()).unwrap();
+        let doc = parser.as_document();
+        assert_eq!(
+            "foo",
+            evaluate_xpath(&doc, "/sodg/v[@id=0]/e[1]/@a")
+                .unwrap()
+                .string(),
+        );
+        assert_eq!(
+            "68 65 6C 6C 6F",
+            evaluate_xpath(&doc, "/sodg/v[@id=0]/data")
+                .unwrap()
+                .string(),
+        );
+    }
 }

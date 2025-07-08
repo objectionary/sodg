@@ -1,10 +1,11 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
+use std::fmt::{self, Debug, Display, Formatter};
+
+use anyhow::{Context as _, Result};
+
 use crate::{Persistence, Sodg};
-use anyhow::{Context, Result};
-use std::fmt;
-use std::fmt::{Debug, Display, Formatter};
 
 impl<const N: usize> Display for Sodg<N> {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {

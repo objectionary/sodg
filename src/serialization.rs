@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::Sodg;
-use anyhow::{Context, Result};
-use bincode::{deserialize, serialize};
-use log::trace;
 use std::fs;
 use std::path::Path;
 use std::time::Instant;
+
+use anyhow::{Context as _, Result};
+use log::trace;
+
+use crate::Sodg;
 
 impl<const N: usize> Sodg<N> {
     /// Save the entire [`Sodg`] into a binary file.
@@ -21,7 +22,8 @@ impl<const N: usize> Sodg<N> {
     /// If impossible to save, an error will be returned.
     pub fn save(&self, path: &Path) -> Result<usize> {
         let start = Instant::now();
-        let bytes: Vec<u8> = serialize(self).with_context(|| "Failed to serialize")?;
+        let bytes: Vec<u8> = bincode::serde::encode_to_vec(self, bincode::config::legacy())
+            .context("Failed to serialize")?;
         let size = bytes.len();
         fs::write(path, bytes).with_context(|| format!("Can't write to {}", path.display()))?;
         trace!(
@@ -29,7 +31,7 @@ impl<const N: usize> Sodg<N> {
             self.len(),
             size,
             path.display(),
-            start.elapsed()
+            start.elapsed(),
         );
         Ok(size)
     }
@@ -45,8 +47,9 @@ impl<const N: usize> Sodg<N> {
         let bytes =
             fs::read(path).with_context(|| format!("Can't read from {}", path.display()))?;
         let size = bytes.len();
-        let sodg: Self = deserialize(&bytes)
-            .with_context(|| format!("Can't deserialize from {}", path.display()))?;
+        let sodg: Self = bincode::serde::decode_from_slice(&bytes, bincode::config::legacy())
+            .with_context(|| format!("Can't deserialize from {}", path.display()))?
+            .0;
         trace!(
             "Deserialized {} vertices ({} bytes) from {} in {:?}",
             sodg.len(),
@@ -59,37 +62,35 @@ impl<const N: usize> Sodg<N> {
 }
 
 #[cfg(test)]
-use tempfile::TempDir;
+mod tests {
+    use std::str::FromStr as _;
 
-#[cfg(test)]
-use crate::Hex;
+    use tempfile::TempDir;
 
-#[cfg(test)]
-use crate::Label;
+    use super::*;
+    use crate::{Hex, Label};
 
-#[cfg(test)]
-use std::str::FromStr;
+    #[test]
+    fn can_save() {
+        let mut g: Sodg<16> = Sodg::empty(256);
+        g.add(0);
+        g.add(1);
+        g.bind(0, 1, Label::from_str("foo").unwrap());
+        let tmp = TempDir::new().unwrap();
+        let file = tmp.path().join("foo.sodg");
+        g.save(file.as_path()).unwrap();
+        assert!(file.metadata().unwrap().len() > 0);
+    }
 
-#[test]
-fn can_save() {
-    let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0);
-    g.add(1);
-    g.bind(0, 1, Label::from_str("foo").unwrap());
-    let tmp = TempDir::new().unwrap();
-    let file = tmp.path().join("foo.sodg");
-    g.save(file.as_path()).unwrap();
-    assert!(file.metadata().unwrap().len() > 0);
-}
-
-#[test]
-fn saves_and_loads() {
-    let mut g: Sodg<1> = Sodg::empty(100);
-    g.add(0);
-    g.put(0, &Hex::from_str_bytes("hello"));
-    let tmp = TempDir::new().unwrap();
-    let file = tmp.path().join("foo.sodg");
-    g.save(file.as_path()).unwrap();
-    let after: Sodg<1> = Sodg::load(file.as_path()).unwrap();
-    assert_eq!(g.inspect(0).unwrap(), after.inspect(0).unwrap());
+    #[test]
+    fn saves_and_loads() {
+        let mut g: Sodg<1> = Sodg::empty(100);
+        g.add(0);
+        g.put(0, &Hex::from_str_bytes("hello"));
+        let tmp = TempDir::new().unwrap();
+        let file = tmp.path().join("foo.sodg");
+        g.save(file.as_path()).unwrap();
+        let after: Sodg<1> = Sodg::load(file.as_path()).unwrap();
+        assert_eq!(g.inspect(0).unwrap(), after.inspect(0).unwrap());
+    }
 }
