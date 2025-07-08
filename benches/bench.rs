@@ -9,7 +9,9 @@
 ///
 /// If you want to run a single benchmark, you can use the command
 /// `cargo bench -- bench_name`, for example `cargo bench -- add_vertices`.
-use criterion::{BenchmarkId, Criterion, black_box, criterion_group, criterion_main};
+use std::hint::black_box;
+
+use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
 use sodg::{Hex, Label, Sodg};
 
 fn setup_graph(n: usize) -> Sodg<16> {
