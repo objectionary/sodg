@@ -35,7 +35,7 @@ fn bench_add_vertices(c: &mut Criterion) {
                     black_box(graph.add(black_box(i)));
                 }
                 black_box(&mut graph);
-            })
+            });
         });
     }
     group.finish();
@@ -58,7 +58,7 @@ fn bench_bind_edges(c: &mut Criterion) {
                     }
                 }
                 black_box(&mut graph);
-            })
+            });
         });
     }
     group.finish();
@@ -77,7 +77,7 @@ fn bench_put(c: &mut Criterion) {
                     );
                 }
                 black_box(&mut graph);
-            })
+            });
         });
     }
     group.finish();
@@ -97,7 +97,7 @@ fn bench_put_and_data(c: &mut Criterion) {
                     _ = black_box(graph.data(black_box(i)));
                 }
                 black_box(&mut graph);
-            })
+            });
         });
     }
     group.finish();
