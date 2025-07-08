@@ -3,7 +3,6 @@
 
 use crate::Sodg;
 use anyhow::{Context, Result};
-use bincode::{deserialize, serialize};
 use log::trace;
 use std::fs;
 use std::path::Path;
@@ -21,7 +20,8 @@ impl<const N: usize> Sodg<N> {
     /// If impossible to save, an error will be returned.
     pub fn save(&self, path: &Path) -> Result<usize> {
         let start = Instant::now();
-        let bytes: Vec<u8> = serialize(self).with_context(|| "Failed to serialize")?;
+        let bytes: Vec<u8> = bincode::serde::encode_to_vec(self, bincode::config::legacy())
+            .with_context(|| "Failed to serialize")?;
         let size = bytes.len();
         fs::write(path, bytes).with_context(|| format!("Can't write to {}", path.display()))?;
         trace!(
@@ -45,8 +45,9 @@ impl<const N: usize> Sodg<N> {
         let bytes =
             fs::read(path).with_context(|| format!("Can't read from {}", path.display()))?;
         let size = bytes.len();
-        let sodg: Self = deserialize(&bytes)
-            .with_context(|| format!("Can't deserialize from {}", path.display()))?;
+        let sodg: Self = bincode::serde::decode_from_slice(&bytes, bincode::config::legacy())
+            .with_context(|| format!("Can't deserialize from {}", path.display()))?
+            .0;
         trace!(
             "Deserialized {} vertices ({} bytes) from {} in {:?}",
             sodg.len(),
