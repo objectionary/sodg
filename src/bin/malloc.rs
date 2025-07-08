@@ -72,6 +72,16 @@ pub fn on_heap(total: usize) -> (i64, Duration) {
     (std::hint::black_box(sum), start.elapsed())
 }
 
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss
+)]
+fn u128_to_f64(x: u128) -> Option<f64> {
+    let res = x as f64;
+    (res as u128 == x).then_some(res)
+}
+
 fn main() {
     let total = 1_000_000;
     let (s1, d1) = on_graph(total);
@@ -83,14 +93,4 @@ fn main() {
     println!("gain: {:.2}x", d2_nanos / d1_nanos);
     println!("loss: {:.2}x", d1_nanos / d2_nanos);
     assert_eq!(s1, s2);
-}
-
-#[allow(
-    clippy::cast_possible_truncation,
-    clippy::cast_precision_loss,
-    clippy::cast_sign_loss
-)]
-fn u128_to_f64(x: u128) -> Option<f64> {
-    let res = x as f64;
-    (res as u128 == x).then_some(res)
 }
