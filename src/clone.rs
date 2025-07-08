@@ -29,6 +29,7 @@ fn makes_a_clone() {
 }
 
 #[test]
+#[allow(clippy::redundant_clone)]
 fn makes_an_empty_clone() {
     let g: Sodg<16> = Sodg::empty(256);
     let c = g.clone();

@@ -997,5 +997,5 @@ fn test_from_str_bytes_correctly() {
     let a = Hex::from_str_bytes("Hello, world!");
     let b = &a[5..];
     let res = String::from_utf8(b.to_vec()).unwrap();
-    assert_eq!(&res, ", world!")
+    assert_eq!(&res, ", world!");
 }

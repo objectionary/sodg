@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
+#![allow(clippy::unit_arg)]
 /// Benchmark Usage:
 ///
 /// `cargo bench --bench bench` will run all benchmarks in this file.

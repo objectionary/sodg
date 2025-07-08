@@ -72,9 +72,9 @@ pub fn on_heap(total: usize) -> (i64, Duration) {
 fn main() {
     let total = 1000000;
     let (s1, d1) = on_graph(total);
-    println!("on_graph: {:?}", d1);
+    println!("on_graph: {d1:?}");
     let (s2, d2) = on_heap(total);
-    println!("on_heap: {:?}", d2);
+    println!("on_heap: {d2:?}");
     println!("gain: {:.2}x", d2.as_nanos() as f64 / d1.as_nanos() as f64);
     println!("loss: {:.2}x", d1.as_nanos() as f64 / d2.as_nanos() as f64);
     assert_eq!(s1, s2);
