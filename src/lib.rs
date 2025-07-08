@@ -26,6 +26,10 @@
 #![allow(clippy::multiple_inherent_impl)]
 #![allow(clippy::multiple_crate_versions)]
 
+use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
+
 mod clone;
 mod ctors;
 mod debug;
@@ -41,9 +45,6 @@ mod script;
 mod serialization;
 mod slice;
 mod xml;
-
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
 
 const HEX_SIZE: usize = 8;
 const MAX_BRANCHES: usize = 16;
@@ -150,14 +151,11 @@ struct Vertex<const N: usize> {
 }
 
 #[cfg(test)]
-use simple_logger::SimpleLogger;
-
-#[cfg(test)]
-use log::LevelFilter;
-
-#[cfg(test)]
 #[ctor::ctor]
 fn init() {
+    use log::LevelFilter;
+    use simple_logger::SimpleLogger;
+
     SimpleLogger::new()
         .without_timestamps()
         .with_level(LevelFilter::Trace)

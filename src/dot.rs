@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::{Label, Persistence, Sodg};
 use itertools::Itertools;
+
+use crate::{Label, Persistence, Sodg};
 
 impl<const N: usize> Sodg<N> {
     /// Print SODG as a DOT graph.

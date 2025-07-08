@@ -1,8 +1,9 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use sodg::{Hex, Label, Sodg};
 use std::time::{Duration, Instant};
+
+use sodg::{Hex, Label, Sodg};
 
 trait Book {
     fn price(&self) -> i64;
@@ -70,7 +71,7 @@ pub fn on_heap(total: usize) -> (i64, Duration) {
 }
 
 fn main() {
-    let total = 1000000;
+    let total = 1_000_000;
     let (s1, d1) = on_graph(total);
     println!("on_graph: {d1:?}");
     let (s2, d2) = on_heap(total);

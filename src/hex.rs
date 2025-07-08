@@ -1,14 +1,15 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::{HEX_SIZE, Hex};
-use anyhow::{Context, Result};
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::{
     Index, IndexMut, Range, RangeFrom, RangeFull, RangeInclusive, RangeTo, RangeToInclusive,
 };
-
 use std::str::FromStr;
+
+use anyhow::{Context as _, Result};
+
+use crate::{HEX_SIZE, Hex};
 
 impl Debug for Hex {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
@@ -328,7 +329,7 @@ impl Hex {
         let a: &[u8; 8] = &self.bytes().try_into().with_context(|| {
             format!(
                 "There is not enough bytes, can't make INT (just {} while we need eight)",
-                self.bytes().len()
+                self.bytes().len(),
             )
         })?;
         Ok(i64::from_be_bytes(*a))
@@ -351,7 +352,7 @@ impl Hex {
         let a: &[u8; 8] = &self.bytes().try_into().with_context(|| {
             format!(
                 "There is not enough bytes, can't make FLOAT (just {} while we need eight)",
-                self.bytes().len()
+                self.bytes().len(),
             )
         })?;
         Ok(f64::from_be_bytes(*a))
@@ -629,373 +630,378 @@ impl FromStr for Hex {
     }
 }
 
-#[test]
-fn simple_int() {
-    let i = 42;
-    let d = Hex::from(i);
-    assert_eq!(i, d.to_i64().unwrap());
-    assert_eq!("00-00-00-00-00-00-00-2A", d.print());
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn simple_i32() {
-    let i = 42_i32;
-    let d = Hex::from(i);
-    assert_eq!("00-00-00-2A", d.print());
-}
-
-#[test]
-fn simple_i16() {
-    let i = 42_i16;
-    let d = Hex::from(i);
-    assert_eq!("00-2A", d.print());
-}
-
-#[test]
-fn simple_i8() {
-    let i = 42_i8;
-    let d = Hex::from(i);
-    assert_eq!("2A", d.print());
-}
-
-#[test]
-fn simple_f32() {
-    let f = std::f32::consts::PI;
-    let d = Hex::from(f);
-    assert_eq!("40-49-0F-DB", d.print());
-}
-
-#[test]
-fn simple_bool() {
-    let b = true;
-    let d = Hex::from(b);
-    assert_eq!(b, d.to_bool());
-    assert_eq!("01", d.print());
-}
-
-#[test]
-fn simple_float() {
-    let f = std::f64::consts::PI;
-    let d = Hex::from(f);
-    let allowed_error = 0.0001;
-    let is_equal = (f - d.to_f64().unwrap()).abs() < allowed_error;
-    assert!(is_equal);
-    assert_eq!("40-09-21-FB-54-44-2D-18", d.print());
-}
-
-#[test]
-fn compares_with_data() {
-    let i = 42;
-    let left = Hex::from(i);
-    let right = Hex::from(i);
-    assert_eq!(left, right);
-}
-
-#[test]
-fn prints_bytes() {
-    let txt = "привет";
-    let d = Hex::from_str_bytes(txt);
-    assert_eq!("D0-BF-D1-80-D0-B8-D0-B2-D0-B5-D1-82", d.print());
-    assert_eq!(txt, Hex::from_str(&d.print()).unwrap().to_utf8().unwrap());
-}
-
-#[test]
-fn prints_empty_bytes() {
-    let txt = "";
-    let d = Hex::from_str_bytes(txt);
-    assert_eq!("--", d.print());
-}
-
-#[test]
-fn broken_int_from_small_data() {
-    let d = Hex::from_vec([0x01, 0x02].to_vec());
-    let ret = d.to_i64();
-    assert!(ret.is_err());
-}
-
-#[test]
-fn broken_float_from_small_data() {
-    let d = Hex::from_vec([0x00].to_vec());
-    let ret = d.to_f64();
-    assert!(ret.is_err());
-}
-
-#[test]
-fn direct_access_to_vec() {
-    let d = Hex::from_vec([0x1F, 0x01].to_vec());
-    assert_eq!(0x1F, *d.bytes().first().unwrap());
-}
-
-#[test]
-fn not_enough_data_for_int() {
-    let d = Hex::from_vec(vec![0x00, 0x2A]);
-    assert!(d.to_i64().is_err());
-}
-
-#[test]
-fn not_enough_data_for_float() {
-    let d = Hex::from_vec(vec![0x00, 0x2A]);
-    assert!(d.to_f64().is_err());
-}
-
-#[test]
-fn too_much_data_for_int() {
-    let d = Hex::from_vec(vec![0x00, 0x2A, 0x00, 0x2A, 0x00, 0x2A, 0x00, 0x2A, 0x11]);
-    assert!(d.to_i64().is_err());
-}
-
-#[test]
-fn makes_string() {
-    let d = Hex::from_vec(vec![0x41, 0x42, 0x43]);
-    assert_eq!("ABC", d.to_utf8().unwrap().as_str());
-}
-
-#[test]
-fn empty_string() {
-    let d = Hex::from_vec(vec![]);
-    assert_eq!("", d.to_utf8().unwrap().as_str());
-}
-
-#[test]
-fn non_utf8_string() {
-    let d = Hex::from_vec(vec![0x00, 0xEF]);
-    assert!(d.to_utf8().is_err());
-}
-
-#[test]
-fn takes_tail() {
-    let d = Hex::from_str_bytes("Hello, world!");
-    assert_eq!("world!", d.tail(7).to_utf8().unwrap());
-}
-
-#[test]
-fn takes_one_byte() {
-    let d = Hex::from_str_bytes("Ура!");
-    assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
-    assert_eq!(0xD1, d.byte_at(2));
-}
-
-#[test]
-fn measures_length() {
-    let d = Hex::from_str_bytes("Ура!");
-    assert_eq!(7, d.len());
-}
-
-#[test]
-fn correct_equality() {
-    let d = Hex::from_str("DE-AD-BE-EF").unwrap();
-    let d1 = Hex::from_str("AA-BB").unwrap();
-    let d2 = Hex::from_str("DE-AD-BE-EF").unwrap();
-    assert_eq!(d, d);
-    assert_ne!(d, d1);
-    assert_eq!(d, d2);
-}
-
-#[test]
-fn concat_test() {
-    let a = Hex::from_str("DE-AD").unwrap();
-    let b = Hex::from_str("BE-EF").unwrap();
-    assert_eq!(a.concat(&b), Hex::from_str("DE-AD-BE-EF").unwrap());
-}
-
-#[test]
-fn creates_from_big_slice() {
-    let s: [u8; 9] = [0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
-    let mut accum = vec![];
-    for el in s {
-        accum.push(el);
-        accum.push(el);
-        accum.push(el);
+    #[test]
+    fn simple_int() {
+        let i = 42;
+        let d = Hex::from(i);
+        assert_eq!(i, d.to_i64().unwrap());
+        assert_eq!("00-00-00-00-00-00-00-2A", d.print());
     }
-    let h = Hex::from_slice(accum.as_slice());
-    assert_eq!(27, h.len());
-    assert_eq!(h.to_vec(), accum);
-}
 
-#[test]
-fn concatenates_from_hex_vec() {
-    let a = Hex::from_vec(vec![0x12, 0xAB]);
-    let b = Hex::from_slice(b"as_bytesss");
-    let c = Hex::from_vec(vec![0x12, 0xAD]);
-    let res = a.concat(&b).concat(&c);
-    assert_eq!(20, res.len());
-}
+    #[test]
+    fn simple_i32() {
+        let i = 42_i32;
+        let d = Hex::from(i);
+        assert_eq!("00-00-00-2A", d.print());
+    }
 
-#[test]
-fn concatenates_from_hex_str() {
-    let a = Hex::from_str_bytes("Привет!");
-    let b = Hex::from_vec(vec![0x01, 0x02]);
-    let c = Hex::from_str_bytes("Пока!");
-    let res = a.concat(&b).concat(&c);
-    assert_eq!(24, res.len());
-}
+    #[test]
+    fn simple_i16() {
+        let i = 42_i16;
+        let d = Hex::from(i);
+        assert_eq!("00-2A", d.print());
+    }
 
-#[test]
-fn test_index_vec() {
-    // vector
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
-    let a = Hex::from_vec(base);
-    assert_eq!(a[1], 0xD8);
-    // array
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
-    let a = Hex::from_vec(base);
-    assert_eq!(a[1], 0xD8);
-}
+    #[test]
+    fn simple_i8() {
+        let i = 42_i8;
+        let d = Hex::from(i);
+        assert_eq!("2A", d.print());
+    }
 
-#[test]
-#[should_panic(expected = "Index 6 out of bounds (len = 3)")]
-fn test_index_out_of_range() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
-    let a = Hex::from_vec(base);
-    assert_eq!(a[6], 0xAB);
-}
+    #[test]
+    fn simple_f32() {
+        let f = std::f32::consts::PI;
+        let d = Hex::from(f);
+        assert_eq!("40-49-0F-DB", d.print());
+    }
 
-#[test]
-fn test_index_vec_mut() {
-    // vector
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
-    let mut a = Hex::from_vec(base);
-    a[0] = 0xD8;
-    assert_eq!(a[0], 0xD8);
-    // array
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
-    let mut a = Hex::from_vec(base);
-    a[0] = 0xD8;
-    assert_eq!(a[0], 0xD8);
-}
+    #[test]
+    fn simple_bool() {
+        let b = true;
+        let d = Hex::from(b);
+        assert_eq!(b, d.to_bool());
+        assert_eq!("01", d.print());
+    }
 
-#[test]
-#[should_panic(expected = "Index 6 out of bounds (len = 3)")]
-fn test_index_out_of_range_mut() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
-    let mut a = Hex::from_vec(base);
-    a[6] = 0xAB;
-}
+    #[test]
+    fn simple_float() {
+        let f = std::f64::consts::PI;
+        let d = Hex::from(f);
+        let allowed_error = 0.0001;
+        let is_equal = (f - d.to_f64().unwrap()).abs() < allowed_error;
+        assert!(is_equal);
+        assert_eq!("40-09-21-FB-54-44-2D-18", d.print());
+    }
 
-#[test]
-fn test_range() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
-    let a = Hex::from_vec(base);
-    let b = &a[0..4];
-    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8], b);
+    #[test]
+    fn compares_with_data() {
+        let i = 42;
+        let left = Hex::from(i);
+        let right = Hex::from(i);
+        assert_eq!(left, right);
+    }
 
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let b = &a[0..2];
-    assert_eq!(&[0xAB, 0xD8], b);
-}
+    #[test]
+    fn prints_bytes() {
+        let txt = "привет";
+        let d = Hex::from_str_bytes(txt);
+        assert_eq!("D0-BF-D1-80-D0-B8-D0-B2-D0-B5-D1-82", d.print());
+        assert_eq!(txt, Hex::from_str(&d.print()).unwrap().to_utf8().unwrap());
+    }
 
-#[test]
-#[should_panic(expected = "Range 0..10 out of bounds (len = 4)")]
-fn test_range_panic() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let _ = &a[0..10];
-}
+    #[test]
+    fn prints_empty_bytes() {
+        let txt = "";
+        let d = Hex::from_str_bytes(txt);
+        assert_eq!("--", d.print());
+    }
 
-#[test]
-fn test_range_from() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
-    let a = Hex::from_vec(base);
-    let b = &a[2..];
-    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB], b);
+    #[test]
+    fn broken_int_from_small_data() {
+        let d = Hex::from_vec([0x01, 0x02].to_vec());
+        let ret = d.to_i64();
+        assert!(ret.is_err());
+    }
 
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let b = &a[2..];
-    assert_eq!(&[0xAB, 0xD8], b);
-    let b = &a[4..];
-    assert!(b.is_empty());
-}
+    #[test]
+    fn broken_float_from_small_data() {
+        let d = Hex::from_vec([0x00].to_vec());
+        let ret = d.to_f64();
+        assert!(ret.is_err());
+    }
 
-#[test]
-#[should_panic(expected = "RangeFrom 5.. out of bounds (len = 4)")]
-fn test_range_from_panic() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let _ = &a[5..];
-}
+    #[test]
+    fn direct_access_to_vec() {
+        let d = Hex::from_vec([0x1F, 0x01].to_vec());
+        assert_eq!(0x1F, *d.bytes().first().unwrap());
+    }
 
-#[test]
-fn test_range_full() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
-    let a = Hex::from_vec(base);
-    let b = &a[..];
-    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB], b);
+    #[test]
+    fn not_enough_data_for_int() {
+        let d = Hex::from_vec(vec![0x00, 0x2A]);
+        assert!(d.to_i64().is_err());
+    }
 
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let b = &a[..];
-    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8], b);
-}
+    #[test]
+    fn not_enough_data_for_float() {
+        let d = Hex::from_vec(vec![0x00, 0x2A]);
+        assert!(d.to_f64().is_err());
+    }
 
-#[test]
-fn test_range_inclusive() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
-    let a = Hex::from_vec(base);
-    let b = &a[1..=4];
-    assert_eq!(&[0xD8, 0xAB, 0xD8, 0xAB], b);
+    #[test]
+    fn too_much_data_for_int() {
+        let d = Hex::from_vec(vec![0x00, 0x2A, 0x00, 0x2A, 0x00, 0x2A, 0x00, 0x2A, 0x11]);
+        assert!(d.to_i64().is_err());
+    }
 
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let b = &a[1..=3];
-    assert_eq!(&[0xD8, 0xAB, 0xD8], b);
-}
+    #[test]
+    fn makes_string() {
+        let d = Hex::from_vec(vec![0x41, 0x42, 0x43]);
+        assert_eq!("ABC", d.to_utf8().unwrap().as_str());
+    }
 
-#[test]
-#[should_panic(expected = "RangeInclusive 2..=4 out of bounds (len = 4)")]
-fn test_range_inclusive_panic() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let _ = &a[2..=4];
-}
+    #[test]
+    fn empty_string() {
+        let d = Hex::from_vec(vec![]);
+        assert_eq!("", d.to_utf8().unwrap().as_str());
+    }
 
-#[test]
-fn test_range_to() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
-    let a = Hex::from_vec(base);
-    let b = &a[..4];
-    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8], b);
+    #[test]
+    fn non_utf8_string() {
+        let d = Hex::from_vec(vec![0x00, 0xEF]);
+        assert!(d.to_utf8().is_err());
+    }
 
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let b = &a[..2];
-    assert_eq!(&[0xAB, 0xD8], b);
-}
+    #[test]
+    fn takes_tail() {
+        let d = Hex::from_str_bytes("Hello, world!");
+        assert_eq!("world!", d.tail(7).to_utf8().unwrap());
+    }
 
-#[test]
-#[should_panic(expected = "RangeTo ..7 out of bounds (len = 4)")]
-fn test_range_to_panic() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let _ = &a[..7];
-}
+    #[test]
+    fn takes_one_byte() {
+        let d = Hex::from_str_bytes("Ура!");
+        assert_eq!("D0-A3-D1-80-D0-B0-21", d.print());
+        assert_eq!(0xD1, d.byte_at(2));
+    }
 
-#[test]
-fn test_range_to_inclusive() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
-    let a = Hex::from_vec(base);
-    let b = &a[..=4];
-    assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8, 0xAB], b);
+    #[test]
+    fn measures_length() {
+        let d = Hex::from_str_bytes("Ура!");
+        assert_eq!(7, d.len());
+    }
 
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let b = &a[..=2];
-    assert_eq!(&[0xAB, 0xD8, 0xAB], b);
-}
+    #[test]
+    fn correct_equality() {
+        let d = Hex::from_str("DE-AD-BE-EF").unwrap();
+        let d1 = Hex::from_str("AA-BB").unwrap();
+        let d2 = Hex::from_str("DE-AD-BE-EF").unwrap();
+        assert_eq!(d, d);
+        assert_ne!(d, d1);
+        assert_eq!(d, d2);
+    }
 
-#[test]
-#[should_panic(expected = "RangeToInclusive ..=7 out of bounds (len = 4)")]
-fn test_range_to_inclusive_panic() {
-    let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
-    let a = Hex::from_vec(base);
-    let _ = &a[..=7];
-}
+    #[test]
+    fn concat_test() {
+        let a = Hex::from_str("DE-AD").unwrap();
+        let b = Hex::from_str("BE-EF").unwrap();
+        assert_eq!(a.concat(&b), Hex::from_str("DE-AD-BE-EF").unwrap());
+    }
 
-#[test]
-fn test_from_str_bytes_correctly() {
-    let a = Hex::from_str_bytes("Hello, world!");
-    let b = &a[5..];
-    let res = String::from_utf8(b.to_vec()).unwrap();
-    assert_eq!(&res, ", world!");
+    #[test]
+    fn creates_from_big_slice() {
+        let s: [u8; 9] = [0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+        let mut accum = vec![];
+        for el in s {
+            accum.push(el);
+            accum.push(el);
+            accum.push(el);
+        }
+        let h = Hex::from_slice(accum.as_slice());
+        assert_eq!(27, h.len());
+        assert_eq!(h.to_vec(), accum);
+    }
+
+    #[test]
+    fn concatenates_from_hex_vec() {
+        let a = Hex::from_vec(vec![0x12, 0xAB]);
+        let b = Hex::from_slice(b"as_bytesss");
+        let c = Hex::from_vec(vec![0x12, 0xAD]);
+        let res = a.concat(&b).concat(&c);
+        assert_eq!(20, res.len());
+    }
+
+    #[test]
+    fn concatenates_from_hex_str() {
+        let a = Hex::from_str_bytes("Привет!");
+        let b = Hex::from_vec(vec![0x01, 0x02]);
+        let c = Hex::from_str_bytes("Пока!");
+        let res = a.concat(&b).concat(&c);
+        assert_eq!(24, res.len());
+    }
+
+    #[test]
+    fn test_index_vec() {
+        // vector
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+        let a = Hex::from_vec(base);
+        assert_eq!(a[1], 0xD8);
+        // array
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
+        let a = Hex::from_vec(base);
+        assert_eq!(a[1], 0xD8);
+    }
+
+    #[test]
+    #[should_panic(expected = "Index 6 out of bounds (len = 3)")]
+    fn test_index_out_of_range() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
+        let a = Hex::from_vec(base);
+        assert_eq!(a[6], 0xAB);
+    }
+
+    #[test]
+    fn test_index_vec_mut() {
+        // vector
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+        let mut a = Hex::from_vec(base);
+        a[0] = 0xD8;
+        assert_eq!(a[0], 0xD8);
+        // array
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
+        let mut a = Hex::from_vec(base);
+        a[0] = 0xD8;
+        assert_eq!(a[0], 0xD8);
+    }
+
+    #[test]
+    #[should_panic(expected = "Index 6 out of bounds (len = 3)")]
+    fn test_index_out_of_range_mut() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB];
+        let mut a = Hex::from_vec(base);
+        a[6] = 0xAB;
+    }
+
+    #[test]
+    fn test_range() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+        let a = Hex::from_vec(base);
+        let b = &a[0..4];
+        assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8], b);
+
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let b = &a[0..2];
+        assert_eq!(&[0xAB, 0xD8], b);
+    }
+
+    #[test]
+    #[should_panic(expected = "Range 0..10 out of bounds (len = 4)")]
+    fn test_range_panic() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let _ = &a[0..10];
+    }
+
+    #[test]
+    fn test_range_from() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+        let a = Hex::from_vec(base);
+        let b = &a[2..];
+        assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB], b);
+
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let b = &a[2..];
+        assert_eq!(&[0xAB, 0xD8], b);
+        let b = &a[4..];
+        assert!(b.is_empty());
+    }
+
+    #[test]
+    #[should_panic(expected = "RangeFrom 5.. out of bounds (len = 4)")]
+    fn test_range_from_panic() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let _ = &a[5..];
+    }
+
+    #[test]
+    fn test_range_full() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+        let a = Hex::from_vec(base);
+        let b = &a[..];
+        assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB], b);
+
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let b = &a[..];
+        assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8], b);
+    }
+
+    #[test]
+    fn test_range_inclusive() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+        let a = Hex::from_vec(base);
+        let b = &a[1..=4];
+        assert_eq!(&[0xD8, 0xAB, 0xD8, 0xAB], b);
+
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let b = &a[1..=3];
+        assert_eq!(&[0xD8, 0xAB, 0xD8], b);
+    }
+
+    #[test]
+    #[should_panic(expected = "RangeInclusive 2..=4 out of bounds (len = 4)")]
+    fn test_range_inclusive_panic() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let _ = &a[2..=4];
+    }
+
+    #[test]
+    fn test_range_to() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+        let a = Hex::from_vec(base);
+        let b = &a[..4];
+        assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8], b);
+
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let b = &a[..2];
+        assert_eq!(&[0xAB, 0xD8], b);
+    }
+
+    #[test]
+    #[should_panic(expected = "RangeTo ..7 out of bounds (len = 4)")]
+    fn test_range_to_panic() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let _ = &a[..7];
+    }
+
+    #[test]
+    fn test_range_to_inclusive() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB, 0xD8, 0xAB];
+        let a = Hex::from_vec(base);
+        let b = &a[..=4];
+        assert_eq!(&[0xAB, 0xD8, 0xAB, 0xD8, 0xAB], b);
+
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let b = &a[..=2];
+        assert_eq!(&[0xAB, 0xD8, 0xAB], b);
+    }
+
+    #[test]
+    #[should_panic(expected = "RangeToInclusive ..=7 out of bounds (len = 4)")]
+    fn test_range_to_inclusive_panic() {
+        let base: Vec<u8> = vec![0xAB, 0xD8, 0xAB, 0xD8];
+        let a = Hex::from_vec(base);
+        let _ = &a[..=7];
+    }
+
+    #[test]
+    fn test_from_str_bytes_correctly() {
+        let a = Hex::from_str_bytes("Hello, world!");
+        let b = &a[5..];
+        let res = String::from_utf8(b.to_vec()).unwrap();
+        assert_eq!(&res, ", world!");
+    }
 }

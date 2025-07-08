@@ -1,10 +1,12 @@
 // SPDX-FileCopyrightText: Copyright (c) 2022-2025 Objectionary.com
 // SPDX-License-Identifier: MIT
 
-use crate::Sodg;
-use anyhow::{Context, Result};
-use itertools::Itertools;
 use std::collections::HashSet;
+
+use anyhow::{Context as _, Result};
+use itertools::Itertools;
+
+use crate::Sodg;
 
 impl<const N: usize> Sodg<N> {
     /// Find an object by the provided locator and print its tree
@@ -20,7 +22,7 @@ impl<const N: usize> Sodg<N> {
         Ok(format!(
             "ν{}\n{}",
             v,
-            self.inspect_v(v, &mut seen)?.join("\n")
+            self.inspect_v(v, &mut seen)?.join("\n"),
         ))
     }
 
@@ -40,10 +42,10 @@ impl<const N: usize> Sodg<N> {
                     e.0,
                     e.1,
                     if skip {
-                        "…".to_string()
+                        "…".to_owned()
                     } else {
                         String::new()
-                    }
+                    },
                 );
                 lines.push(line);
                 if !skip {
@@ -59,18 +61,19 @@ impl<const N: usize> Sodg<N> {
 }
 
 #[cfg(test)]
-use crate::Hex;
+mod tests {
+    use super::*;
+    use crate::Hex;
+    use crate::Label;
 
-#[cfg(test)]
-use crate::Label;
-
-#[test]
-fn inspects_simple_object() {
-    let mut g: Sodg<16> = Sodg::empty(256);
-    g.add(0);
-    g.put(0, &Hex::from_str_bytes("hello"));
-    g.add(1);
-    let txt = g.inspect(0).unwrap();
-    g.bind(0, 1, Label::Alpha(0));
-    assert_ne!(String::new(), txt);
+    #[test]
+    fn inspects_simple_object() {
+        let mut g: Sodg<16> = Sodg::empty(256);
+        g.add(0);
+        g.put(0, &Hex::from_str_bytes("hello"));
+        g.add(1);
+        let txt = g.inspect(0).unwrap();
+        g.bind(0, 1, Label::Alpha(0));
+        assert_ne!(String::new(), txt);
+    }
 }

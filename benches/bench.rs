@@ -13,6 +13,7 @@
 use std::hint::black_box;
 
 use criterion::{BenchmarkId, Criterion, criterion_group, criterion_main};
+
 use sodg::{Hex, Label, Sodg};
 
 fn setup_graph(n: usize) -> Sodg<16> {

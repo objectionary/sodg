@@ -27,8 +27,13 @@ impl<const N: usize> Sodg<N> {
     }
 }
 
-#[test]
-fn counts_vertices() {
-    let g: Sodg<16> = Sodg::empty(256);
-    assert_eq!(0, g.len());
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn counts_vertices() {
+        let g: Sodg<16> = Sodg::empty(256);
+        assert_eq!(0, g.len());
+    }
 }
