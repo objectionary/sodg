@@ -77,10 +77,20 @@ fn main() {
     let (s1, d1) = on_graph(total);
     println!("on_graph: {d1:?}");
     let (s2, d2) = on_heap(total);
-    let d1_nanos = f64::from(u32::try_from(d1.as_nanos()).unwrap());
-    let d2_nanos = f64::from(u32::try_from(d2.as_nanos()).unwrap());
+    let d1_nanos = u128_to_f64(d1.as_nanos()).unwrap();
+    let d2_nanos = u128_to_f64(d2.as_nanos()).unwrap();
     println!("on_heap: {d2_nanos:?}");
     println!("gain: {:.2}x", d2_nanos / d1_nanos);
     println!("loss: {:.2}x", d1_nanos / d2_nanos);
     assert_eq!(s1, s2);
+}
+
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss
+)]
+fn u128_to_f64(x: u128) -> Option<f64> {
+    let res = x as f64;
+    (res as u128 == x).then_some(res)
 }
