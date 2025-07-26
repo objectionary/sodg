@@ -1039,4 +1039,19 @@ mod tests {
         let h = Hex::from_slice(&[1, 2, 3]);
         let _ = &h[1..=3];
     }
+
+    #[test]
+    fn concat_transition_to_vector() {
+        let mut a = Hex::empty();
+        let mut b = Hex::empty();
+        
+        for i in 0..HEX_SIZE {
+            a = a.concat(&Hex::from_slice(&[i as u8]));
+            b = b.concat(&Hex::from_slice(&[i as u8]));
+        }
+        
+        let c = a.concat(&b);
+        assert!(matches!(c, Hex::Vector(_)));
+        assert_eq!(c.len(), HEX_SIZE * 2);
+    }
 }
