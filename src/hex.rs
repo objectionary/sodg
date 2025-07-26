@@ -1018,4 +1018,25 @@ mod tests {
         let mut h = Hex::from_slice(&[1, 2, 3]);
         h[3] = 4;
     }
+
+    #[test]
+    #[should_panic(expected = "Range 2..5 out of bounds (len = 3)")]
+    fn range_panic_for_bytes() {
+        let h = Hex::from_slice(&[1, 2, 3]);
+        let _ = &h[2..5];
+    }
+    
+    #[test]
+    #[should_panic(expected = "RangeFrom 4.. out of bounds (len = 3)")]
+    fn range_from_panic_for_bytes() {
+        let h = Hex::from_slice(&[1, 2, 3]);
+        let _ = &h[4..];
+    }
+    
+    #[test]
+    #[should_panic(expected = "RangeInclusive 1..=3 out of bounds (len = 3)")]
+    fn range_inclusive_panic_for_bytes() {
+        let h = Hex::from_slice(&[1, 2, 3]);
+        let _ = &h[1..=3];
+    }
 }
