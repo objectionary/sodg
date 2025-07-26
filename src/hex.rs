@@ -1066,4 +1066,16 @@ mod tests {
         let h = Hex::from_slice(&[2]);
         assert!(h.to_bool());
     }
+
+    #[test]
+    fn float_special_values() {
+        let nan = Hex::from(f64::NAN);
+        assert!(nan.to_f64().unwrap().is_nan());
+        
+        let inf = Hex::from(f64::INFINITY);
+        assert_eq!(inf.to_f64().unwrap(), f64::INFINITY);
+        
+        let neg_zero = Hex::from(-0.0f64);
+        assert_eq!(neg_zero.to_f64().unwrap().to_bits(), (-0.0f64).to_bits());
+    }
 }
