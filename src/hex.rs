@@ -1078,4 +1078,22 @@ mod tests {
         let neg_zero = Hex::from(-0.0f64);
         assert_eq!(neg_zero.to_f64().unwrap().to_bits(), (-0.0f64).to_bits());
     }
+
+    #[test]
+    fn from_str_without_dashes() {
+        let h = Hex::from_str("DEADBEEF").unwrap();
+        assert_eq!(h.print(), "DE-AD-BE-EF");
+    }
+    
+    #[test]
+    fn from_str_odd_length() {
+        let result = Hex::from_str("ABC");
+        assert!(result.is_err());
+    }
+    
+    #[test]
+    fn from_str_invalid_chars() {
+        let result = Hex::from_str("DE-AD-BE-EG");
+        assert!(result.is_err());
+    }
 }
