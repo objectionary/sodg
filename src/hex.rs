@@ -1054,4 +1054,16 @@ mod tests {
         assert!(matches!(c, Hex::Vector(_)));
         assert_eq!(c.len(), HEX_SIZE * 2);
     }
+
+    #[test]
+    fn false_boolean_conversion() {
+        let h = Hex::from(false);
+        assert!(!h.to_bool());
+    }
+    
+    #[test]
+    fn non_standard_boolean() {
+        let h = Hex::from_slice(&[2]);
+        assert!(h.to_bool());
+    }
 }
