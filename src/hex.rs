@@ -1096,4 +1096,11 @@ mod tests {
         let result = Hex::from_str("DE-AD-BE-EG");
         assert!(result.is_err());
     }
+
+    #[test]
+    fn equality_between_variants() {
+        let bytes = Hex::from_slice(&[1, 2, 3]);
+        let vector = Hex::from_vec(vec![1, 2, 3]);
+        assert_eq!(bytes, vector);
+    }
 }
