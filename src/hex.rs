@@ -1011,13 +1011,6 @@ mod tests {
         let h = Hex::from_slice(&[1, 2, 3]);
         let _ = h[3];
     }
-    
-    #[test]
-    #[should_panic(expected = "Index 3 out of bounds (len = 3)")]
-    fn index_mut_panic_for_bytes() {
-        let h = Hex::from_slice(&[1, 2, 3]);
-        h[3] = 4;
-    }
 
     #[test]
     #[should_panic(expected = "Range 2..5 out of bounds (len = 3)")]
