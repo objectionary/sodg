@@ -1103,4 +1103,20 @@ mod tests {
         let vector = Hex::from_vec(vec![1, 2, 3]);
         assert_eq!(bytes, vector);
     }
+    
+    #[test]
+    fn min_max_integer_conversions() {
+        let min = Hex::from(i64::MIN);
+        assert_eq!(min.to_i64().unwrap(), i64::MIN);
+        
+        let max = Hex::from(i64::MAX);
+        assert_eq!(max.to_i64().unwrap(), i64::MAX);
+    }
+    
+    #[test]
+    fn float_negative_conversion() {
+        let val = -123.456f64;
+        let h = Hex::from(val);
+        assert_eq!(h.to_f64().unwrap(), val);
+    }
 }
